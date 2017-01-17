@@ -1,0 +1,41 @@
+{
+  "name": "etave",
+  "version": "0.0.1",
+  "description": "chrome extension for event tracking and visualization",
+  "main": "",
+  "dependencies": {
+    "eslint": "^3.13.1",
+    "eslint-config-airbnb": "^14.0.0",
+    "eslint-plugin-import": "^2.2.0",
+    "gulp": "^3.9.1",
+    "gulp-autoprefixer": "^3.1.1",
+    "gulp-cssnano": "^2.1.2",
+    "gulp-eslint": "^3.0.1",
+    "gulp-pug": "^3.2.0",
+    "gulp-sass": "^3.1.0",
+    "gulp-uncss": "^1.0.6"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "gulp build",
+    "dev": "gulp"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/RomanKol/etave.git"
+  },
+  "keywords": [
+    "chrome",
+    "extension",
+    "event",
+    "tracking",
+    "visualization"
+  ],
+  "author": "Roman Kollatschny <mail@kollatschny.net> (http://kollatschny.net/)",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/RomanKol/etave/issues"
+  },
+  "homepage": "https://github.com/RomanKol/etave#readme"
+}

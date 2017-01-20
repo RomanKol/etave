@@ -1,0 +1,50 @@
+html
+  head
+    title #{name}
+    link(href="styles.css", rel="stylesheet")
+
+  body#popup.container
+    header.row
+      div.col
+        span.lead #{name}
+        a(href="#", title="Settings").float-right Settings
+
+    main.row.mt-2
+      section#settings.col-12
+
+        p.lead Quick Settings
+
+        input(type="checkbox" name="mouse")#mouse
+        label(for="mouse" title="Mouseclicks and movement") Mouse
+        br
+
+        input(type="checkbox" name="scroll")#scroll
+        label(for="scroll" title="Page scrolling") Scroll
+        br
+
+        input(type="checkbox" name="keys")#keys
+        label(for="keys" title="Keyups") Keys
+
+        br
+
+        small Go to the #[a(href="#Settings" title="Settings") Settings] for futher settings
+
+        button#save.btn.btn-sm.btn-primary save settings
+
+      section#session.col-12.mt-4.mb-2
+
+        p.lead Record session
+
+        div.input-group
+          span.input-group-addon Name
+          input(type="text")#name.form-control
+
+        div.input-group.mt-1
+          span.input-group-addon Descr
+          input(type="text")#descr.form-control
+
+        div.btn-group.mt-3
+          button#stop.btn.btn-danger stop
+          button#start.btn.btn-success start
+
+    script(src="popup.js")

@@ -1,0 +1,37 @@
+input[type='checkbox'] {
+  display: none;
+
+  + label {
+    color: #ccc;
+
+    transition: color .4s ease;
+
+    position: relative;
+    padding-left: 2em;
+    cursor: pointer;
+
+    &:before {
+      box-sizing: content-box;
+      content: '';
+      position: absolute;
+      left: 0;
+      width: 20px;
+      height: 20px;
+      border: 2px solid #4f8196;
+      text-align: center;
+      transition: all .4s ease;
+      font-size: 24px;
+      line-height: 18px;
+     }
+  }
+
+  &:checked + label {
+    color: inherit;
+    font-style: normal;
+
+    &:before {
+      background: #ddd;
+      content: '✔️️';
+    }
+  }
+}

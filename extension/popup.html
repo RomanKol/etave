@@ -1,0 +1,38 @@
+
+<html>
+  <head>
+    <title>etave</title>
+    <link href="styles.css" rel="stylesheet"/>
+  </head>
+  <body class="container" id="popup">
+    <header class="row">
+      <div class="col"><span class="lead">etave</span><a class="float-right" href="#" title="Settings">Settings</a></div>
+    </header>
+    <main class="row mt-2">
+      <section class="col-12" id="settings">
+        <p class="lead">Quick Settings</p>
+        <input type="checkbox" name="mouse" id="mouse"/>
+        <label for="mouse" title="Mouseclicks and movement">Mouse</label><br/>
+        <input type="checkbox" name="scroll" id="scroll"/>
+        <label for="scroll" title="Page scrolling">Scroll</label><br/>
+        <input type="checkbox" name="keys" id="keys"/>
+        <label for="keys" title="Keyups">Keys</label><br/><small>Go to the <a href="#Settings" title="Settings">Settings</a> for futher settings</small>
+        <button class="btn btn-sm btn-primary" id="save">save settings</button>
+      </section>
+      <section class="col-12 mt-4 mb-2" id="session">
+        <p class="lead">Record session</p>
+        <div class="input-group"><span class="input-group-addon">Name</span>
+          <input class="form-control" type="text" id="name"/>
+        </div>
+        <div class="input-group mt-1"><span class="input-group-addon">Descr</span>
+          <input class="form-control" type="text" id="descr"/>
+        </div>
+        <div class="btn-group mt-3">
+          <button class="btn btn-danger" id="stop">stop</button>
+          <button class="btn btn-success" id="start">start</button>
+        </div>
+      </section>
+    </main>
+    <script src="popup.js"></script>
+  </body>
+</html>

@@ -10,13 +10,15 @@ const cssnano = require('gulp-cssnano');
 
 const eslint = require('gulp-eslint');
 
+const imagemin = require('gulp-imagemin');
+
 // Eslinting task
 gulp.task('lint', () => gulp.src('./src/js/*.js')
   .pipe(eslint({
     fix: true,
   }))
   .pipe(eslint.format())
-  .pipe(eslint.failAfterError())
+  // .pipe(eslint.failAfterError())
   .pipe(gulp.dest('./extension/')));
 
 
@@ -25,7 +27,7 @@ gulp.task('pug', () => gulp.src('./src/pug/*.pug')
   .pipe(pug({
     pretty: true,
     locals: {
-      name: 'ETaVE',
+      name: 'etave',
     },
   }))
   .pipe(gulp.dest('./extension/')));
@@ -55,22 +57,28 @@ gulp.task('css-min', () => gulp.src('./src/sass/styles.scss')
   .pipe(gulp.dest('./extension/')));
 
 
+// Image Task
+gulp.task('image', () => gulp.src('src/images/*')
+  .pipe(imagemin())
+  .pipe(gulp.dest('./extension/')));
+
+
 // Manifest Task
 gulp.task('manifest', () => gulp.src('./src/manifest.json')
-.pipe(gulp.dest('./extension/')));
-
+  .pipe(gulp.dest('./extension/')));
 
 // Watch Task
 gulp.task('watch', () => {
   gulp.watch('./src/pug/*.pug', ['pug']);
   gulp.watch('./src/sass/*.scss', ['css']);
+  gulp.watch('./src/img/**', ['image']);
   gulp.watch('./src/js/*.js', ['lint']);
-  gulp.watch('./src/menifest.json', ['manifest']);
+  gulp.watch('./src/manifest.json', ['manifest']);
 });
 
 
 // Default/Dev Task
-gulp.task('default', ['watch', 'pug', 'css', 'lint', 'manifest']);
+gulp.task('default', ['watch', 'pug', 'css', 'lint', 'image', 'manifest']);
 
 // Build Task
-gulp.task('build', ['pug', 'css-min', 'lint']);
+gulp.task('build', ['pug', 'css-min', 'lint', 'manifest']);

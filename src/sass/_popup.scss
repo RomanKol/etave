@@ -1,0 +1,51 @@
+#popup {
+  font-size: 14px;
+  min-width: 256px;
+
+  header {
+    background-color: $blue;
+    color: white;
+    span {
+      font-size: 24px;
+    }
+    a {
+      color: white;
+      line-height: 36px;
+    }
+  }
+
+  .btn-group {
+    width: 100%;
+    button {
+      width: 50%;
+    }
+  }
+
+  .line {
+    height: 1px;
+    background: $blue;
+    width: 100%;
+  }
+
+  .input-group {
+    font-size: 12px;
+    line-height: 14px;
+
+    span {
+      font-size: inherit;
+      line-height: inherit;
+      background-color: $blue;
+      color: white;
+    }
+
+    input {
+      font-size: inherit;
+      line-height: inherit;
+      background: transparent;
+      border-color: $blue;
+      &::placeholder {
+        color: #ccc;
+      }
+    }
+  }
+}

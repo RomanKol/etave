@@ -1,0 +1,40 @@
+html
+  head
+    title #{name}
+    link(href="styles.css", rel="stylesheet")
+
+  body#options.container
+    header.row
+      div.col
+        span.lead #{name}
+
+    main.row.mt-2
+      section#settings.col-12
+        h2 Settings
+
+        h5 Mouse Events
+        p.form-text.text-muted The mouseevents includes #[code mousedown], #[code mouseup] and #[code mousemove] events.
+
+        input(type="checkbox" name="mouse")#mouse
+        label(for="mouse" title="Mouseclicks and movement") Mouse
+        br
+
+        h5 Scroll Events
+        p.form-text.text-muted The scrollevents includes #[code scroll] events of any source (keyboard, scrollwheel, scrollbar).
+
+        input(type="checkbox" name="scroll")#scroll
+        label(for="scroll" title="Page scrolling") Scroll
+        br
+
+        h5 Key Events
+        p.form-text.text-muted The keyevents includes #[code keydown] and #[code keyup] events.
+
+        input(type="checkbox" name="key")#key
+        label(for="key" title="Keyups") Keys
+
+      section#sessions.col-12
+        h2 Sessions
+
+        div#session-list.list-group
+
+    script(src="options.js")

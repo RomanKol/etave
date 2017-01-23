@@ -1,20 +1,20 @@
 /**
  * @typedef {object} Site
- * @param {string} uuid - Uuid of the site
- * @param {number} end - Timestamp ot the end
- * @param {number} start - Timestamp of the start
- * @param {string} title - Title of the page
- * @param {string} url - Url of the page
+ * @prop {string} uuid - Uuid of the site
+ * @prop {number} end - Timestamp ot the end
+ * @prop {number} start - Timestamp of the start
+ * @prop {string} title - Title of the page
+ * @prop {string} url - Url of the page
  */
 
 /**
  * @typedef {object} Session
- * @param {string} uuid - Uuid of the session
- * @param {string} name - Name of the session
- * @param {boolean} description - Description of the session
- * @param {site[]} sites - Array with sites in session
- * @param {number} start - Timestamp of session start
- * @param {obj} viewport - Object with height and width of viewport as numbers
+ * @prop {string} uuid - Uuid of the session
+ * @prop {string} name - Name of the session
+ * @prop {boolean} description - Description of the session
+ * @prop {site[]} sites - Array with sites in session
+ * @prop {number} start - Timestamp of session start
+ * @prop {obj} viewport - Object with height and width of viewport as numbers
  */
 
 /**
@@ -219,9 +219,7 @@ function startRecording(data) {
       }
       return { tab, task: data.task, uuid: site.uuid };
     })
-    .then(({ tab, task, uuid }) => {
-      return sendTabMessage(tab, { task, uuid });
-    });
+    .then(({ tab, task, uuid }) => sendTabMessage(tab, { task, uuid }));
 }
 
 /**
@@ -231,14 +229,12 @@ function startRecording(data) {
 function stopRecording(data) {
   // Get the active tab
   return getActiveTab()
-    .then((tab) => {
-      // Send the tab a message
-      return sendTabMessage(tab, data)
+    // Send the tab a message
+    .then(tab => sendTabMessage(tab, data)
         .catch((err) => {
           console.error(err);
         })
-        .then(() => tab);
-    })
+        .then(() => tab))
     .then((tab) => {
       // If the tabs have an event listener, remove it
       if (chrome.tabs.onUpdated.hasListener(tabListener)) {
@@ -258,8 +254,8 @@ function stopRecording(data) {
 /**
  * Object that holds the tasks which can be called by messages
  * @typedef {object} tasks
- * @param {function} startRecording - The startRecording function
- * @param {function} stopRecording - The stopRecording function
+ * @prop {function} startRecording - The startRecording function
+ * @prop {function} stopRecording - The stopRecording function
  */
 const tasks = {
   startRecording,

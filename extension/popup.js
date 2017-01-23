@@ -1,5 +1,5 @@
 /**
- * DOM elements user can iteract with
+ * DOM elements user can interact with
  */
 const startBtn = document.querySelector('#start');
 const stopBtn = document.querySelector('#stop');
@@ -11,7 +11,7 @@ const descrInp = document.querySelector('#descr');
 /**
  * Function to load data from the chrome.storage api
  * @param {string} key - The key of the data
- * @return {any} - The saved data
+ * @return {Promise.<boolean, Error>} - The saved data, else an error
  */
 function loadFromStorage(key) {
   return new Promise((resolve, reject) => {
@@ -23,17 +23,14 @@ function loadFromStorage(key) {
 }
 
 /**
- * Function to save data with the chrome.stroage api
+ * Function to save data with the chrome.storage api
  * @param {string} key - Key for the data
  * @param {any} data - Data to be saved
- * @returns {Promise.<boolean, Error>} - If data was saved
+ * @returns {Promise.<boolean, Error>} - True, else an error
  */
 function saveInStorage(key, data) {
   return new Promise((resolve, reject) => {
-    const obj = {};
-    obj[key] = data;
-
-    chrome.storage.local.set(obj, () => {
+    chrome.storage.local.set({ [key]: data }, () => {
       if (chrome.runtime.lastError) reject(new Error());
       resolve(true);
     });
@@ -42,35 +39,26 @@ function saveInStorage(key, data) {
 
 /**
  * Function to get the current settings
- * @return {string[]} - Array of active settings by name
+ * @return {string[]} - Array of active settings
 */
 function getSettings() {
   const settings = [];
-
   document.querySelectorAll('#settings input[type="checkbox"]:checked')
     .forEach((el) => {
       settings.push(el.name || el.id);
     });
-
   return settings;
 }
 
 /**
- * Function to save the current settings
- */
-function saveSettings() {
-  saveInStorage('settings', getSettings());
-}
-
-
-/**
  * Function to send a message
  * @param {any} msg - Message to send
+ * @return {Promise<Tab, Error>} - Returns a tab, else an error
  */
 function getActiveTab() {
   return new Promise((resolve, reject) => {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      if (tabs.length === 0) reject(new Error());
+      if (tabs.length === 0) reject(new Error('No tab'));
       resolve(tabs[0]);
     });
   });
@@ -78,11 +66,13 @@ function getActiveTab() {
 
 /**
  * Function to send a message to the active tab
+ * @param {any} msg - The message to send
+ * @return {Promise<response, Error>} - Returns the response, else an error
  */
 function sendRuntimeMessage(msg) {
   return new Promise((resolve, reject) => {
     chrome.runtime.sendMessage(msg, (response) => {
-      if ('error' in response) reject(new Error());
+      if (response === undefined) reject(new Error('Message undefined'));
       resolve(response);
     });
   });
@@ -95,25 +85,37 @@ function sendRuntimeMessage(msg) {
 function getSessionSettings() {
   const name = nameInp.value || nameInp.placeholder;
   const descr = descrInp.value || descrInp.placeholder;
-
   return { name, descr };
 }
 
+/**
+ * Function to save the current settings in chrome.storage
+ */
+function saveSettings() {
+  saveInStorage('settings', getSettings());
+}
+
+/**
+ * Function to extract domain from url string
+ * @author 'anubhava'
+ * @external {@link http://stackoverflow.com/a/25703406}
+ * @param {string} url - Url string with domain
+ * @return {string} - Domain from url string
+ */
+function getDomain(url) {
+  const regex = new RegExp(/^(?:https?:\/\/)?(?:[^@\n]+@)?(?:www\.)?([^:/\n]+)/im);
+  return regex.exec(url)[1];
+}
 
 /**
  * Function to start recording
  */
-function initiateRecording() {
+function startRecording() {
   const msg = {
     task: 'startRecording',
-    settings: getSettings(),
     session: getSessionSettings(),
   };
-
   sendRuntimeMessage(msg)
-    .then((response) => {
-      console.log(response);
-    })
     .catch((err) => {
       console.error(err);
     });
@@ -123,64 +125,33 @@ function initiateRecording() {
  * Function to stop recording
  */
 function stopRecording() {
-  const msg = {
-    task: 'stopRecording',
-  };
-
-  sendRuntimeMessage(msg)
-    .then((response) => {
-      console.log(response);
-    })
+  sendRuntimeMessage({ task: 'stopRecording' })
     .catch((err) => {
       console.error(err);
     });
 }
 
-
 /**
- * Function to handle runtime messages
- * @param {obj} msg - Received message
- * @param {obj} sender - The sender of the message (content.js)
- */
-function messageListener(msg, sender) {
-  console.log(msg, sender);
-}
-
-/**
- * Function to extract domain from url string
- * @param {string} url - Url string with domain
- * @return {string} - Domain from url string
- */
-function getDomain(url) {
-  const regex = new RegExp(/^(?:https?:\/\/)?(?:[^@\n]+@)?(?:www\.)?([^:/\n]+)/im);
-
-  return regex.exec(url)[0];
-}
-
-/**
- * Function for initalizing the popup
+ * Function to initialize the popup
  */
 function initPopup() {
+  // Load settings from storage, else use default settings
   loadFromStorage('settings')
+    .catch(() => ['mouse', 'scroll', 'key'])
     .then((settings) => {
       settings.forEach((setting) => {
         document.getElementById(setting).checked = true;
       });
     });
 
+  // Get active tab
   getActiveTab()
     .then((tab) => {
       const domain = getDomain(tab.url) || tab.url;
-
       nameInp.placeholder = `${domain} - ${new Date().toLocaleString()}`;
       descrInp.placeholder = `${tab.title}`;
     });
 }
-
-/**
- * Chrome runtime message listener
- */
-chrome.runtime.onMessage.addListener(messageListener);
 
 /**
  * Document event listeners
@@ -191,5 +162,5 @@ document.addEventListener('DOMContentLoaded', initPopup);
  * User event listeners
  */
 saveBtn.addEventListener('click', saveSettings);
-startBtn.addEventListener('click', initiateRecording);
+startBtn.addEventListener('click', startRecording);
 stopBtn.addEventListener('click', stopRecording);

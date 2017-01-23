@@ -1,7 +1,7 @@
 /**
- * @typedef {eventObj} Eventobject
+ * @typedef {eventObj} Event object
  * @param {string} type - Type of event
- * @param {number} timeStamp - Timestamp of event relativ to siteload
+ * @param {number} timeStamp - Timestamp of event relative to site load
  * @param {number=} pageX - X-position on page of event
  * @param {number=} pageY - Y-position on page of event
  * @param {string=} target - The event target
@@ -16,7 +16,10 @@
  */
 
 /**
- * Initiale mousemove and scroll object
+ * Initial mouse move object
+ * @param {number} pageX - X position
+ * @param {number} pageY - Y position
+ * @param {number} stimeStamp - Timestamp
  */
 let previousSavedMousemove = {
   pageX: -25,
@@ -24,11 +27,20 @@ let previousSavedMousemove = {
   timeStamp: -50,
 };
 
+/**
+ * Initial scroll object
+ * @param {number} scrollX - X position
+ * @param {number} scrollY - Y position
+ * @param {number} timeStamp - Timestamp
+ */
 let previousSavedScroll = {
   scrollX: -25,
   scrollY: -25,
   timeStamp: -50,
 };
+
+let uuid;
+let intervalID;
 
 /**
  * local events db
@@ -36,7 +48,53 @@ let previousSavedScroll = {
 const events = [];
 
 /**
- * Function to throttle mousemove event
+ * Function to load data from the chrome.storage api
+ * @param {string} key - The key of the data
+ * @return {Promise<any, false>} - The saved data or false, if no data was found
+ */
+function loadStorage(key) {
+  return new Promise((resolve, reject) => {
+    chrome.storage.local.get(key, (items) => {
+      if (Object.keys(items).length === 0) reject(false);
+      if (chrome.runtime.lastError) reject(new Error('Runtime error'));
+      resolve(items[key]);
+    });
+  });
+}
+
+/**
+ * Function to save data in chrome.storage.local
+ * @param {string} key - Key for the data
+ * @param {any} data - Data to be saved
+ * @returns {Promise.<boolean, Error>} - If data was saved
+ */
+function saveStorage(key, data) {
+  return new Promise((resolve, reject) => {
+    chrome.storage.local.set({ [key]: data }, () => {
+      if (chrome.runtime.lastError) reject(new Error('Runtime error'));
+      resolve(true);
+    });
+  });
+}
+
+/**
+ * Function to load settings from chrome.storage.local
+ * @return {Promise<array, array>} - Returns a array with the settings, else default
+ */
+function loadSettings() {
+  return loadStorage('settings')
+    .catch(() => ['mouse', 'scroll', 'key']);
+}
+
+/**
+ * Function to save events
+ */
+function saveEvents() {
+  return saveStorage(uuid, events);
+}
+
+/**
+ * Function to throttle mouse move event
  * @param {eventObj} cur - The current event object
  * @param {eventObj} prev - The previous event object
  * @param {number} distanceMin - The minimal distance
@@ -51,12 +109,12 @@ function throttleMove(cur, prev, distanceMin = 25, timeMin = 50) {
 }
 
 /**
- * Function to throttle mousemove event
+ * Function to throttle mouse move event
  * @param {eventObj} cur - The current event object
  * @param {eventObj} prev - The previous event object
  * @param {number} distanceMin - The minimal distance
  * @param {number} timeMin - The minimal time difference
- * @return {boolen} - Returns true,if event should be saved
+ * @return {boolean} - Returns true,if event should be saved
  */
 function throttleScroll(cur, prev, distanceMin = 25, timeMin = 50) {
   const distanceX = Math.abs(cur.scrollX - prev.scrollX);
@@ -80,14 +138,13 @@ function createElementSelector(element) {
 
   if (element.classList.length > 0) element.classList.forEach((elClass) => { selector += `.${elClass}`; });
 
-  const elementSiblings = [...element.parentElement.querySelectorAll(selector)]
+  const elementSiblings = Array.from(element.parentElement.querySelectorAll(selector))
     .filter(elementSibling => elementSibling.parentElement === element.parentElement);
 
   if ((elementSiblings.length) > 1) selector += `:nth-of-type(${elementSiblings.indexOf(element) + 1})`;
 
   return selector;
 }
-
 
 /**
  * Function to get a dom path from an element
@@ -109,10 +166,9 @@ function createDomPath(target) {
   return nodes.reverse(); // .join('/');
 }
 
-
 /**
- * Function to record mousedown events
- * @param {eventObjobj} - Event object
+ * Function to record mouse down events
+ * @param {eventObj} - Event object
  */
 function mousedown({ pageX, pageY, target, timeStamp, type }) {
   const data = {
@@ -128,8 +184,8 @@ function mousedown({ pageX, pageY, target, timeStamp, type }) {
 }
 
 /**
- * Function to record mousedown events, copy of mousedown
- * @param {eventObjobj} - Event object
+ * Function to record mouse up events
+ * @param {eventObj} - Event object
  */
 function mouseup({ pageX, pageY, target, timeStamp, type }) {
   const data = {
@@ -146,7 +202,7 @@ function mouseup({ pageX, pageY, target, timeStamp, type }) {
 }
 
 /**
- * Function to record mousemove events
+ * Function to record mouse move events
  * @param {eventObj} - Event object
  */
 function mousemove({ pageX, pageY, timeStamp, type }) {
@@ -182,7 +238,7 @@ function scroll({ timeStamp, type }) {
 }
 
 /**
- * Function to record keydown events
+ * Function to record key down events
  * @param {eventObj} - Event object
  */
 function keydown({ altKey, ctrlKey, metaKey, key, target, timeStamp, type }) {
@@ -205,13 +261,13 @@ function keydown({ altKey, ctrlKey, metaKey, key, target, timeStamp, type }) {
 }
 
 /**
- * Function to record keydown events, copy of mousedown
+ * Function to record key down events, copy of mouse down
  * @param {eventObj} - Event object
  */
 const keyup = keydown;
 
 /**
- * Function to add mouse eventlisteners
+ * Function to add mouse event listeners
  */
 function addMouseEvents() {
   document.addEventListener('mousemove', mousemove);
@@ -228,14 +284,14 @@ function addKeyEvents() {
 }
 
 /**
- * Funciton to add scroll event listeners
+ * Function to add scroll event listeners
  */
 function addScrollEvents() {
   document.addEventListener('scroll', scroll);
 }
 
 /**
- * Function to remove all eventlisteners
+ * Function to remove all event listeners
  */
 function removeAllEvents() {
   document.removeEventListener('mousemove', mousemove);
@@ -244,34 +300,51 @@ function removeAllEvents() {
   document.removeEventListener('keydown', keydown);
   document.removeEventListener('keyup', keyup);
   document.removeEventListener('scroll', scroll);
+  window.removeEventListener('beforeunload', saveEvents);
 }
 
 /**
- * Function to start recording by adding eventlisteners
+ * Function to start recording by adding event listeners
  */
-function startRecording(msg) {
-  console.log('recording', msg);
+function startRecording(data) {
+  // Load settings
+  return loadSettings()
+    .then((settings) => {
+      // Set uuid
+      uuid = data.uuid;
 
-  if (msg.settings.includes('mouse')) addMouseEvents();
-  if (msg.settings.includes('scroll')) addScrollEvents();
-  if (msg.settings.includes('keys')) addKeyEvents();
+      // Add user event listeners
+      if (settings.includes('mouse')) addMouseEvents();
+      if (settings.includes('scroll')) addScrollEvents();
+      if (settings.includes('keys')) addKeyEvents();
+
+      // Add event listener for data saving
+      window.addEventListener('beforeunload', saveEvents);
+
+      // Initiate data saving interval
+      intervalID = setInterval(saveEvents, (60 * 1000));
+    });
 }
 
+
 /**
- * Function to stop recording be removing eventlisteners
+ * Function to stop recording be removing event listeners
  * @param {any} msg - Message
  */
-function stopRecording(msg) {
-  console.log('stopping', msg);
-  removeAllEvents();
-  console.table(events);
+function stopRecording() {
+  return saveEvents()
+    .then(() => {
+      // Remove all event listeners and clear interval
+      removeAllEvents();
+      clearInterval(intervalID);
+    });
 }
 
 /**
- * Object that holds the tasks wich can be called by messages
+ * Object that holds the tasks which can be called by messages
  * @typedef {object} tasks
  * @param {function} startRecording - The startRecording function
- * @param {funciton} stopRecording - The stopRecording function
+ * @param {function} stopRecording - The stopRecording function
  */
 const tasks = {
   startRecording,
@@ -285,17 +358,20 @@ const tasks = {
  * @param {function} sendResponse - Function to send a response
  */
 function messageListener(msg, sender, sendResponse) {
-  console.log(msg, sender);
-
-  if ('task' in msg) tasks[msg.task](msg);
-
-  const response = {
-    sender,
-    request: msg,
-    response: true,
-  };
-
-  sendResponse(response);
+  if ('task' in msg) {
+    tasks[msg.task](msg)
+      // .then(() => {
+      //   console.log('task done', Date.now());
+      // })
+      // .then(() => {
+      //   console.log('sendResponse', Date.now());
+      //   sendResponse({ response: true });
+      // })
+      .catch((err) => {
+        console.error(err);
+      });
+    sendResponse({ response: true });
+  }
 }
 
 /**

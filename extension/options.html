@@ -1,0 +1,34 @@
+
+<html>
+  <head>
+    <title>etave</title>
+    <link href="styles.css" rel="stylesheet"/>
+  </head>
+  <body class="container" id="options">
+    <header class="row">
+      <div class="col"><span class="lead">etave</span></div>
+    </header>
+    <main class="row mt-2">
+      <section class="col-12" id="settings">
+        <h2>Settings</h2>
+        <h5>Mouse Events</h5>
+        <p class="form-text text-muted">The mouseevents includes <code>mousedown</code>, <code>mouseup</code> and <code>mousemove</code> events.</p>
+        <input type="checkbox" name="mouse" id="mouse"/>
+        <label for="mouse" title="Mouseclicks and movement">Mouse</label><br/>
+        <h5>Scroll Events</h5>
+        <p class="form-text text-muted">The scrollevents includes <code>scroll</code> events of any source (keyboard, scrollwheel, scrollbar).</p>
+        <input type="checkbox" name="scroll" id="scroll"/>
+        <label for="scroll" title="Page scrolling">Scroll</label><br/>
+        <h5>Key Events</h5>
+        <p class="form-text text-muted">The keyevents includes <code>keydown</code> and <code>keyup</code> events.</p>
+        <input type="checkbox" name="key" id="key"/>
+        <label for="key" title="Keyups">Keys</label>
+      </section>
+      <section class="col-12" id="sessions">
+        <h2>Sessions</h2>
+        <div class="list-group" id="session-list"></div>
+      </section>
+    </main>
+    <script src="options.js"></script>
+  </body>
+</html>

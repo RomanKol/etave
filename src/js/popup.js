@@ -116,6 +116,9 @@ function startRecording() {
     session: getSessionSettings(),
   };
   sendRuntimeMessage(msg)
+    .then(() => {
+      window.close();
+    })
     .catch((err) => {
       console.error(err);
     });

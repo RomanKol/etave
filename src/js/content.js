@@ -242,22 +242,20 @@ function scroll({ timeStamp, type }) {
  * @param {eventObj} - Event object
  */
 function keydown({ altKey, ctrlKey, metaKey, key, target, timeStamp, type }) {
-  if (target.nodeName.toLowerCase() === 'input' && target.type === 'password') {
-    return;
+  if (target.nodeName.toLowerCase() !== 'input' && target.type !== 'password') {
+    const data = {
+      altKey,
+      ctrlKey,
+      key,
+      metaKey,
+      domPath: createDomPath(target),
+      target: createElementSelector(target),
+      timeStamp: Math.round(timeStamp),
+      type,
+    };
+
+    events.push(data);
   }
-
-  const data = {
-    altKey,
-    ctrlKey,
-    key,
-    metaKey,
-    domPath: createDomPath(target),
-    target: createElementSelector(target),
-    timeStamp: Math.round(timeStamp),
-    type,
-  };
-
-  events.push(data);
 }
 
 /**
@@ -304,6 +302,23 @@ function removeAllEvents() {
 }
 
 /**
+ * Function to add a 'video recorder dot' to the window
+ */
+function addDot() {
+  const dot = document.createElement('div');
+  dot.id = 'etave-recorder-dot';
+  document.body.appendChild(dot);
+}
+
+/**
+ * Function to remove the video recorder dot
+ */
+function removeDot() {
+  const dot = document.getElementById('etave-recorder-dot');
+  dot.parentElement.removeChild(dot);
+}
+
+/**
  * Function to start recording by adding event listeners
  */
 function startRecording(data) {
@@ -323,6 +338,9 @@ function startRecording(data) {
 
       // Initiate data saving interval
       intervalID = setInterval(saveEvents, (60 * 1000));
+    })
+    .then(() => {
+      addDot();
     });
 }
 
@@ -337,6 +355,9 @@ function stopRecording() {
       // Remove all event listeners and clear interval
       removeAllEvents();
       clearInterval(intervalID);
+    })
+    .then(() => {
+      removeDot();
     });
 }
 

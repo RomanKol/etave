@@ -34,7 +34,7 @@ gulp.task('pug', () => gulp.src('./src/pug/*.pug')
 
 
 // Sass css compilation task
-gulp.task('css', () => gulp.src('./src/sass/styles.scss')
+gulp.task('css', () => gulp.src(['./src/sass/styles.scss', './src/sass/content.scss'])
   .pipe(sass({
     sourceMap: true,
   }))
@@ -44,7 +44,7 @@ gulp.task('css', () => gulp.src('./src/sass/styles.scss')
   }))
   .pipe(gulp.dest('./extension/')));
 
-gulp.task('css-min', () => gulp.src('./src/sass/styles.scss')
+gulp.task('css-min', () => gulp.src(['./src/sass/styles.scss', './src/sass/content.scss'])
   .pipe(sass())
   .pipe(autoprefixer({
     browsers: ['last 2 versions'],

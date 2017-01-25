@@ -60,6 +60,11 @@ gulp.task('css-min', () => gulp.src(['./src/sass/styles.scss', './src/sass/conte
   }))
   .pipe(uncss({
     html: ['./extension/**.html'],
+    ignore: [
+      '#etave-recorder-dot',
+      '.btn-danger',
+      '.btn-success',
+    ],
   }))
   .pipe(cssnano())
   .pipe(gulp.dest('./extension/')));
@@ -74,6 +79,7 @@ gulp.task('image', () => gulp.src('src/images/*')
 // Manifest Task
 gulp.task('manifest', () => gulp.src('./src/manifest.json')
   .pipe(gulp.dest('./extension/')));
+
 
 // Watch Task
 gulp.task('watch', () => {

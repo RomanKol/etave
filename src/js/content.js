@@ -42,6 +42,8 @@ let previousSavedScroll = {
 let uuid;
 let intervalID;
 
+let ts;
+
 /**
  * local events db
  */
@@ -83,7 +85,7 @@ function saveStorage(key, data) {
  */
 function loadSettings() {
   return loadStorage('settings')
-    .catch(() => ['mouse', 'scroll', 'key']);
+    .catch(() => ['mouse', 'scroll', 'keys']);
 }
 
 /**
@@ -142,11 +144,13 @@ function createElementSelector(element) {
   if (element.classList.length > 0) Array.from(element.classList.value).join('.');
 
   // Check if there are siblings of the same element
-  const elementSiblings = Array.from(element.parentElement.querySelectorAll(selector))
-    .filter(elementSibling => elementSibling.parentElement === element.parentElement);
+  if (element.parentElement) {
+    const elementSiblings = Array.from(element.parentElement.querySelectorAll(selector))
+      .filter(elementSibling => elementSibling.parentElement === element.parentElement);
 
-  // If so, add the nth-of-type selector
-  if ((elementSiblings.length) > 1) selector += `:nth-of-type(${elementSiblings.indexOf(element) + 1})`;
+    // If so, add the nth-of-type selector
+    if ((elementSiblings.length) > 1) selector += `:nth-of-type(${elementSiblings.indexOf(element) + 1})`;
+  }
 
   return selector;
 }
@@ -177,9 +181,9 @@ function createDomPath(target) {
  */
 function mousedown({ pageX, pageY, target, timeStamp, type }) {
   const data = {
+    domPath: createDomPath(target),
     pageX: Math.round(pageX),
     pageY: Math.round(pageY),
-    domPath: createDomPath(target),
     target: createElementSelector(target),
     timeStamp: Math.round(timeStamp),
     type,
@@ -194,9 +198,9 @@ function mousedown({ pageX, pageY, target, timeStamp, type }) {
  */
 function mouseup({ pageX, pageY, target, timeStamp, type }) {
   const data = {
+    domPath: createDomPath(target),
     pageX: Math.round(pageX),
     pageY: Math.round(pageY),
-    domPath: createDomPath(target),
     selection: getSelection().toString(),
     target: createElementSelector(target),
     timeStamp: Math.round(timeStamp),
@@ -225,6 +229,23 @@ function mousemove({ pageX, pageY, timeStamp, type }) {
 }
 
 /**
+ * Function to record mouse over events
+ * @param {eventObj} - Event object
+ */
+function mouseover({ pageX, pageY, target, timeStamp, type }) {
+  const data = {
+    domPath: createDomPath(target),
+    pageX: Math.round(pageX),
+    pageY: Math.round(pageY),
+    target: createElementSelector(target),
+    timeStamp: Math.round(timeStamp),
+    type,
+  };
+
+  events.push(data);
+}
+
+/**
  * Function to record scroll events
  * @param {eventObj} - Event object
  */
@@ -247,20 +268,17 @@ function scroll({ timeStamp, type }) {
  * @param {eventObj} - Event object
  */
 function keydown({ altKey, ctrlKey, metaKey, key, target, timeStamp, type }) {
-  if (target.nodeName.toLowerCase() !== 'input' && target.type !== 'password') {
-    const data = {
-      altKey,
-      ctrlKey,
-      key,
-      metaKey,
-      domPath: createDomPath(target),
-      target: createElementSelector(target),
-      timeStamp: Math.round(timeStamp),
-      type,
-    };
-
-    events.push(data);
-  }
+  const data = {
+    altKey,
+    ctrlKey,
+    domPath: createDomPath(target),
+    key: (target.nodeName.toLowerCase() !== 'input' || ((target.nodeName.toLowerCase() === 'input') && (target.type !== 'password'))) ? key : '*',
+    metaKey,
+    target: createElementSelector(target),
+    timeStamp: Math.round(timeStamp),
+    type,
+  };
+  events.push(data);
 }
 
 /**
@@ -269,6 +287,24 @@ function keydown({ altKey, ctrlKey, metaKey, key, target, timeStamp, type }) {
  */
 const keyup = keydown;
 
+
+/**
+ * New MutationObersver
+ */
+const observer = new MutationObserver((mutations) => {
+  mutations.forEach(({ attribute, target, type }) => {
+    const data = {
+      attribute,
+      domPath: createDomPath(target),
+      target: createElementSelector(target),
+      timeStamp: Math.round(Date.now() - ts),
+      type,
+    };
+    events.push(data);
+  });
+});
+
+
 /**
  * Function to add mouse event listeners
  */
@@ -276,6 +312,7 @@ function addMouseEvents() {
   document.addEventListener('mousemove', mousemove);
   document.addEventListener('mousedown', mousedown);
   document.addEventListener('mouseup', mouseup);
+  document.addEventListener('mouseover', mouseover);
 }
 
 /**
@@ -294,16 +331,30 @@ function addScrollEvents() {
 }
 
 /**
+ * Function to add MutationObserver listener
+ */
+function addMutationObserver() {
+  const config = {
+    childList: true,
+    attributes: true,
+    subtree: true,
+  };
+  observer.observe(document, config);
+}
+
+/**
  * Function to remove all event listeners
  */
 function removeAllEvents() {
   document.removeEventListener('mousemove', mousemove);
   document.removeEventListener('mousedown', mousedown);
   document.removeEventListener('mouseup', mouseup);
+  document.removeEventListener('mouseover', mouseover);
   document.removeEventListener('keydown', keydown);
   document.removeEventListener('keyup', keyup);
   document.removeEventListener('scroll', scroll);
   window.removeEventListener('beforeunload', saveEvents);
+  observer.disconnect();
 }
 
 /**
@@ -333,10 +384,13 @@ function startRecording(data) {
       // Set uuid
       uuid = data.uuid;
 
+      console.log(settings);
+
       // Add user event listeners
       if (settings.includes('mouse')) addMouseEvents();
       if (settings.includes('scroll')) addScrollEvents();
       if (settings.includes('keys')) addKeyEvents();
+      if (settings.includes('dom')) addMutationObserver();
 
       // Add event listener for data saving
       window.addEventListener('beforeunload', saveEvents);

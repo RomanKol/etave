@@ -147,7 +147,7 @@ function recording() {
 function initPopup() {
   // Load settings from storage, else use default settings
   loadStorage('settings')
-    .catch(() => ['mouse', 'scroll', 'key'])
+    .catch(() => ['mouse', 'scroll', 'keys'])
     .then((settings) => {
       settings.forEach((setting) => {
         document.getElementById(setting).checked = true;

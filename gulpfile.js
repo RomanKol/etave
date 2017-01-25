@@ -12,6 +12,13 @@ const eslint = require('gulp-eslint');
 
 const imagemin = require('gulp-imagemin');
 
+function reportError(error) {
+  // If you want details of the error in the console
+  console.log(error.toString());
+
+  this.emit('end');
+}
+
 // Eslinting task
 gulp.task('lint', () => gulp.src('./src/js/*.js')
   .pipe(eslint({
@@ -30,6 +37,7 @@ gulp.task('pug', () => gulp.src('./src/pug/*.pug')
       name: 'etave',
     },
   }))
+  .on('error', reportError)
   .pipe(gulp.dest('./extension/')));
 
 

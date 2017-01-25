@@ -1,8 +1,7 @@
 /**
  * DOM elements user can interact with
  */
-const startBtn = document.querySelector('#start');
-const stopBtn = document.querySelector('#stop');
+const recorderBtn = document.querySelector('#recorder');
 const saveBtn = document.querySelector('#save');
 
 const nameInp = document.querySelector('#name');
@@ -13,9 +12,10 @@ const descrInp = document.querySelector('#descr');
  * @param {string} key - The key of the data
  * @return {Promise.<boolean, Error>} - The saved data, else an error
  */
-function loadFromStorage(key) {
+function loadStorage(key) {
   return new Promise((resolve, reject) => {
     chrome.storage.local.get(key, (items) => {
+      if (chrome.runtime.lastError) reject(new Error('Runtime error'));
       if (Object.keys(items).length === 0) reject(false);
       resolve(items[key]);
     });
@@ -28,10 +28,10 @@ function loadFromStorage(key) {
  * @param {any} data - Data to be saved
  * @returns {Promise.<boolean, Error>} - True, else an error
  */
-function saveInStorage(key, data) {
+function saveStorage(key, data) {
   return new Promise((resolve, reject) => {
     chrome.storage.local.set({ [key]: data }, () => {
-      if (chrome.runtime.lastError) reject(new Error());
+      if (chrome.runtime.lastError) reject(new Error('Runtime error'));
       resolve(true);
     });
   });
@@ -92,7 +92,7 @@ function getSessionSettings() {
  * Function to save the current settings in chrome.storage
  */
 function saveSettings() {
-  saveInStorage('settings', getSettings());
+  saveStorage('settings', getSettings());
 }
 
 /**
@@ -110,11 +110,28 @@ function getDomain(url) {
 /**
  * Function to start recording
  */
-function startRecording() {
-  const msg = {
-    task: 'startRecording',
-    session: getSessionSettings(),
-  };
+function recording() {
+  const msg = {};
+  if (recorderBtn.classList.contains('btn-success')) {
+    // Update the button
+    recorderBtn.classList.remove('btn-success');
+    recorderBtn.classList.add('btn-danger');
+    recorderBtn.textContent = 'stop and save';
+
+    // Set the message
+    msg.task = 'startRecording';
+    msg.session = getSessionSettings();
+  } else {
+    // Update the button
+    recorderBtn.classList.contains('btn-success');
+    recorderBtn.classList.contains('btn-success');
+    recorderBtn.textContent = 'start';
+
+    // Set the message
+    msg.task = 'stopRecording';
+  }
+
+  // Send the message
   sendRuntimeMessage(msg)
     .then(() => {
       window.close();
@@ -125,21 +142,11 @@ function startRecording() {
 }
 
 /**
- * Function to stop recording
- */
-function stopRecording() {
-  sendRuntimeMessage({ task: 'stopRecording' })
-    .catch((err) => {
-      console.error(err);
-    });
-}
-
-/**
  * Function to initialize the popup
  */
 function initPopup() {
   // Load settings from storage, else use default settings
-  loadFromStorage('settings')
+  loadStorage('settings')
     .catch(() => ['mouse', 'scroll', 'key'])
     .then((settings) => {
       settings.forEach((setting) => {
@@ -147,12 +154,28 @@ function initPopup() {
       });
     });
 
+  let currentTab;
+
   // Get active tab
   getActiveTab()
     .then((tab) => {
       const domain = getDomain(tab.url) || tab.url;
       nameInp.placeholder = `${domain} - ${new Date().toLocaleString()}`;
       descrInp.placeholder = `${tab.title}`;
+      currentTab = tab;
+    })
+    .then(() => loadStorage('recordingSessions'))
+    .then((_sessions) => {
+      const id = _sessions.findIndex(_session => _session.tabId === currentTab.id);
+      // Check if there are recordings and if the tab is recording
+      if (_sessions && id !== -1) {
+        recorderBtn.classList.add('btn-danger');
+        recorderBtn.textContent = 'stop and save';
+        // Else disable the stop button
+      } else {
+        recorderBtn.classList.add('btn-success');
+        recorderBtn.textContent = 'start';
+      }
     });
 }
 
@@ -165,5 +188,4 @@ document.addEventListener('DOMContentLoaded', initPopup);
  * User event listeners
  */
 saveBtn.addEventListener('click', saveSettings);
-startBtn.addEventListener('click', startRecording);
-stopBtn.addEventListener('click', stopRecording);
+recorderBtn.addEventListener('click', recording);

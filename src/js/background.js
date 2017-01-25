@@ -1,33 +1,29 @@
 /**
  * @typedef {object} Site
- * @prop {string} uuid - Uuid of the site
  * @prop {number} end - Timestamp ot the end
  * @prop {number} start - Timestamp of the start
  * @prop {string} title - Title of the page
  * @prop {string} url - Url of the page
+ * @prop {string} uuid - Uuid of the site
  */
 
 /**
  * @typedef {object} Session
- * @prop {string} uuid - Uuid of the session
+ * @prop {boolean} completed - Status of Session, true if session was enden, else false
+ * @prop {boolean} descr - Description of the session
  * @prop {string} name - Name of the session
- * @prop {boolean} description - Description of the session
  * @prop {site[]} sites - Array with sites in session
  * @prop {number} start - Timestamp of session start
+ * @prop {string} uuid - Uuid of the session
  * @prop {obj} viewport - Object with height and width of viewport as numbers
  */
-
-/**
- * Array with recording sessions
- */
-const sessions = [];
 
 /**
  * Function to load data from the chrome.storage api
  * @param {string} key - The key of the data
  * @return {Promise<any, false>} -  The saved data or false, if no data was found
  */
-function loadFromStorage(key) {
+function loadStorage(key) {
   return new Promise((resolve, reject) => {
     chrome.storage.local.get(key, (items) => {
       if (Object.keys(items).length === 0) reject(false);
@@ -43,7 +39,7 @@ function loadFromStorage(key) {
  * @param {any} data - Data to be saved
  * @returns {Promise.<boolean, Error>} - If data was saved
  */
-function saveInStorage(key, data) {
+function saveStorage(key, data) {
   return new Promise((resolve, reject) => {
     chrome.storage.local.set({ [key]: data }, () => {
       if (chrome.runtime.lastError) reject(new Error('Runtime error'));
@@ -53,25 +49,50 @@ function saveInStorage(key, data) {
 }
 
 /**
- * Function to update a sessions in chrome.storage
+ * Function to update a sessions in chrome.storage recordingSessions
+ * @param {Session} session - The session object
+ * @param {boolean=} remove - If the session object should be removed
+ */
+function updateRecordings(session, remove = false) {
+  // Load sessions array, else return empty array
+  return loadStorage('recordingSessions')
+    .then((_sessions) => {
+      // Search for session object, if found update it, else push it
+      const sessionIndex = _sessions.findIndex(_session => _session.uuid === session.uuid);
+
+      // If the session has to be removed, remove it
+      if (remove) {
+        _sessions.splice(sessionIndex, 1);
+      // Elseif the position is not already in the sessions, push it
+      } else if (sessionIndex === -1) {
+        _sessions.push(session);
+      // Else update it
+      } else {
+        _sessions[sessionIndex] = session;
+      }
+
+      return _sessions;
+    })
+    // Save updated sessions
+    .then(_sessions => saveStorage('recordingSessions', _sessions))
+    .catch((err) => {
+      console.log(err);
+    });
+}
+
+/**
+ * Function to update a session in chrome.storage sessions
  * @param {Session} session - The session object
  */
 function updateSessions(session) {
   // Load sessions array, else return empty array
-  return loadFromStorage('sessions')
-    .catch(() => [])
+  return loadStorage('sessions')
     .then((_sessions) => {
-      // Search for session object, if found update it, else push it
-      const sessionIndex = _sessions.findIndex(_session => _session.uuid === session.uuid);
-      if (sessionIndex !== -1) {
-        _sessions[sessionIndex] = session;
-      } else {
-        _sessions.push(session);
-      }
+      _sessions.push(session);
       return _sessions;
     })
     // Save updated sessions
-    .then(_sessions => saveInStorage('sessions', _sessions))
+    .then(_sessions => saveStorage('sessions', _sessions))
     .catch((err) => {
       console.log(err);
     });
@@ -99,10 +120,10 @@ function generateUuid() {
  */
 function createSite(tab) {
   const site = {
-    uuid: generateUuid(),
     start: Date.now(),
     title: tab.title,
     url: tab.url,
+    uuid: generateUuid(),
   };
   return site;
 }
@@ -115,12 +136,13 @@ function createSite(tab) {
  */
 function createSession(data, tab) {
   const session = {
-    uuid: generateUuid(),
-    tabId: tab.id,
-    name: data.session.name,
+    completed: false,
     descr: data.session.descr,
+    name: data.session.name,
     sites: [],
     start: Date.now(),
+    tabId: tab.id,
+    uuid: generateUuid(),
     viewport: {
       height: tab.height,
       width: tab.width,
@@ -157,23 +179,6 @@ function sendTabMessage(tab, msg) {
 }
 
 /**
- * Function to continue recording after site refresh/load
- * @param {obj} tab - The current active tab
- * @param {string} uuid - The uuid of the site recording
- */
-function continueRecording(tab, uuid) {
-  const data = {
-    task: 'startRecording',
-    uuid,
-  };
-  // Send the tab a message
-  sendTabMessage(tab, data)
-    .catch((err) => {
-      console.error(err);
-    });
-}
-
-/**
  * Function to handle tab events
  * @param {number} tabID - ID of the tab
  * @param {obj} info - Information about the tab status
@@ -182,19 +187,31 @@ function continueRecording(tab, uuid) {
 function tabListener(tabId, info, tab) {
   if (info.status === 'complete') {
     // Find the session object of the tab
-    const session = sessions.find(_session => _session.tabId === tabId);
+    loadStorage('recordingSessions')
+      .then((_sessions) => {
+        const session = _sessions.find(_session => _session.tabId === tabId);
 
-    // If there is one
-    if (session) {
-      // Update set the end time of the site
-      session.sites[session.sites.length - 1].end = Date.now();
+        // If there is one
+        if (session) {
+          // Update set the end time of the site
+          session.sites[session.sites.length - 1].end = Date.now();
 
-      // Create a new site and add it to the session
-      const site = createSite(tab);
-      session.sites.push(site);
-      updateSessions(session);
-      continueRecording(tab, site.uuid);
-    }
+          // Create a new site and add it to the session
+          const site = createSite(tab);
+          session.sites.push(site);
+          updateRecordings(session);
+
+          // Send the tab a message
+          const msg = {
+            task: 'startRecording',
+            uuid: site.uuid,
+          };
+          sendTabMessage(tab, msg)
+            .catch((err) => {
+              console.error(err);
+            });
+        }
+      });
   }
 }
 
@@ -211,12 +228,16 @@ function startRecording(data) {
 
       // Add the site to the session and the session to session array
       session.sites.push(site);
-      sessions.push(session);
+      // sessions.push(session);
 
       // Add the event listener to the tabs
       if (!chrome.tabs.onUpdated.hasListener(tabListener)) {
         chrome.tabs.onUpdated.addListener(tabListener);
       }
+
+      // Update Recordings
+      updateRecordings(session);
+
       return { tab, task: data.task, uuid: site.uuid };
     })
     .then(({ tab, task, uuid }) => sendTabMessage(tab, { task, uuid }));
@@ -226,29 +247,30 @@ function startRecording(data) {
  * Function to stop recording be removing event listeners
  * @param {any} data - Message
  */
-function stopRecording(data) {
+async function stopRecording(data) {
   // Get the active tab
-  return getActiveTab()
-    // Send the tab a message
-    .then(tab => sendTabMessage(tab, data)
-        .catch((err) => {
-          console.error(err);
-        })
-        .then(() => tab))
-    .then((tab) => {
-      // If the tabs have an event listener, remove it
-      if (chrome.tabs.onUpdated.hasListener(tabListener)) {
-        chrome.tabs.onUpdated.removeListener(tabListener);
-      }
+  const tab = await getActiveTab();
 
-      // Find our session in the sessions array, add the end end prop
-      const sessionIndex = sessions.findIndex(_session => _session.tabId === tab.id);
-      const session = sessions.splice(sessionIndex, 1)[0];
-      session.end = Date.now();
-
-      // Update the sessions in chrome.storage
-      return updateSessions(session);
+  // Send the tab a message
+  sendTabMessage(tab, data)
+    .catch((err) => {
+      console.error(err);
     });
+
+  // Load sessions and find our session
+  const session = await loadStorage('recordingSessions')
+    .then(_sessions => _sessions.find(_session => _session.tabId === tab.id));
+
+  // Add the end end prop
+  session.end = Date.now();
+
+  await updateSessions(session);
+  await updateRecordings(session, true);
+
+  // If the tabs have an event listener, remove it
+  if (chrome.tabs.onUpdated.hasListener(tabListener)) {
+    chrome.tabs.onUpdated.removeListener(tabListener);
+  }
 }
 
 /**
@@ -286,7 +308,17 @@ function messageListener(msg, sender, sendResponse) {
 }
 
 /**
- * Chrome runtime message listener
+ * Init function
+ */
+function init() {
+  loadStorage('recordingSessions')
+    .catch(() => saveStorage('recordingSessions', []));
+  loadStorage('sessions')
+    .catch(() => saveStorage('sessions', []));
+}
+
+/**
+ * Chrome runtime listeners
  */
 chrome.runtime.onMessage.addListener(messageListener);
-
+chrome.runtime.onInstalled.addListener(init);

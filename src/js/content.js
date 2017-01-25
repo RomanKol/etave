@@ -130,17 +130,22 @@ function throttleScroll(cur, prev, distanceMin = 25, timeMin = 50) {
  * @return {string} - String of the dom element
  */
 function createElementSelector(element) {
+  // If the element has an id, return the id
   if (element.id !== '') {
     return `#${element.id}`;
   }
 
+  // Set the node name
   let selector = element.nodeName.toLowerCase();
 
-  if (element.classList.length > 0) element.classList.forEach((elClass) => { selector += `.${elClass}`; });
+  // Join all classes and add them
+  if (element.classList.length > 0) Array.from(element.classList.value).join('.');
 
+  // Check if there are siblings of the same element
   const elementSiblings = Array.from(element.parentElement.querySelectorAll(selector))
     .filter(elementSibling => elementSibling.parentElement === element.parentElement);
 
+  // If so, add the nth-of-type selector
   if ((elementSiblings.length) > 1) selector += `:nth-of-type(${elementSiblings.indexOf(element) + 1})`;
 
   return selector;
@@ -152,18 +157,18 @@ function createElementSelector(element) {
  * @return {string[]} - Array of element selector strings
  */
 function createDomPath(target) {
-  let node = target;
+  let element = target;
 
-  const nodes = [];
+  const elements = [];
 
-  if (node.parentElement !== null) {
-    while (node.parentElement !== null) {
-      nodes.push(createElementSelector(node));
-      node = node.parentElement;
-    }
+  // Loop over the parents
+  while (element.parentElement !== null) {
+    elements.push(createElementSelector(element));
+    element = element.parentElement;
   }
 
-  return nodes.reverse(); // .join('/');
+  // Return the reveserd array, starting from top/document
+  return elements.reverse(); // .join('/');
 }
 
 /**
@@ -315,7 +320,7 @@ function addDot() {
  */
 function removeDot() {
   const dot = document.getElementById('etave-recorder-dot');
-  dot.parentElement.removeChild(dot);
+  if (dot) dot.parentElement.removeChild(dot);
 }
 
 /**

@@ -3,6 +3,7 @@
  */
 const recorderBtn = document.querySelector('#recorder');
 const saveBtn = document.querySelector('#save');
+const settingsLink = document.querySelector('#settingsLink');
 
 const nameInp = document.querySelector('#name');
 const descrInp = document.querySelector('#descr');
@@ -180,6 +181,15 @@ function initPopup() {
 }
 
 /**
+ * Function to open the options page in a new tab
+ * @param {object} e - Event object
+ */
+function openOptions(e) {
+  e.preventDefault();
+  chrome.tabs.create({ url: '/options.html' });
+}
+
+/**
  * Document event listeners
  */
 document.addEventListener('DOMContentLoaded', initPopup);
@@ -189,3 +199,4 @@ document.addEventListener('DOMContentLoaded', initPopup);
  */
 saveBtn.addEventListener('click', saveSettings);
 recorderBtn.addEventListener('click', recording);
+settingsLink.addEventListener('click', openOptions);

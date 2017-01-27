@@ -161,7 +161,7 @@ function initPopup() {
   getActiveTab()
     .then((tab) => {
       const domain = getDomain(tab.url) || tab.url;
-      nameInp.placeholder = `${domain} - ${new Date().toLocaleString()}`;
+      nameInp.placeholder = `${domain}`;
       descrInp.placeholder = `${tab.title}`;
       currentTab = tab;
     })

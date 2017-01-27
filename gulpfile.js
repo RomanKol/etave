@@ -71,7 +71,7 @@ gulp.task('css-min', () => gulp.src(['./src/sass/styles.scss', './src/sass/conte
 
 
 // Image Task
-gulp.task('image', () => gulp.src('src/images/*')
+gulp.task('image', () => gulp.src('src/img/*')
   .pipe(imagemin())
   .pipe(gulp.dest('./extension/')));
 

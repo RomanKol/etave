@@ -1,16 +1,12 @@
 #popup {
   font-size: 14px;
   min-width: 256px;
+  min-height: 384px;
 
   header {
-    background-color: $blue;
-    color: white;
-    span {
-      font-size: 24px;
-    }
     a {
-      color: white;
-      line-height: 36px;
+      font-size: 1.1rem;
+      line-height: 1.2rem;
     }
   }
 
@@ -19,12 +15,6 @@
     button {
       width: 50%;
     }
-  }
-
-  .line {
-    height: 1px;
-    background: $blue;
-    width: 100%;
   }
 
   .input-group {
@@ -36,6 +26,7 @@
       line-height: inherit;
       background-color: $blue;
       color: white;
+      min-width: 60px;
     }
 
     input {
@@ -48,4 +39,13 @@
       }
     }
   }
+
+  #settings,
+  #session {
+    display: none;
+    &:target {
+      display: block;
+    }
+  }
+
 }

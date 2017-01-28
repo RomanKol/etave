@@ -1,3 +1,4 @@
+// Checkbox
 input[type='checkbox'] {
   display: none;
 
@@ -39,6 +40,38 @@ input[type='checkbox'] {
       background: #ddd;
       // content: '';
       content: '✔️️';
+    }
+  }
+}
+
+// Header
+.navbar {
+  flex-direction: row;
+  & button {
+    margin-left: auto;
+  }
+}
+
+// Navigation
+.nav {
+  .nav-link {
+    transition: all 0.3s ease-in;
+  }
+}
+
+.nav-tabs {
+  &.flex-row {
+    .nav-item {
+      flex-grow: 1;
+      .nav-link {
+        border: none;
+        border-radius: 0;
+        &.active {
+          color: #fff;
+          cursor: default;
+          background-color: $blue;
+        }
+      }
     }
   }
 }

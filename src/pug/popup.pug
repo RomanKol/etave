@@ -1,53 +1,57 @@
 html
   head
-    title #{name}
+    title #{name} Popup
     link(href="styles.css", rel="stylesheet")
 
-  body#popup.container
-    header.row
-      div.col
-        span.lead #{name}
-        a#settingsLink(href="#", title="Settings").float-right Settings
+  body#popup
 
-    main.row.mt-2
-      section#settings.col-12
+    header.navbar.navbar-inverse.bg-inverse
+      a.navbar-brand(href='#') etave
+      button#dashboard.btn.btn-primary.btn-sm.float-right Dashboard
 
-        p.lead Quick Settings
+    nav.bg-faded
+      ul.nav.nav-tabs.flex-row
+        li.nav-item
+          a.nav-link.active(href='#session') Session
+        li.nav-item
+          a.nav-link(href='#settings') Settings
 
-        input(type="checkbox" name="mouse")#mouse
-        label(for="mouse" title="Mouseclicks and movement") Mouse
-        br
+    .container-fluid
+      section.row
+        div#session.col-12.mt-2.mb-2
 
-        input(type="checkbox" name="scroll")#scroll
-        label(for="scroll" title="Page scrolling") Scroll
-        br
+          h5 Session
 
-        input(type="checkbox" name="keys")#keys
-        label(for="keys" title="Keyups") Keys
-        br
+          div.input-group
+            span.input-group-addon Name
+            input(type="text")#name.form-control
 
-        input(type="checkbox" name="dom")#dom
-        label(for="dom" title="Document mutations") DOM
-        br
+          div.input-group.mt-2
+            span.input-group-addon Descr
+            input(type="text")#descr.form-control
 
-        small For more informations, go to the #[a(href="#Settings" title="Settings") Settings]
+          button#recorder.btn.btn-block.mt-2
 
-        br
+        div#settings.col-12.mt-2.mb-2
 
-        button#save.btn.btn-sm.btn-primary save settings
+          h5 Settings
 
-      section#session.col-12.mt-4.mb-2
+          input(type="checkbox" name="mouse")#mouse
+          label(for="mouse" title="Mouseclicks and movement") Mouse
+          br
 
-        p.lead Record session
+          input(type="checkbox" name="scroll")#scroll
+          label(for="scroll" title="Page scrolling") Scroll
+          br
 
-        div.input-group
-          span.input-group-addon Name
-          input(type="text")#name.form-control
+          input(type="checkbox" name="keys")#keys
+          label(for="keys" title="Keyups") Keys
+          br
 
-        div.input-group.mt-1
-          span.input-group-addon Descr
-          input(type="text")#descr.form-control
+          input(type="checkbox" name="dom")#dom
+          label(for="dom" title="Document mutations") DOM
+          br
 
-        button#recorder.btn.btn-block.mt-4
+          button#save.btn.btn-primary.mt-2 save settings
 
     script(src="popup.js")

@@ -1,31 +1,14 @@
 #options {
 
   /*
-  * Base structure
-  */
-
-  /* Move down content because we have a fixed navbar that is 50px tall */
-
-  // padding-top: 50px;
-
-
-  /*
   * Typography
   */
 
   h1 {
     margin-bottom: 20px;
     padding-bottom: 9px;
-    border-bottom: 1px solid #eee;
+    border-bottom: 1px solid $border;
   }
-
-  .navbar {
-    flex-direction: row;
-    & button {
-      margin-left: auto;
-    }
-  }
-
 
   /*
   * Sidebar
@@ -33,36 +16,32 @@
 
   .sidebar {
     position: fixed;
-    top: 51px;
+    top: 55px;
     bottom: 0;
     left: 0;
     z-index: 1000;
-    padding: 20px;
     overflow-x: hidden;
     overflow-y: auto; /* Scrollable contents if viewport is shorter than content. */
-    border-right: 1px solid #eee;
-  }
+    border-right: 1px solid $border;
 
-  /* Sidebar navigation */
-  .sidebar {
     padding-left: 0;
     padding-right: 0;
-  }
 
-  .sidebar .nav {
-    margin-bottom: 20px;
-  }
+    .nav {
+      margin-bottom: 20px;
+    }
 
-  .sidebar .nav-item {
-    width: 100%;
-  }
+    .nav-item {
+      width: 100%;
 
-  .sidebar .nav-item + .nav-item {
-    margin-left: 0;
-  }
+      &  + .nav-item {
+        margin-left: 0;
+      }
+    }
 
-  .sidebar .nav-link {
-    border-radius: 0;
+    .nav-link {
+      border-radius: 0;
+    }
   }
 
   /*

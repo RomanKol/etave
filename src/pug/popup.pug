@@ -21,6 +21,7 @@ html
         div#session.col-12.mt-2.mb-2
 
           h5 Session
+          p.text-muted Insert a name/title and a description into the fields bleow and start recording a session
 
           div.input-group
             span.input-group-addon Name
@@ -30,28 +31,60 @@ html
             span.input-group-addon Descr
             input(type="text")#descr.form-control
 
-          button#recorder.btn.btn-block.mt-2
+          button#recorder.btn.btn-block.mt-2 Start recording
 
         div#settings.col-12.mt-2.mb-2
 
           h5 Settings
+          p.text-muted Select the events to be recorded
 
-          input(type="checkbox" name="mouse")#mouse
-          label(for="mouse" title="Mouseclicks and movement") Mouse
-          br
+          .row
 
-          input(type="checkbox" name="scroll")#scroll
-          label(for="scroll" title="Page scrolling") Scroll
-          br
+            fieldset.form-group.form-check.col-6
+              legend Mouse events
 
-          input(type="checkbox" name="keys")#keys
-          label(for="keys" title="Keyups") Keys
-          br
+              input(type='checkbox' name='mousedown')#mousedown
+              label(for='mousedown' title='Mousedown') Mousedown
 
-          input(type="checkbox" name="dom")#dom
-          label(for="dom" title="Document mutations") DOM
-          br
+              br
 
-          button#save.btn.btn-primary.mt-2 save settings
+              input(type='checkbox' name='mouseup')#mouseup
+              label(for='mouseup' title='Mouseup') Mouseup
+
+              br
+
+              input(type='checkbox' name='mousemove')#mousemove
+              label(for='mousemove' title='Mousemove') Mousemove
+
+              br
+
+              input(type='checkbox' name='mouseover')#mouseover
+              label(for='mouseover' title='Mouseover') Mouseover
+
+            fieldset.form-group.form-check.col-6
+              legend Key events
+
+              input(type='checkbox' name='keydown')#keydown
+              label(for='keydown' title='Keyup') Keydown
+
+              br
+
+              input(type='checkbox' name='keyup')#keyup
+              label(for='keyup' title='Keyup') Keyup
+
+            fieldset.form-group.form-check.col-6
+              legend  Scroll events
+
+              input(type='checkbox' name='scroll')#scroll
+              label(for='scroll' title='Scroll') Scroll
+
+            fieldset.form-group.form-check.col-6
+              legend DOM events
+
+              input(type='checkbox' name='dom')#dom
+              label(for='dom' title='DOM') DOM
+
+            .col-12
+              button#save.btn.btn-primary.mt-2 Save settings
 
     script(src="popup.js")

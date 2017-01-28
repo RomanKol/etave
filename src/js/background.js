@@ -309,12 +309,15 @@ function messageListener(msg, sender, sendResponse) {
 
 /**
  * Init function
+
  */
 function init() {
   loadStorage('recordingSessions')
     .catch(() => saveStorage('recordingSessions', []));
   loadStorage('sessions')
     .catch(() => saveStorage('sessions', []));
+  loadStorage('settings')
+    .catch(() => saveStorage('settings', ['mousedown', 'mouseup', 'mousemove', 'keydown', 'keyup', 'scroll']));
 }
 
 /**

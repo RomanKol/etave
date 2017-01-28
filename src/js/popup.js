@@ -3,7 +3,8 @@
  */
 const recorderBtn = document.querySelector('#recorder');
 const saveBtn = document.querySelector('#save');
-const settingsLink = document.querySelector('#settingsLink');
+const dashboardBtn = document.querySelector('#dashboard');
+const navTabs = document.querySelector('.nav-tabs');
 
 const nameInp = document.querySelector('#name');
 const descrInp = document.querySelector('#descr');
@@ -93,7 +94,9 @@ function getSessionSettings() {
  * Function to save the current settings in chrome.storage
  */
 function saveSettings() {
-  saveStorage('settings', getSettings());
+  const settings = getSettings();
+  saveStorage('settings', settings);
+  console.log(settings);
 }
 
 /**
@@ -143,12 +146,27 @@ function recording() {
 }
 
 /**
+ * Function to update tabs
+ */
+function updateNav() {
+  if (location.hash) {
+    // Remove active
+    const active = navTabs.querySelector('a.active');
+    if (active) active.classList.remove('active');
+
+    // Add active
+    const selector = `a[href="${location.hash}"]`;
+    const now = navTabs.querySelector(selector);
+    if (now) now.classList.add('active');
+  }
+}
+
+/**
  * Function to initialize the popup
  */
 function initPopup() {
   // Load settings from storage, else use default settings
   loadStorage('settings')
-    .catch(() => ['mouse', 'scroll', 'keys'])
     .then((settings) => {
       settings.forEach((setting) => {
         document.getElementById(setting).checked = true;
@@ -171,20 +189,23 @@ function initPopup() {
       // Check if there are recordings and if the tab is recording
       if (_sessions && id !== -1) {
         recorderBtn.classList.add('btn-danger');
-        recorderBtn.textContent = 'stop and save';
+        recorderBtn.textContent = 'Stop recording';
         // Else disable the stop button
       } else {
         recorderBtn.classList.add('btn-success');
-        recorderBtn.textContent = 'start';
+        recorderBtn.textContent = 'Start recording';
       }
     });
+
+  location.hash = '#session';
+  updateNav();
 }
 
 /**
  * Function to open the options page in a new tab
  * @param {object} e - Event object
  */
-function openOptions(e) {
+function openDashboard(e) {
   e.preventDefault();
   chrome.tabs.create({ url: '/options.html' });
 }
@@ -193,10 +214,10 @@ function openOptions(e) {
  * Document event listeners
  */
 document.addEventListener('DOMContentLoaded', initPopup);
-
+window.addEventListener('hashchange', updateNav);
 /**
  * User event listeners
  */
 saveBtn.addEventListener('click', saveSettings);
 recorderBtn.addEventListener('click', recording);
-settingsLink.addEventListener('click', openOptions);
+dashboardBtn.addEventListener('click', openDashboard);

@@ -304,34 +304,8 @@ const observer = new MutationObserver((mutations) => {
   });
 });
 
-
 /**
- * Function to add mouse event listeners
- */
-function addMouseEvents() {
-  document.addEventListener('mousemove', mousemove);
-  document.addEventListener('mousedown', mousedown);
-  document.addEventListener('mouseup', mouseup);
-  document.addEventListener('mouseover', mouseover);
-}
-
-/**
- * Function to add key event listener
- */
-function addKeyEvents() {
-  document.addEventListener('keydown', keydown);
-  document.addEventListener('keyup', keyup);
-}
-
-/**
- * Function to add scroll event listeners
- */
-function addScrollEvents() {
-  document.addEventListener('scroll', scroll);
-}
-
-/**
- * Function to add MutationObserver listener
+ * Function to activate MutationObserver listener
  */
 function addMutationObserver() {
   const config = {
@@ -384,12 +358,20 @@ function startRecording(data) {
       // Set uuid
       uuid = data.uuid;
 
-      console.log(settings);
+      // Check for mouse settings
+      if (settings.includes('mousemove')) document.addEventListener('mousemove', mousemove);
+      if (settings.includes('mousedown')) document.addEventListener('mousedown', mousedown);
+      if (settings.includes('mouseup')) document.addEventListener('mouseup', mouseup);
+      if (settings.includes('mouseover')) document.addEventListener('mouseover', mouseover);
 
-      // Add user event listeners
-      if (settings.includes('mouse')) addMouseEvents();
-      if (settings.includes('scroll')) addScrollEvents();
-      if (settings.includes('keys')) addKeyEvents();
+      // Check for key settings
+      if (settings.includes('keydown')) document.addEventListener('keydown', keydown);
+      if (settings.includes('keyup')) document.addEventListener('keyup', keyup);
+
+      // Check for scroll settings
+      if (settings.includes('scroll')) document.addEventListener('scroll', scroll);
+
+      // Check for dom settings
       if (settings.includes('dom')) addMutationObserver();
 
       // Add event listener for data saving

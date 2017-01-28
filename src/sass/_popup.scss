@@ -1,7 +1,7 @@
 #popup {
   font-size: 14px;
   min-width: 256px;
-  min-height: 384px;
+  min-height: 460px;
 
   header {
     a {
@@ -10,11 +10,12 @@
     }
   }
 
-  .btn-group {
+  #recorder {
     width: 100%;
-    button {
-      width: 50%;
-    }
+  }
+
+  legend {
+    font-size: 1rem;
   }
 
   .input-group {

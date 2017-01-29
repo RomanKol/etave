@@ -99,11 +99,15 @@ function createSessionElement(session) {
     <td>${session.descr}</td>
     <td>${start.toLocaleDateString()}</td>
     <td>${hr}:${min}:${sec}</td>
-    <td>${session.sites.length}</td>
     <td>
-      <button class="btn btn-primary btn-icon" data-uuid="${session.uuid}">
-        <img src="download.svg" alt="download">
+      <button class='btn btn-primary btn-icon' data-uuid='${session.uuid}' title='Download'>
+        <img src='download.svg' alt='download'>
       </button>
+    </td>
+    <td>
+      <a href='session.html#${session.uuid}' class='btn btn-primary btn-icon' title='Details' target='_blank'>
+        <img src='details.svg' alt='details'>
+      </a>
     </td>`;
 
   tableRow.innerHTML = template;
@@ -131,7 +135,7 @@ function updateNav() {
     if (active) active.classList.remove('active');
 
     // Add active
-    const selector = `a[href="${location.hash}"]`;
+    const selector = `a[href='${location.hash}']`;
     const now = navList.querySelector(selector);
     if (now) now.classList.add('active');
   }
@@ -188,8 +192,8 @@ async function init() {
 /**
  * Page event listener
  */
-window.addEventListener('hashchange', updateNav);
 document.addEventListener('DOMContentLoaded', init);
+window.addEventListener('hashchange', updateNav);
 
 sessionsList.addEventListener('click', downloadSession);
 sessionsBtn.addEventListener('click', loadSessions);

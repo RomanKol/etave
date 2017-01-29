@@ -1,8 +1,12 @@
-#popup {
+body#popup {
+
   font-size: 14px;
   min-width: 256px;
   min-height: 460px;
 
+  /**
+   * Header with name and dashboard button
+   */
   header {
     a {
       font-size: 1.1rem;
@@ -10,14 +14,42 @@
     }
   }
 
-  #recorder {
-    width: 100%;
+  /**
+   * Tabs navigation
+   */
+  .nav-tabs {
+    &.flex-row {
+      .nav-item {
+        flex-grow: 1;
+        .nav-link {
+          border: none;
+          border-radius: 0;
+          &.active {
+            color: #fff;
+            cursor: default;
+            background-color: $blue;
+          }
+        }
+      }
+    }
   }
 
-  legend {
-    font-size: 1rem;
+  /**
+   * Tabs
+   */
+  #settings,
+  #session {
+    display: none;
+    &:target {
+      display: block;
+    }
   }
 
+  /**
+   * Session tab
+   */
+
+   // Name and description input
   .input-group {
     font-size: 12px;
     line-height: 14px;
@@ -41,12 +73,15 @@
     }
   }
 
-  #settings,
-  #session {
-    display: none;
-    &:target {
-      display: block;
-    }
+  // Start/Stop button
+  #recorder {
+    width: 100%;
   }
 
+  /**
+   * Settings
+   */
+  legend {
+    font-size: 1rem;
+  }
 }

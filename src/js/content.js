@@ -84,8 +84,7 @@ function saveStorage(key, data) {
  * @return {Promise<array, array>} - Returns a array with the settings, else default
  */
 function loadSettings() {
-  return loadStorage('settings')
-    .catch(() => ['mouse', 'scroll', 'keys']);
+  return loadStorage('settings');
 }
 
 /**
@@ -101,7 +100,7 @@ function saveEvents() {
  * @param {eventObj} prev - The previous event object
  * @param {number} distanceMin - The minimal distance
  * @param {number} timeMin - The minimal time difference
- * @return {boolen} - Returns true,if event should be saved
+ * @return {boolean} - Returns true,if event should be saved
  */
 function throttleMove(cur, prev, distanceMin = 25, timeMin = 50) {
   const distance = Math.sqrt(((cur.pageX - prev.pageX) ** 2) + ((cur.pageY - prev.pageY) ** 2));

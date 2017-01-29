@@ -263,6 +263,7 @@ async function stopRecording(data) {
 
   // Add the end end prop
   session.end = Date.now();
+  session.sites[session.sites.length - 1].end = Date.now();
 
   await updateSessions(session);
   await updateRecordings(session, true);

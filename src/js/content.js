@@ -419,19 +419,23 @@ const tasks = {
  * @param {function} sendResponse - Function to send a response
  */
 function messageListener(msg, sender, sendResponse) {
+  console.log(msg);
   if ('task' in msg) {
     tasks[msg.task](msg)
-      // .then(() => {
-      //   console.log('task done', Date.now());
-      // })
-      // .then(() => {
-      //   console.log('sendResponse', Date.now());
-      //   sendResponse({ response: true });
-      // })
       .catch((err) => {
         console.error(err);
       });
-    sendResponse({ response: true });
+
+    const height = Math.round(document.documentElement.getBoundingClientRect().height);
+    const width = Math.round(document.documentElement.getBoundingClientRect().width);
+
+    const response = {
+      height,
+      timeStamp: Date.now(),
+      width,
+    };
+
+    sendResponse(response);
   }
 }
 

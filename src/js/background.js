@@ -1,21 +1,22 @@
 /**
  * @typedef {object} Site
  * @prop {number} end - Timestamp ot the end
+ * @prop {number} height - The height of the document in pixel
  * @prop {number} start - Timestamp of the start
  * @prop {string} title - Title of the page
  * @prop {string} url - Url of the page
  * @prop {string} uuid - Uuid of the site
+ * @prop {number} width - The width of the document in pixel
  */
 
 /**
  * @typedef {object} Session
- * @prop {boolean} completed - Status of Session, true if session was enden, else false
  * @prop {boolean} descr - Description of the session
  * @prop {string} name - Name of the session
  * @prop {site[]} sites - Array with sites in session
  * @prop {number} start - Timestamp of session start
  * @prop {string} uuid - Uuid of the session
- * @prop {obj} viewport - Object with height and width of viewport as numbers
+ * @prop {obj} viewport - Object with height and width of the tab
  */
 
 /**
@@ -119,8 +120,8 @@ function generateUuid() {
  * @return {obj} - Site Object
  */
 function createSite(tab) {
+  console.log(tab);
   const site = {
-    start: Date.now(),
     title: tab.title,
     url: tab.url,
     uuid: generateUuid(),
@@ -136,7 +137,6 @@ function createSite(tab) {
  */
 function createSession(data, tab) {
   const session = {
-    completed: false,
     descr: data.session.descr,
     name: data.session.name,
     sites: [],
@@ -152,10 +152,10 @@ function createSession(data, tab) {
 }
 
 /**
- * Function to get a tab
+ * Function to get the current tab
  * @return {Promise<tab, Error>} - Returns a tab or an error
  */
-function getActiveTab() {
+function getCurrentTab() {
   return new Promise((resolve, reject) => {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       if (tabs.length === 0) reject(new Error('No tab'));
@@ -198,8 +198,6 @@ function tabListener(tabId, info, tab) {
 
           // Create a new site and add it to the session
           const site = createSite(tab);
-          session.sites.push(site);
-          updateRecordings(session);
 
           // Send the tab a message
           const msg = {
@@ -207,6 +205,15 @@ function tabListener(tabId, info, tab) {
             uuid: site.uuid,
           };
           sendTabMessage(tab, msg)
+            .then((page) => {
+              // Update Site object with start time and height/width data
+              site.start = page.timeStamp;
+              site.height = page.height;
+              site.width = page.width;
+
+              session.sites.push(site);
+              updateRecordings(session);
+            })
             .catch((err) => {
               console.error(err);
             });
@@ -220,58 +227,62 @@ function tabListener(tabId, info, tab) {
  * @param {obj} data - Object with session data
  */
 function startRecording(data) {
-  // Get active tab and create new session and site object
-  return getActiveTab()
+
+  // Get active tab
+  return getCurrentTab()
     .then((tab) => {
+      // Create new session and site object
       const session = createSession(data, tab);
       const site = createSite(tab);
 
-      // Add the site to the session and the session to session array
-      session.sites.push(site);
-      // sessions.push(session);
-
-      // Add the event listener to the tabs
+      // Add the tab listener
       if (!chrome.tabs.onUpdated.hasListener(tabListener)) {
         chrome.tabs.onUpdated.addListener(tabListener);
       }
 
-      // Update Recordings
-      updateRecordings(session);
+      // Send a message to the tab
+      const msg = {
+        task: 'startRecording',
+        uuid: site.uuid,
+      };
+      return sendTabMessage(tab, msg)
+        .then((page) => {
+          // Update Site object with start time and height/width data
+          site.start = page.timeStamp;
+          site.height = page.height;
+          site.width = page.width;
 
-      return { tab, task: data.task, uuid: site.uuid };
-    })
-    .then(({ tab, task, uuid }) => sendTabMessage(tab, { task, uuid }));
+          session.sites.push(site);
+          return updateRecordings(session);
+        });
+    });
 }
 
 /**
  * Function to stop recording be removing event listeners
  * @param {any} data - Message
  */
-async function stopRecording(data) {
-  // Get the active tab
-  const tab = await getActiveTab();
+function stopRecording(data) {
+  // Get the active tab and load the sessions
+  return Promise.all([getCurrentTab(), loadStorage('recordingSessions')])
+    .then(([tab, _sessions]) => {
+      console.log(tab, _sessions, data);
+      // Remove the tab listener
+      if (chrome.tabs.onUpdated.hasListener(tabListener)) {
+        chrome.tabs.onUpdated.removeListener(tabListener);
+      }
 
-  // Send the tab a message
-  sendTabMessage(tab, data)
-    .catch((err) => {
-      console.error(err);
+      // Find our session and update
+      const session = _sessions.find(_session => _session.tabId === tab.id);
+      session.end = Date.now();
+      session.sites[session.sites.length - 1].end = Date.now();
+
+      // Remove session from recordings, update session, send message
+      return Promise.all([updateRecordings(session, true),
+        updateSessions(session),
+        sendTabMessage(tab, data),
+      ]);
     });
-
-  // Load sessions and find our session
-  const session = await loadStorage('recordingSessions')
-    .then(_sessions => _sessions.find(_session => _session.tabId === tab.id));
-
-  // Add the end end prop
-  session.end = Date.now();
-  session.sites[session.sites.length - 1].end = Date.now();
-
-  await updateSessions(session);
-  await updateRecordings(session, true);
-
-  // If the tabs have an event listener, remove it
-  if (chrome.tabs.onUpdated.hasListener(tabListener)) {
-    chrome.tabs.onUpdated.removeListener(tabListener);
-  }
 }
 
 /**
@@ -294,13 +305,6 @@ const tasks = {
 function messageListener(msg, sender, sendResponse) {
   if ('task' in msg) {
     tasks[msg.task](msg)
-      // .then(() => {
-      //   console.log('task done', Date.now());
-      // })
-      // .then(() => {
-      //   console.log('sendResponse', Date.now());
-      //   sendResponse({ response: true });
-      // })
       .catch((err) => {
         console.error(err);
       });

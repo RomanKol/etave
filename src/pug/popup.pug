@@ -1,7 +1,7 @@
 html
   head
     title #{name} Popup
-    link(href="styles.css", rel="stylesheet")
+    link(href='styles.css', rel='stylesheet')
 
   body#popup
 
@@ -18,27 +18,27 @@ html
 
     .container-fluid
       section.row
-        div#session.col-12.mt-2.mb-2
+        #session.col-12.mt-2.mb-2
 
           h5 Session
           p.text-muted Insert a name/title and a description into the fields bleow and start recording a session
 
-          div.input-group
-            span.input-group-addon Name
-            input(type="text")#name.form-control
+          .form-group
+            label(for='#name') Session name
+            input#name.form-control(type='text' name='name')
 
-          div.input-group.mt-2
-            span.input-group-addon Descr
-            input(type="text")#descr.form-control
+          .form-group.mt-2
+            label(for='descr') Description
+            input(type='text')#descr.form-control
 
-          div.form-group.form-check.mt-2
+          .form-group.form-check.mt-2
             small.form-text.text-muted For sites with dynamic content
             input(type='checkbox' name='screenshot')#screenshot
             label(for='screenshot' title='screenshot') Screenshot
 
           button#recorder.btn.btn-block.mt-2 Start recording
 
-        div#settings.col-12.mt-2.mb-2
+        #settings.col-12.mt-2.mb-2
 
           h5 Settings
           p.text-muted Select the events to be recorded
@@ -92,4 +92,4 @@ html
             .col-12
               button#save.btn.btn-primary.mt-2 Save settings
 
-    script(src="popup.js")
+    script(src='popup.js')

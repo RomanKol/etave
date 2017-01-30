@@ -65,8 +65,8 @@ body#popup {
     input {
       font-size: inherit;
       line-height: inherit;
-      background: transparent;
-      border-color: $blue;
+      // background: transparent;
+      // border-color: $blue;
       &::placeholder {
         color: #ccc;
       }

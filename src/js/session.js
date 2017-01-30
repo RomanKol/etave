@@ -40,18 +40,99 @@ function timestampToLocal(timestamp) {
  * @param {number} index - Index of the site in the array
  * @return {element} - A site element
  */
-function createSitesListItem(site, index) {
-  const item = document.createElement('li');
-  item.classList.add('list-group-item');
+function createSitesListItem(site) {
+  const item = document.createElement('tr');
 
   const end = site.end ? new Date(site.end) : new Date(session.end);
 
-  const template = `<div class="d-flex w-100 justify-content-between">
-      <h5 class="mb-1">${site.title}</h5>
-      <small>${index + 1}</small>
-    </div>
-    <p class="mb-1">${site.url}</p>
-    <small>${timestampToLocal(site.start)} - ${end.toLocaleTimeString()}</small>
+  const template = `
+    <td>
+      <div class='form-group'>
+        <label>Title</label>
+        <input class='form-control' type='text' value='${site.title}' readonly>
+      </div>
+      <div class='form-group mt-2'>
+        <label>Url</label>
+        <input class='form-control' type='text' value='${site.url}' readonly>
+      </div>
+    </td>
+    <td>
+      <div class='form-group'>
+        <label>Start</label>
+        <input class='form-control' type='text' value='${timestampToLocal(site.start)}' readonly>
+      </div>
+      <div class='form-group mt-2'>
+        <label>End</label>
+        <input class='form-control' type='text' value='${timestampToLocal(end)}' readonly>
+      </div>
+    </td>
+    <td>
+      <div class="form-group">
+        <label>Width</label>
+        <div class="input-group">
+          <input class="form-control text-right" type="text" name="width" readonly="readonly" value='${site.width}'><span class="input-group-addon">px</span>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="height">Height</label>
+        <div class="input-group">
+          <input class="form-control text-right" type="text" name="height" readonly="readonly" value='${site.height}'><span class="input-group-addon">px</span>
+        </div>
+      </div>
+
+    </td>
+    <td>
+      <form>
+        <button class='btn btn-icon btn-success' title='Play'>
+          <img src='play.svg' alt='Play'>
+        </button>
+        <input type='hidden' name='uuid' value='${site.uuid}'>
+      </form>
+    </td>
+    <td>
+      <form>
+        <button type='submit' class='btn btn-icon btn-primary' title='Heatmap'>
+          <img src='heatmap.svg' alt='Heatmap'>
+        </button>
+
+        <input type='hidden' name='uuid' value='${site.uuid}'>
+
+        <strong class='mt-2'>Options:</strong>
+        <div class='form-check mt-2'>
+          <label class='form-check-label'>
+            <input class='form-check-input' type='radio' name='heatmap' value='move' checked> Move
+          </label>
+        </div>
+        <div class='form-check'>
+          <label class='form-check-label'>
+            <input class='form-check-input' type='radio' name='heatmap' value='click'> Click
+          </label>
+        </div>
+      </form>
+    </td>
+    <td>
+      <form>
+        <button type='submit' class='btn btn-icon btn-primary' title='Path'>
+          <img src='path.svg' alt='Path'>
+        </button>
+
+        <input type='hidden' name='uuid' value='${site.uuid}'>
+
+        <strong class='mt-2'>Options:</strong>
+        <div class='form-check mt-2'>
+          <label class='form-check-label'>
+            <input class='form-check-input' type='checkbox' name='path' value='move' checked> Move
+          </label>
+        </div>
+        <div class='form-check'>
+          <label class='form-check-label'>
+            <input class='form-check-input' type='checkbox' name='path' value='click' checked> Click
+          </label>
+        </div>
+
+      </form>
+
+    </td>
   `;
 
   item.innerHTML = template;
@@ -65,7 +146,7 @@ function createSitesListItem(site, index) {
  * @return {array} - Array with sites elements
  */
 function createSitesList(sites) {
-  return sites.map((site, index) => createSitesListItem(site, index));
+  return sites.map((site, index) => createSitesListItem(site));
 }
 
 /**
@@ -87,7 +168,7 @@ function buildSidebar() {
   sidebar.querySelector('#width').value = session.viewport.width;
   sidebar.querySelector('#height').value = session.viewport.height;
 
-  const sitesList = main.querySelector('#sites-list');
+  const sitesList = main.querySelector('#sites-table tbody');
   const sites = createSitesList(session.sites);
   sites.forEach((site) => {
     sitesList.appendChild(site);
@@ -142,9 +223,26 @@ function deleteSession() {
 }
 
 /**
+ * Function to handle submit events
+ * @param {object} e - Submit event object
+ */
+function actions(e) {
+  e.preventDefault();
+
+  const checked = e.target.querySelectorAll(':checked');
+  checked.forEach((element) => { console.log(element.name, element.value); });
+  // ToDo
+  loadStorage(e.target.elements.uuid.value)
+    .then((events) => {
+      console.log(events);
+    });
+}
+
+/**
  * Event listeners
  */
 document.addEventListener('DOMContentLoaded', init);
+document.addEventListener('submit', actions);
 
 /**
  * User event listeners

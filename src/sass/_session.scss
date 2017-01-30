@@ -18,8 +18,8 @@ body#session {
 
   main {
     flex: 1;
-    background-color: $grey;
-    overflow: hidden;
+    // background-color: $grey;
+    // overflow: hidden;
     display: flex;
 
     // align-items: center;
@@ -27,7 +27,10 @@ body#session {
 
     // Sites list
     #sites {
-
+      // overflow-y: auto
+      #sites-table tbody {
+        vertical-align: initial;
+      }
     }
 
     // Site details
@@ -55,6 +58,10 @@ body#session {
     background-clip: initial;
   }
 
+  legend {
+    font-size: 1.25rem;
+  }
+
 
   /**
    * Sidebar
@@ -62,7 +69,7 @@ body#session {
   .sidebar {
     .nav-link {
       margin-bottom: 0;
-      border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+      // border-bottom: 1px solid rgba(0, 0, 0, 0.125);
     }
     .nav-item-content {
       padding-top: 1rem;

@@ -67,11 +67,23 @@ html
                   span.input-group-addon px
 
       main
+        .container
+          section#sites.row
+            .col-12
+              h1 Sites
+              table#sites-table.table.table-striped
+                thead
+                  tr
+                    th Site Details
+                    th Times
+                    th Size
+                    th Replay
+                    th Heatmap
+                    th Path
+                tbody
 
-        section#sites
-           ul#sites-list.list-group
+          section#site.row
+            .overlay
 
-        section#site
-          .overlay
-
+  script(src='svg.js')
   script(src='session.js')

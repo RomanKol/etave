@@ -42,6 +42,8 @@ let previousSavedScroll = {
 let uuid;
 let intervalID;
 
+let ts;
+
 /**
  * local events db
  */
@@ -82,8 +84,7 @@ function saveStorage(key, data) {
  * @return {Promise<array, array>} - Returns a array with the settings, else default
  */
 function loadSettings() {
-  return loadStorage('settings')
-    .catch(() => ['mouse', 'scroll', 'key']);
+  return loadStorage('settings');
 }
 
 /**
@@ -99,7 +100,7 @@ function saveEvents() {
  * @param {eventObj} prev - The previous event object
  * @param {number} distanceMin - The minimal distance
  * @param {number} timeMin - The minimal time difference
- * @return {boolen} - Returns true,if event should be saved
+ * @return {boolean} - Returns true,if event should be saved
  */
 function throttleMove(cur, prev, distanceMin = 25, timeMin = 50) {
   const distance = Math.sqrt(((cur.pageX - prev.pageX) ** 2) + ((cur.pageY - prev.pageY) ** 2));
@@ -130,18 +131,25 @@ function throttleScroll(cur, prev, distanceMin = 25, timeMin = 50) {
  * @return {string} - String of the dom element
  */
 function createElementSelector(element) {
+  // If the element has an id, return the id
   if (element.id !== '') {
     return `#${element.id}`;
   }
 
+  // Set the node name
   let selector = element.nodeName.toLowerCase();
 
-  if (element.classList.length > 0) element.classList.forEach((elClass) => { selector += `.${elClass}`; });
+  // Join all classes and add them
+  if (element.classList.length > 0) Array.from(element.classList.value).join('.');
 
-  const elementSiblings = Array.from(element.parentElement.querySelectorAll(selector))
-    .filter(elementSibling => elementSibling.parentElement === element.parentElement);
+  // Check if there are siblings of the same element
+  if (element.parentElement) {
+    const elementSiblings = Array.from(element.parentElement.querySelectorAll(selector))
+      .filter(elementSibling => elementSibling.parentElement === element.parentElement);
 
-  if ((elementSiblings.length) > 1) selector += `:nth-of-type(${elementSiblings.indexOf(element) + 1})`;
+    // If so, add the nth-of-type selector
+    if ((elementSiblings.length) > 1) selector += `:nth-of-type(${elementSiblings.indexOf(element) + 1})`;
+  }
 
   return selector;
 }
@@ -152,18 +160,18 @@ function createElementSelector(element) {
  * @return {string[]} - Array of element selector strings
  */
 function createDomPath(target) {
-  let node = target;
+  let element = target;
 
-  const nodes = [];
+  const elements = [];
 
-  if (node.parentElement !== null) {
-    while (node.parentElement !== null) {
-      nodes.push(createElementSelector(node));
-      node = node.parentElement;
-    }
+  // Loop over the parents
+  while (element.parentElement !== null) {
+    elements.push(createElementSelector(element));
+    element = element.parentElement;
   }
 
-  return nodes.reverse(); // .join('/');
+  // Return the reveserd array, starting from top/document
+  return elements.reverse(); // .join('/');
 }
 
 /**
@@ -172,9 +180,9 @@ function createDomPath(target) {
  */
 function mousedown({ pageX, pageY, target, timeStamp, type }) {
   const data = {
+    domPath: createDomPath(target),
     pageX: Math.round(pageX),
     pageY: Math.round(pageY),
-    domPath: createDomPath(target),
     target: createElementSelector(target),
     timeStamp: Math.round(timeStamp),
     type,
@@ -189,9 +197,9 @@ function mousedown({ pageX, pageY, target, timeStamp, type }) {
  */
 function mouseup({ pageX, pageY, target, timeStamp, type }) {
   const data = {
+    domPath: createDomPath(target),
     pageX: Math.round(pageX),
     pageY: Math.round(pageY),
-    domPath: createDomPath(target),
     selection: getSelection().toString(),
     target: createElementSelector(target),
     timeStamp: Math.round(timeStamp),
@@ -220,6 +228,23 @@ function mousemove({ pageX, pageY, timeStamp, type }) {
 }
 
 /**
+ * Function to record mouse over events
+ * @param {eventObj} - Event object
+ */
+function mouseover({ pageX, pageY, target, timeStamp, type }) {
+  const data = {
+    domPath: createDomPath(target),
+    pageX: Math.round(pageX),
+    pageY: Math.round(pageY),
+    target: createElementSelector(target),
+    timeStamp: Math.round(timeStamp),
+    type,
+  };
+
+  events.push(data);
+}
+
+/**
  * Function to record scroll events
  * @param {eventObj} - Event object
  */
@@ -242,21 +267,16 @@ function scroll({ timeStamp, type }) {
  * @param {eventObj} - Event object
  */
 function keydown({ altKey, ctrlKey, metaKey, key, target, timeStamp, type }) {
-  if (target.nodeName.toLowerCase() === 'input' && target.type === 'password') {
-    return;
-  }
-
   const data = {
     altKey,
     ctrlKey,
-    key,
-    metaKey,
     domPath: createDomPath(target),
+    key: (target.nodeName.toLowerCase() !== 'input' || ((target.nodeName.toLowerCase() === 'input') && (target.type !== 'password'))) ? key : '*',
+    metaKey,
     target: createElementSelector(target),
     timeStamp: Math.round(timeStamp),
     type,
   };
-
   events.push(data);
 }
 
@@ -266,28 +286,33 @@ function keydown({ altKey, ctrlKey, metaKey, key, target, timeStamp, type }) {
  */
 const keyup = keydown;
 
-/**
- * Function to add mouse event listeners
- */
-function addMouseEvents() {
-  document.addEventListener('mousemove', mousemove);
-  document.addEventListener('mousedown', mousedown);
-  document.addEventListener('mouseup', mouseup);
-}
 
 /**
- * Function to add key event listener
+ * New MutationObersver
  */
-function addKeyEvents() {
-  document.addEventListener('keydown', keydown);
-  document.addEventListener('keyup', keyup);
-}
+const observer = new MutationObserver((mutations) => {
+  mutations.forEach(({ attribute, target, type }) => {
+    const data = {
+      attribute,
+      domPath: createDomPath(target),
+      target: createElementSelector(target),
+      timeStamp: Math.round(Date.now() - ts),
+      type,
+    };
+    events.push(data);
+  });
+});
 
 /**
- * Function to add scroll event listeners
+ * Function to activate MutationObserver listener
  */
-function addScrollEvents() {
-  document.addEventListener('scroll', scroll);
+function addMutationObserver() {
+  const config = {
+    childList: true,
+    attributes: true,
+    subtree: true,
+  };
+  observer.observe(document, config);
 }
 
 /**
@@ -297,10 +322,29 @@ function removeAllEvents() {
   document.removeEventListener('mousemove', mousemove);
   document.removeEventListener('mousedown', mousedown);
   document.removeEventListener('mouseup', mouseup);
+  document.removeEventListener('mouseover', mouseover);
   document.removeEventListener('keydown', keydown);
   document.removeEventListener('keyup', keyup);
   document.removeEventListener('scroll', scroll);
   window.removeEventListener('beforeunload', saveEvents);
+  observer.disconnect();
+}
+
+/**
+ * Function to add a 'video recorder dot' to the window
+ */
+function addDot() {
+  const dot = document.createElement('div');
+  dot.id = 'etave-recorder-dot';
+  document.body.appendChild(dot);
+}
+
+/**
+ * Function to remove the video recorder dot
+ */
+function removeDot() {
+  const dot = document.getElementById('etave-recorder-dot');
+  if (dot) dot.parentElement.removeChild(dot);
 }
 
 /**
@@ -313,16 +357,30 @@ function startRecording(data) {
       // Set uuid
       uuid = data.uuid;
 
-      // Add user event listeners
-      if (settings.includes('mouse')) addMouseEvents();
-      if (settings.includes('scroll')) addScrollEvents();
-      if (settings.includes('keys')) addKeyEvents();
+      // Check for mouse settings
+      if (settings.includes('mousemove')) document.addEventListener('mousemove', mousemove);
+      if (settings.includes('mousedown')) document.addEventListener('mousedown', mousedown);
+      if (settings.includes('mouseup')) document.addEventListener('mouseup', mouseup);
+      if (settings.includes('mouseover')) document.addEventListener('mouseover', mouseover);
+
+      // Check for key settings
+      if (settings.includes('keydown')) document.addEventListener('keydown', keydown);
+      if (settings.includes('keyup')) document.addEventListener('keyup', keyup);
+
+      // Check for scroll settings
+      if (settings.includes('scroll')) document.addEventListener('scroll', scroll);
+
+      // Check for dom settings
+      if (settings.includes('dom')) addMutationObserver();
 
       // Add event listener for data saving
       window.addEventListener('beforeunload', saveEvents);
 
       // Initiate data saving interval
       intervalID = setInterval(saveEvents, (60 * 1000));
+    })
+    .then(() => {
+      addDot();
     });
 }
 
@@ -337,6 +395,9 @@ function stopRecording() {
       // Remove all event listeners and clear interval
       removeAllEvents();
       clearInterval(intervalID);
+    })
+    .then(() => {
+      removeDot();
     });
 }
 
@@ -358,19 +419,23 @@ const tasks = {
  * @param {function} sendResponse - Function to send a response
  */
 function messageListener(msg, sender, sendResponse) {
+  console.log(msg);
   if ('task' in msg) {
     tasks[msg.task](msg)
-      // .then(() => {
-      //   console.log('task done', Date.now());
-      // })
-      // .then(() => {
-      //   console.log('sendResponse', Date.now());
-      //   sendResponse({ response: true });
-      // })
       .catch((err) => {
         console.error(err);
       });
-    sendResponse({ response: true });
+
+    const height = Math.round(document.documentElement.getBoundingClientRect().height);
+    const width = Math.round(document.documentElement.getBoundingClientRect().width);
+
+    const response = {
+      height,
+      timeStamp: Date.now(),
+      width,
+    };
+
+    sendResponse(response);
   }
 }
 

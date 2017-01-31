@@ -1,9 +1,10 @@
 /**
  * DOM elements user can interact with
  */
-const startBtn = document.querySelector('#start');
-const stopBtn = document.querySelector('#stop');
+const recorderBtn = document.querySelector('#recorder');
 const saveBtn = document.querySelector('#save');
+const dashboardBtn = document.querySelector('#dashboard');
+const navTabs = document.querySelector('.nav-tabs');
 
 const nameInp = document.querySelector('#name');
 const descrInp = document.querySelector('#descr');
@@ -13,9 +14,10 @@ const descrInp = document.querySelector('#descr');
  * @param {string} key - The key of the data
  * @return {Promise.<boolean, Error>} - The saved data, else an error
  */
-function loadFromStorage(key) {
+function loadStorage(key) {
   return new Promise((resolve, reject) => {
     chrome.storage.local.get(key, (items) => {
+      if (chrome.runtime.lastError) reject(new Error('Runtime error'));
       if (Object.keys(items).length === 0) reject(false);
       resolve(items[key]);
     });
@@ -28,10 +30,10 @@ function loadFromStorage(key) {
  * @param {any} data - Data to be saved
  * @returns {Promise.<boolean, Error>} - True, else an error
  */
-function saveInStorage(key, data) {
+function saveStorage(key, data) {
   return new Promise((resolve, reject) => {
     chrome.storage.local.set({ [key]: data }, () => {
-      if (chrome.runtime.lastError) reject(new Error());
+      if (chrome.runtime.lastError) reject(new Error('Runtime error'));
       resolve(true);
     });
   });
@@ -92,7 +94,9 @@ function getSessionSettings() {
  * Function to save the current settings in chrome.storage
  */
 function saveSettings() {
-  saveInStorage('settings', getSettings());
+  const settings = getSettings();
+  saveStorage('settings', settings);
+  console.log(settings);
 }
 
 /**
@@ -110,25 +114,51 @@ function getDomain(url) {
 /**
  * Function to start recording
  */
-function startRecording() {
-  const msg = {
-    task: 'startRecording',
-    session: getSessionSettings(),
-  };
+function recording() {
+  const msg = {};
+  if (recorderBtn.classList.contains('btn-success')) {
+    // Update the button
+    recorderBtn.classList.remove('btn-success');
+    recorderBtn.classList.add('btn-danger');
+    recorderBtn.textContent = 'stop and save';
+
+    // Set the message
+    msg.task = 'startRecording';
+    msg.session = getSessionSettings();
+  } else {
+    // Update the button
+    recorderBtn.classList.contains('btn-success');
+    recorderBtn.classList.contains('btn-success');
+    recorderBtn.textContent = 'start';
+
+    // Set the message
+    msg.task = 'stopRecording';
+  }
+
+  // Send the message
   sendRuntimeMessage(msg)
+    .then(() => {
+      window.close();
+    })
     .catch((err) => {
       console.error(err);
     });
 }
 
 /**
- * Function to stop recording
+ * Function to update tabs
  */
-function stopRecording() {
-  sendRuntimeMessage({ task: 'stopRecording' })
-    .catch((err) => {
-      console.error(err);
-    });
+function updateNav() {
+  if (location.hash) {
+    // Remove active
+    const active = navTabs.querySelector('a.active');
+    if (active) active.classList.remove('active');
+
+    // Add active
+    const selector = `a[href="${location.hash}"]`;
+    const now = navTabs.querySelector(selector);
+    if (now) now.classList.add('active');
+  }
 }
 
 /**
@@ -136,31 +166,58 @@ function stopRecording() {
  */
 function initPopup() {
   // Load settings from storage, else use default settings
-  loadFromStorage('settings')
-    .catch(() => ['mouse', 'scroll', 'key'])
+  loadStorage('settings')
     .then((settings) => {
       settings.forEach((setting) => {
         document.getElementById(setting).checked = true;
       });
     });
 
+  let currentTab;
+
   // Get active tab
   getActiveTab()
     .then((tab) => {
       const domain = getDomain(tab.url) || tab.url;
-      nameInp.placeholder = `${domain} - ${new Date().toLocaleString()}`;
+      nameInp.placeholder = `${domain}`;
       descrInp.placeholder = `${tab.title}`;
+      currentTab = tab;
+    })
+    .then(() => loadStorage('recordingSessions'))
+    .then((_sessions) => {
+      const id = _sessions.findIndex(_session => _session.tabId === currentTab.id);
+      // Check if there are recordings and if the tab is recording
+      if (_sessions && id !== -1) {
+        recorderBtn.classList.add('btn-danger');
+        recorderBtn.textContent = 'Stop recording';
+        // Else disable the stop button
+      } else {
+        recorderBtn.classList.add('btn-success');
+        recorderBtn.textContent = 'Start recording';
+      }
     });
+
+  location.hash = '#session';
+  updateNav();
+}
+
+/**
+ * Function to open the options page in a new tab
+ * @param {object} e - Event object
+ */
+function openDashboard(e) {
+  e.preventDefault();
+  chrome.tabs.create({ url: '/options.html' });
 }
 
 /**
  * Document event listeners
  */
 document.addEventListener('DOMContentLoaded', initPopup);
-
+window.addEventListener('hashchange', updateNav);
 /**
  * User event listeners
  */
 saveBtn.addEventListener('click', saveSettings);
-startBtn.addEventListener('click', startRecording);
-stopBtn.addEventListener('click', stopRecording);
+recorderBtn.addEventListener('click', recording);
+dashboardBtn.addEventListener('click', openDashboard);

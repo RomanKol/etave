@@ -12,6 +12,13 @@ const eslint = require('gulp-eslint');
 
 const imagemin = require('gulp-imagemin');
 
+function reportError(error) {
+  // If you want details of the error in the console
+  console.log(error.toString());
+
+  this.emit('end');
+}
+
 // Eslinting task
 gulp.task('lint', () => gulp.src('./src/js/*.js')
   .pipe(eslint({
@@ -30,11 +37,12 @@ gulp.task('pug', () => gulp.src('./src/pug/*.pug')
       name: 'etave',
     },
   }))
+  .on('error', reportError)
   .pipe(gulp.dest('./extension/')));
 
 
 // Sass css compilation task
-gulp.task('css', () => gulp.src('./src/sass/styles.scss')
+gulp.task('css', () => gulp.src(['./src/sass/styles.scss', './src/sass/content.scss'])
   .pipe(sass({
     sourceMap: true,
   }))
@@ -44,7 +52,7 @@ gulp.task('css', () => gulp.src('./src/sass/styles.scss')
   }))
   .pipe(gulp.dest('./extension/')));
 
-gulp.task('css-min', () => gulp.src('./src/sass/styles.scss')
+gulp.task('css-min', () => gulp.src(['./src/sass/styles.scss', './src/sass/content.scss'])
   .pipe(sass())
   .pipe(autoprefixer({
     browsers: ['last 2 versions'],
@@ -52,13 +60,18 @@ gulp.task('css-min', () => gulp.src('./src/sass/styles.scss')
   }))
   .pipe(uncss({
     html: ['./extension/**.html'],
+    ignore: [
+      '#etave-recorder-dot',
+      '.btn-danger',
+      '.btn-success',
+    ],
   }))
   .pipe(cssnano())
   .pipe(gulp.dest('./extension/')));
 
 
 // Image Task
-gulp.task('image', () => gulp.src('src/images/*')
+gulp.task('image', () => gulp.src('src/img/*')
   .pipe(imagemin())
   .pipe(gulp.dest('./extension/')));
 
@@ -66,6 +79,7 @@ gulp.task('image', () => gulp.src('src/images/*')
 // Manifest Task
 gulp.task('manifest', () => gulp.src('./src/manifest.json')
   .pipe(gulp.dest('./extension/')));
+
 
 // Watch Task
 gulp.task('watch', () => {

@@ -1,0 +1,89 @@
+html
+  head
+    title #{name} Session
+    meta(charset='utf-8')
+    meta(name='viewport', content='width=device-width, initial-scale=1, shrink-to-fit=no')
+    meta(name='description', content='etave dashboard')
+    link(href='styles.css', rel='stylesheet')
+
+  body#session.page
+
+    header.navbar-inverse.bg-inverse
+      span.navbar-brand etave session details
+
+      button#download.btn.btn-primary.btn-icon.float-right
+        img(src='download.svg', alt='Download')
+
+      button#delete.btn.btn-danger.btn-icon.float-right
+        img(src='delete.svg', alt='Delete')
+
+    .main
+
+      aside.sidebar.bg-faded
+        ul.nav.nav-pills.flex-column
+          li.nav-item
+            p.nav-link.active Details
+
+            .nav-item-content
+              .form-group.col-12
+                label(for='name') Session name
+                input(type='text' name='name' readonly)#name.form-control
+
+              .form-group.col-12
+                label(for='descr') Session description
+                input(type='text' name='descr' readonly)#descr.form-control
+
+          li.nav-item
+            p.nav-link.active Date/Times
+
+            .nav-item-content
+              .form-group.col-12
+                label(for='start') Session start
+                input(type='text' name='start' readonly)#start.form-control
+
+              .form-group.col-12
+                label(for='end') Session end
+                input(type='text' name='end' readonly)#end.form-control
+
+              .form-group.col-12
+                label(for='duration') Session duration
+                .input-group
+                  input(type='text' name='duration' readonly)#duration.form-control.text-right
+                  span.input-group-addon hh:mm:ss
+
+          li.nav-item
+            p.nav-link.active Screensize
+
+            .nav-item-content
+              .form-group.col-12
+                label(for='width') Width
+                .input-group
+                  input(type='text' name='width' readonly)#width.form-control.text-right
+                  span.input-group-addon px
+              .form-group.col-12
+                label(for='height') Height
+                .input-group
+                  input(type='text' name='height' readonly)#height.form-control.text-right
+                  span.input-group-addon px
+
+      main
+        .container-fluid
+          section#sites.row
+            .col-12
+              h1 Sites
+              table#sites-table.table.table-striped
+                thead
+                  tr
+                    th.w-10 Site Preview
+                    th.w-25 Site Details
+                    th.w-20 Size
+                    th.w-10 Replay
+                    th.w-25(colspan='2') Exports
+                tbody
+
+          section#site.row
+            .overlay
+
+  script(src='svg.js')
+  script(src='heatmap.js')
+  script(src='session.js')

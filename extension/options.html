@@ -2,33 +2,100 @@
 <html>
   <head>
     <title>etave</title>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
+    <meta name="description" content="etave dashboard"/>
     <link href="styles.css" rel="stylesheet"/>
   </head>
-  <body class="container" id="options">
-    <header class="row">
-      <div class="col"><span class="lead">etave</span></div>
-    </header>
-    <main class="row mt-2">
-      <section class="col-12" id="settings">
-        <h2>Settings</h2>
-        <h5>Mouse Events</h5>
-        <p class="form-text text-muted">The mouseevents includes <code>mousedown</code>, <code>mouseup</code> and <code>mousemove</code> events.</p>
-        <input type="checkbox" name="mouse" id="mouse"/>
-        <label for="mouse" title="Mouseclicks and movement">Mouse</label><br/>
-        <h5>Scroll Events</h5>
-        <p class="form-text text-muted">The scrollevents includes <code>scroll</code> events of any source (keyboard, scrollwheel, scrollbar).</p>
-        <input type="checkbox" name="scroll" id="scroll"/>
-        <label for="scroll" title="Page scrolling">Scroll</label><br/>
-        <h5>Key Events</h5>
-        <p class="form-text text-muted">The keyevents includes <code>keydown</code> and <code>keyup</code> events.</p>
-        <input type="checkbox" name="key" id="key"/>
-        <label for="key" title="Keyups">Keys</label>
-      </section>
-      <section class="col-12" id="sessions">
-        <h2>Sessions</h2>
-        <div class="list-group" id="session-list"></div>
-      </section>
-    </main>
+  <body class="page" id="options">
+    <header class="navbar-inverse bg-inverse"><a class="navbar-brand" href="#">etave Dashboard</a></header>
+    <div class="main">
+      <nav class="bg-faded sidebar">
+        <ul class="nav nav-pills flex-column">
+          <li class="nav-item"><a class="nav-link active" href="#dashboard">Dashboard</a></li>
+          <li class="nav-item"><a class="nav-link" href="#sessions">Sessions</a></li>
+          <li class="nav-item"><a class="nav-link" href="#settings">Settings</a></li>
+          <li class="nav-item"><a class="nav-link" href="#about">About</a></li>
+        </ul>
+      </nav>
+      <main class="container">
+        <section class="row" id="dashboard">
+          <header class="col-12">
+            <h1>Dashboard</h1>
+            <p class="lead">Welcome to the etave dashboard. You can manage here your recorded sessions and update the settings for the recordings.</p>
+          </header>
+        </section>
+        <section class="row" id="sessions">
+          <header class="col-12">
+            <h3>Sessions</h3>
+            <p class="lead">List of the three last sessions.</p>
+          </header>
+          <div class="table-responsive col-12" id="sessions-list">
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Description</th>
+                  <th>Date</th>
+                  <th>Duration</th>
+                  <th>Download</th>
+                  <th>Details</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+            <button class="btn btn-primary float-right" id="sessions-loader">Load more sessions</button>
+          </div>
+        </section>
+        <section class="row" id="settings">
+          <header class="col-12">
+            <h3>Settings</h3>
+            <p class="lead">Here you can adjust the settings for the recordings.</p>
+          </header>
+          <fieldset class="form-group form-check col-6">
+            <legend>Mouse events</legend>
+            <p class="form-text text-muted">The mouse events includes <code>mousedown</code>, <code>mouseup</code>, <code>mousemove</code> and <code>mouseover</code> events.</p>
+            <input type="checkbox" name="mousedown" id="mousedown"/>
+            <label for="mousedown" title="Mousedown">Mousedown</label><br/>
+            <input type="checkbox" name="mouseup" id="mouseup"/>
+            <label for="mouseup" title="Mouseup">Mouseup</label><br/>
+            <input type="checkbox" name="mousemove" id="mousemove"/>
+            <label for="mousemove" title="Mousemove">Mousemove</label><br/>
+            <input type="checkbox" name="mouseover" id="mouseover"/>
+            <label for="mouseover" title="Mouseover">Mouseover</label>
+          </fieldset>
+          <fieldset class="form-group form-check col-6">
+            <legend>Key events</legend>
+            <p class="form-text text-muted">The key events includes <code>keydown</code> and <code>keyup</code> events.</p>
+            <input type="checkbox" name="keydown" id="keydown"/>
+            <label for="keydown" title="Keyup">Keydown</label><br/>
+            <input type="checkbox" name="keyup" id="keyup"/>
+            <label for="keyup" title="Keyup">Keyup</label>
+          </fieldset>
+          <fieldset class="form-group form-check col-6">
+            <legend> Scroll events</legend>
+            <p class="form-text text-muted">The scroll events includes <code>scroll</code> events of any source (keyboard, scrollwheel, scrollbar) of the window.</p>
+            <input type="checkbox" name="scroll" id="scroll"/>
+            <label for="scroll" title="Scroll">Scroll</label>
+          </fieldset>
+          <fieldset class="form-group form-check col-sm-6">
+            <legend>DOM events</legend>
+            <p class="form-text text-muted">The dom events includes changes in the dom like adding/removing elements, changing attributes (classes, data) or changing nodes.</p>
+            <input type="checkbox" name="dom" id="dom"/>
+            <label for="dom" title="DOM">DOM</label>
+          </fieldset>
+          <div class="col-12">
+            <button class="btn btn-primary">Save settings</button>
+          </div>
+        </section>
+        <section class="row" id="about">
+          <header class="col-12">
+            <h3>About</h3>
+            <p class="lead">About the event tracking and visualization extension</p>
+          </header>
+        </section>
+      </main>
+    </div>
     <script src="options.js"></script>
   </body>
 </html>

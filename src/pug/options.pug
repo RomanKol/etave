@@ -1,40 +1,121 @@
 html
   head
     title #{name}
-    link(href="styles.css", rel="stylesheet")
+    meta(charset='utf-8')
+    meta(name='viewport', content='width=device-width, initial-scale=1, shrink-to-fit=no')
+    meta(name='description', content='etave dashboard')
+    link(href='styles.css', rel='stylesheet')
 
-  body#options.container
-    header.row
-      div.col
-        span.lead #{name}
+  body#options.page
 
-    main.row.mt-2
-      section#settings.col-12
-        h2 Settings
+    header.navbar-inverse.bg-inverse
+      a.navbar-brand(href='#') etave Dashboard
 
-        h5 Mouse Events
-        p.form-text.text-muted The mouseevents includes #[code mousedown], #[code mouseup] and #[code mousemove] events.
+      //- button.btn.btn-primary.btn-icon.float-right
+        img(src='update.svg', alt='update')
 
-        input(type="checkbox" name="mouse")#mouse
-        label(for="mouse" title="Mouseclicks and movement") Mouse
-        br
+    .main
 
-        h5 Scroll Events
-        p.form-text.text-muted The scrollevents includes #[code scroll] events of any source (keyboard, scrollwheel, scrollbar).
+      nav.bg-faded.sidebar
+        ul.nav.nav-pills.flex-column
+          li.nav-item
+            a.nav-link.active(href='#dashboard') Dashboard
+          li.nav-item
+            a.nav-link(href='#sessions') Sessions
+          li.nav-item
+            a.nav-link(href='#settings') Settings
+          li.nav-item
+            a.nav-link(href='#about') About
 
-        input(type="checkbox" name="scroll")#scroll
-        label(for="scroll" title="Page scrolling") Scroll
-        br
 
-        h5 Key Events
-        p.form-text.text-muted The keyevents includes #[code keydown] and #[code keyup] events.
+      main.container
 
-        input(type="checkbox" name="key")#key
-        label(for="key" title="Keyups") Keys
+        section#dashboard.row
+          header.col-12
+            h1 Dashboard
+            p.lead Welcome to the etave dashboard. You can manage here your recorded sessions and update the settings for the recordings.
 
-      section#sessions.col-12
-        h2 Sessions
 
-        div#session-list.list-group
+        section#sessions.row
+          header.col-12
+            h3 Sessions
+            p.lead List of the three last sessions.
 
-    script(src="options.js")
+          #sessions-list.table-responsive.col-12
+            table.table.table-striped
+              thead
+                tr
+                  th Name
+                  th Description
+                  th Date
+                  th Duration
+                  th Download
+                  th Details
+              tbody
+
+            button#sessions-loader.btn.btn-primary.float-right Load more sessions
+
+
+        section#settings.row
+          header.col-12
+            h3 Settings
+            p.lead Here you can adjust the settings for the recordings.
+
+          fieldset.form-group.form-check.col-6
+            legend Mouse events
+            p.form-text.text-muted The mouse events includes #[code mousedown], #[code mouseup], #[code mousemove] and #[code mouseover] events.
+
+            input(type='checkbox' name='mousedown')#mousedown
+            label(for='mousedown' title='Mousedown') Mousedown
+
+            br
+
+            input(type='checkbox' name='mouseup')#mouseup
+            label(for='mouseup' title='Mouseup') Mouseup
+
+            br
+
+            input(type='checkbox' name='mousemove')#mousemove
+            label(for='mousemove' title='Mousemove') Mousemove
+
+            br
+
+            input(type='checkbox' name='mouseover')#mouseover
+            label(for='mouseover' title='Mouseover') Mouseover
+
+          fieldset.form-group.form-check.col-6
+            legend Key events
+            p.form-text.text-muted The key events includes #[code keydown] and #[code keyup] events.
+
+            input(type='checkbox' name='keydown')#keydown
+            label(for='keydown' title='Keyup') Keydown
+
+            br
+
+            input(type='checkbox' name='keyup')#keyup
+            label(for='keyup' title='Keyup') Keyup
+
+          fieldset.form-group.form-check.col-6
+            legend  Scroll events
+            p.form-text.text-muted The scroll events includes #[code scroll] events of any source (keyboard, scrollwheel, scrollbar) of the window.
+
+            input(type='checkbox' name='scroll')#scroll
+            label(for='scroll' title='Scroll') Scroll
+
+          fieldset.form-group.form-check.col-sm-6
+            legend DOM events
+            p.form-text.text-muted The dom events includes changes in the dom like adding/removing elements, changing attributes (classes, data) or changing nodes.
+
+            input(type='checkbox' name='dom')#dom
+            label(for='dom' title='DOM') DOM
+
+          .col-12
+            button.btn.btn-primary Save settings
+
+
+        section#about.row
+          header.col-12
+            h3 About
+            p.lead About the event tracking and visualization extension
+
+    script(src='options.js')

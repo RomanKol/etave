@@ -1,38 +1,77 @@
 
 <html>
   <head>
-    <title>etave</title>
+    <title>etave Popup</title>
     <link href="styles.css" rel="stylesheet"/>
   </head>
-  <body class="container" id="popup">
-    <header class="row">
-      <div class="col"><span class="lead">etave</span><a class="float-right" href="#" title="Settings">Settings</a></div>
+  <body id="popup">
+    <header class="navbar navbar-inverse bg-inverse"><a class="navbar-brand" href="#">etave</a>
+      <button class="btn btn-primary btn-sm float-right" id="dashboard">Dashboard</button>
     </header>
-    <main class="row mt-2">
-      <section class="col-12" id="settings">
-        <p class="lead">Quick Settings</p>
-        <input type="checkbox" name="mouse" id="mouse"/>
-        <label for="mouse" title="Mouseclicks and movement">Mouse</label><br/>
-        <input type="checkbox" name="scroll" id="scroll"/>
-        <label for="scroll" title="Page scrolling">Scroll</label><br/>
-        <input type="checkbox" name="key" id="key"/>
-        <label for="key" title="Keyups">Keys</label><br/><small>For more informations, go to the <a href="#Settings" title="Settings">Settings</a></small><br/>
-        <button class="btn btn-sm btn-primary" id="save">save settings</button>
+    <nav class="bg-faded">
+      <ul class="nav nav-tabs flex-row">
+        <li class="nav-item"><a class="nav-link active" href="#session">Session</a></li>
+        <li class="nav-item"><a class="nav-link" href="#settings">Settings</a></li>
+      </ul>
+    </nav>
+    <div class="container-fluid">
+      <section class="row">
+        <div class="col-12 mt-2 mb-2" id="session">
+          <h5>Session</h5>
+          <p class="text-muted">Insert a name/title and a description into the fields bleow and start recording a session</p>
+          <div class="form-group">
+            <label for="#name">Session name</label>
+            <input class="form-control" id="name" type="text" name="name"/>
+          </div>
+          <div class="form-group mt-2">
+            <label for="descr">Description</label>
+            <input class="form-control" type="text" id="descr"/>
+          </div>
+          <div class="form-group form-check mt-2"><small class="form-text text-muted">For sites with dynamic content</small>
+            <input type="checkbox" name="screenshot" id="screenshot"/>
+            <label for="screenshot" title="screenshot">Screenshot</label>
+          </div>
+          <button class="btn btn-block mt-2" id="recorder">Start recording</button>
+        </div>
+        <div class="col-12 mt-2 mb-2" id="settings">
+          <h5>Settings</h5>
+          <p class="text-muted">Select the events to be recorded</p>
+          <div class="row">
+            <fieldset class="form-group form-check col-6">
+              <legend>Mouse events</legend>
+              <input type="checkbox" name="mousedown" id="mousedown"/>
+              <label for="mousedown" title="Mousedown">Mousedown</label><br/>
+              <input type="checkbox" name="mouseup" id="mouseup"/>
+              <label for="mouseup" title="Mouseup">Mouseup</label><br/>
+              <input type="checkbox" name="mousemove" id="mousemove"/>
+              <label for="mousemove" title="Mousemove">Mousemove</label><br/>
+              <input type="checkbox" name="mouseover" id="mouseover"/>
+              <label for="mouseover" title="Mouseover">Mouseover</label>
+            </fieldset>
+            <fieldset class="form-group form-check col-6">
+              <legend>Key events</legend>
+              <input type="checkbox" name="keydown" id="keydown"/>
+              <label for="keydown" title="Keyup">Keydown</label><br/>
+              <input type="checkbox" name="keyup" id="keyup"/>
+              <label for="keyup" title="Keyup">Keyup</label>
+            </fieldset>
+            <fieldset class="form-group form-check col-6">
+              <legend> Scroll events</legend>
+              <input type="checkbox" name="scroll" id="scroll"/>
+              <label for="scroll" title="Scroll">Scroll</label>
+            </fieldset>
+            <fieldset class="form-group form-check col-6">
+              <legend>DOM events</legend>
+              <input type="checkbox" name="dom" id="dom"/>
+              <label for="dom" title="DOM">DOM</label>
+            </fieldset>
+            <div class="col-12">
+              <button class="btn btn-primary mt-2" id="save">Save settings</button>
+            </div>
+          </div>
+        </div>
       </section>
-      <section class="col-12 mt-4 mb-2" id="session">
-        <p class="lead">Record session</p>
-        <div class="input-group"><span class="input-group-addon">Name</span>
-          <input class="form-control" type="text" id="name"/>
-        </div>
-        <div class="input-group mt-1"><span class="input-group-addon">Descr</span>
-          <input class="form-control" type="text" id="descr"/>
-        </div>
-        <div class="btn-group mt-3">
-          <button class="btn btn-danger" id="stop">stop</button>
-          <button class="btn btn-success" id="start">start</button>
-        </div>
-      </section>
-    </main>
+    </div>
     <script src="popup.js"></script>
   </body>
 </html>

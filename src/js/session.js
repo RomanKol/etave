@@ -25,6 +25,21 @@ function loadStorage(key) {
 }
 
 /**
+ * Function to download a file with chrome.downloads.download
+ * @param {any} data - The file data
+ * @param {string} filename - The filename
+ */
+function downloadData(data, filename, type) {
+  const file = new Blob([data], type);
+  const url = URL.createObjectURL(file);
+
+  chrome.downloads.download({
+    url,
+    filename,
+  });
+}
+
+/**
  * Function to convert a timestamp to an local time string
  * @param {number} timestamp - The timestamp
  * @return {string} - A local datetime string
@@ -82,7 +97,7 @@ function createSitesListItem(site) {
 
     </td>
     <td>
-      <form>
+      <form data-task='replay' data-uuid='${site.uuid}'>
         <button class='btn btn-icon btn-success' title='Play'>
           <img src='play.svg' alt='Play'>
         </button>
@@ -90,17 +105,16 @@ function createSitesListItem(site) {
       </form>
     </td>
     <td>
-      <form>
+      <form data-task='downloadHeatmap' data-uuid='${site.uuid}'>
+        <label>Heatmap</label>
         <button type='submit' class='btn btn-icon btn-primary' title='Heatmap'>
           <img src='heatmap.svg' alt='Heatmap'>
         </button>
 
-        <input type='hidden' name='uuid' value='${site.uuid}'>
-
         <strong class='mt-2'>Options:</strong>
         <div class='form-check mt-2'>
           <label class='form-check-label'>
-            <input class='form-check-input' type='radio' name='heatmap' value='move' checked> Move
+            <input class='form-check-input' type='radio' name='heatmap' value='mousemove' checked> Move
           </label>
         </div>
         <div class='form-check'>
@@ -111,17 +125,16 @@ function createSitesListItem(site) {
       </form>
     </td>
     <td>
-      <form>
+      <form data-task='downloadPath' data-uuid='${site.uuid}'>
+        <label>Path</label>
         <button type='submit' class='btn btn-icon btn-primary' title='Path'>
           <img src='path.svg' alt='Path'>
         </button>
 
-        <input type='hidden' name='uuid' value='${site.uuid}'>
-
         <strong class='mt-2'>Options:</strong>
         <div class='form-check mt-2'>
           <label class='form-check-label'>
-            <input class='form-check-input' type='checkbox' name='path' value='move' checked> Move
+            <input class='form-check-input' type='checkbox' name='path' value='mousemove' checked> Move
           </label>
         </div>
         <div class='form-check'>
@@ -223,18 +236,83 @@ function deleteSession() {
 }
 
 /**
+ * Function to download a session
+ * @param {string} uuid - The uuid of the site
+ * @param {array} events - An array with site events
+ */
+function downloadHeatmap(uuid, events) {
+  // Download the session
+  console.log(uuid);
+  console.table(events);
+  // downloadData(JSON.stringify(events), `etave-heatmap-${session.uuid}.json`);
+}
+
+/**
+ * Function to download a session
+ * @param {string} uuid - The uuid of the site
+ * @param {array} events - An array with site events
+ */
+function downloadPath(uuid, height, width, events) {
+  // Download the session
+  const svg = createSvgDocument(height, width);
+
+  const path = createSvgPath(events.filter(event => event.type === 'mousemove'));
+  const clicks = createSvgCircles(events.filter(event => event.type === 'mousedown' || event.type === 'mouseup'));
+
+  svg.appendChild(path);
+  svg.appendChild(clicks);
+
+  // 'Convert' svg object to string and 'minify'
+  const svgString = svg.outerHTML.replace(/\r?\n|\r/g, ' ').replace(/\s\s+/g, ' ');
+
+  downloadData(svgString, `etave-path-${uuid}.svg`, { type: 'image/svg+xml;charset=utf-8' });
+}
+
+/**
+ * Function to start a sites replay
+ * @param {string} uuid - The uuid of the site
+ */
+function replay(uuid) {
+  // Replay the site
+  console.log(uuid);
+}
+
+
+/**
+ * Site tasks
+ * @prop {function} downloadHeatmap - The downloadHeatmap function
+ * @prop {function} downloadPath - The downloadPath function
+ * @prop {function} replay - The replay function
+ */
+const tasks = {
+  downloadHeatmap,
+  downloadPath,
+  replay,
+};
+
+/**
  * Function to handle submit events
  * @param {object} e - Submit event object
  */
 function actions(e) {
   e.preventDefault();
+  const form = e.target;
+  const uuid = form.dataset.uuid;
 
-  const checked = e.target.querySelectorAll(':checked');
-  checked.forEach((element) => { console.log(element.name, element.value); });
+  const site = session.sites.find(_site => _site.uuid === uuid);
+
+  // Get options
+  const options = Array.from(form.querySelectorAll(':checked'))
+    .map(element => element.value);
+
+  // Replace click option with mousedown/up
+  if (options.includes('click')) options.splice(options.indexOf('click'), 1, 'mousedown', 'mouseup');
+
   // ToDo
-  loadStorage(e.target.elements.uuid.value)
+  loadStorage(uuid)
+    .then(events => events.filter(event => options.includes(event.type)))
     .then((events) => {
-      console.log(events);
+      tasks[form.dataset.task](uuid, site.height, site.width, events);
     });
 }
 

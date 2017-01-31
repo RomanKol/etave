@@ -74,7 +74,6 @@ async function downloadSession(e) {
     // Download the session
     downloadData(session, `etave-${session.uuid}`);
   }
-
 }
 
 /**

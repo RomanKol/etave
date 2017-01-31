@@ -30,7 +30,7 @@ function createSvgCircles(positions) {
   const groupEl = createSvgElement('g');
 
   positions.forEach((position) => {
-    groupEl.appendChild(createCircle(position));
+    groupEl.appendChild(createSvgCircle(position));
   });
 
   return groupEl;
@@ -66,6 +66,7 @@ function createSvgPath(positions) {
  */
 function createSvgDocument(width, height) {
   const svg = createSvgElement('svg');
+  svg.setAttribute('viewbox', `0 0 ${width} ${height}`);
   svg.setAttribute('width', width);
   svg.setAttribute('height', height);
   svg.setAttribute('version', '1.1');
@@ -75,6 +76,7 @@ function createSvgDocument(width, height) {
   const styleEl = createSvgElement('style');
   styleEl.setAttribute('type', 'text/css');
 
+  // Add styles
   styleEl.textContent = `
     circle.mouseup {
       fill: #ffeb3b;

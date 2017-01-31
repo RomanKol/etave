@@ -167,7 +167,7 @@ function getCurrentTab() {
 /**
  * Function to send a message to a tab
  * @param {object} tab - The tab the message is send to
- * @param {any} msg - The message
+ * @param {Promise<any, Error>} msg - The message
  */
 function sendTabMessage(tab, msg) {
   return new Promise((resolve, reject) => {
@@ -223,6 +223,18 @@ function tabListener(tabId, info, tab) {
 }
 
 /**
+ * Function to capture/create a thumbnail of the tab
+ * @return {Promise<dataUrl, Error>} - Returns a promise with a dataUrl, else error
+ */
+function createThumbnail() {
+  return new Promise((resolve) => {
+    chrome.tabs.captureVisibleTab({ format: 'jpeg', quality: 50 }, (capture) => {
+      resolve(capture);
+    });
+  });
+}
+
+/**
  * Function to start recording
  * @param {obj} data - Object with session data
  */
@@ -245,6 +257,7 @@ function startRecording(data) {
         task: 'startRecording',
         uuid: site.uuid,
       };
+
       return sendTabMessage(tab, msg)
         .then((page) => {
           // Update Site object with start time and height/width data
@@ -252,6 +265,10 @@ function startRecording(data) {
           site.height = page.height;
           site.width = page.width;
 
+          return createThumbnail(tab.width, tab.height);
+        })
+        .then((image) => {
+          site.preview = image;
           session.sites.push(site);
           return updateRecordings(session);
         });

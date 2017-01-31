@@ -62,6 +62,9 @@ function createSitesListItem(site) {
 
   const template = `
     <td>
+      <img src='${site.preview ? site.preview : 'delete.svg'}' width='100'>
+    </td>
+    <td>
       <div class='form-group'>
         <label>Title</label>
         <input class='form-control' type='text' value='${site.title}' readonly>
@@ -70,8 +73,6 @@ function createSitesListItem(site) {
         <label>Url</label>
         <input class='form-control' type='text' value='${site.url}' readonly>
       </div>
-    </td>
-    <td>
       <div class='form-group'>
         <label>Start</label>
         <input class='form-control' type='text' value='${timestampToLocal(site.start)}' readonly>
@@ -94,10 +95,11 @@ function createSitesListItem(site) {
           <input class="form-control text-right" type="text" name="height" readonly="readonly" value='${site.height}'><span class="input-group-addon">px</span>
         </div>
       </div>
-
     </td>
     <td>
       <form data-task='replay' data-uuid='${site.uuid}'>
+       <label>Open replay</label>
+        <br>
         <button class='btn btn-icon btn-success' title='Play'>
           <img src='play.svg' alt='Play'>
         </button>
@@ -107,6 +109,7 @@ function createSitesListItem(site) {
     <td>
       <form data-task='downloadHeatmap' data-uuid='${site.uuid}'>
         <label>Heatmap</label>
+        <br>
         <button type='submit' class='btn btn-icon btn-primary' title='Heatmap'>
           <img src='heatmap.svg' alt='Heatmap'>
         </button>
@@ -127,6 +130,7 @@ function createSitesListItem(site) {
     <td>
       <form data-task='downloadPath' data-uuid='${site.uuid}'>
         <label>Path</label>
+        <br>
         <button type='submit' class='btn btn-icon btn-primary' title='Path'>
           <img src='path.svg' alt='Path'>
         </button>

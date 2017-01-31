@@ -1,3 +1,5 @@
+/* eslint no-unused-vars: off */
+
 /**
  * Function to create a svg element
  * @param {string} string - element name

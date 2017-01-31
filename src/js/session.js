@@ -1,3 +1,5 @@
+/* global createHeatmap, createSvgDocument, createSvgPath, createSvgCircles  */
+
 /**
  * DOM elements
  */
@@ -29,10 +31,7 @@ function loadStorage(key) {
  * @param {any} data - The file data
  * @param {string} filename - The filename
  */
-function downloadData(data, filename, type) {
-  const file = new Blob([data], type);
-  const url = URL.createObjectURL(file);
-
+function downloadData(url, filename) {
   chrome.downloads.download({
     url,
     filename,
@@ -113,7 +112,7 @@ function createSitesListItem(site) {
         <button type='submit' class='btn btn-icon btn-primary' title='Heatmap'>
           <img src='heatmap.svg' alt='Heatmap'>
         </button>
-
+        <br>
         <strong class='mt-2'>Options:</strong>
         <div class='form-check mt-2'>
           <label class='form-check-label'>
@@ -134,7 +133,7 @@ function createSitesListItem(site) {
         <button type='submit' class='btn btn-icon btn-primary' title='Path'>
           <img src='path.svg' alt='Path'>
         </button>
-
+        <br>
         <strong class='mt-2'>Options:</strong>
         <div class='form-check mt-2'>
           <label class='form-check-label'>
@@ -163,7 +162,7 @@ function createSitesListItem(site) {
  * @return {array} - Array with sites elements
  */
 function createSitesList(sites) {
-  return sites.map((site, index) => createSitesListItem(site));
+  return sites.map(site => createSitesListItem(site));
 }
 
 /**
@@ -193,20 +192,6 @@ function buildSidebar() {
 }
 
 /**
- * Function to create an iframe element
- * @param {object} site - Site object
- * @return {node} - An iframe
- */
-function createIframe(site) {
-  const iframe = document.createElement('iframe');
-  iframe.src = site.url;
-  iframe.width = session.viewport.width;
-  iframe.height = session.viewport.height;
-  iframe.setAttribute('scrolling', 'no');
-  return iframe;
-}
-
-/**
  * Function to initialize session replay
  */
 function init() {
@@ -216,7 +201,6 @@ function init() {
     .then(_sessions => _sessions.find(_session => _session.uuid === hash))
     .then((_session) => {
       session = _session;
-      console.log(session);
       buildSidebar();
     });
 }
@@ -244,11 +228,13 @@ function deleteSession() {
  * @param {string} uuid - The uuid of the site
  * @param {array} events - An array with site events
  */
-function downloadHeatmap(uuid, events) {
-  // Download the session
-  console.log(uuid);
-  console.table(events);
-  // downloadData(JSON.stringify(events), `etave-heatmap-${session.uuid}.json`);
+function downloadHeatmap(uuid, width, height, events) {
+  // Create the heatmap and convert to dataUrl
+  const heatmap = createHeatmap(width, height, events);
+  const heatmapUrl = heatmap.toDataURL('image/png');
+
+  // Download it
+  downloadData(heatmapUrl, `etave-heatmap-${uuid}.png`);
 }
 
 /**
@@ -256,9 +242,9 @@ function downloadHeatmap(uuid, events) {
  * @param {string} uuid - The uuid of the site
  * @param {array} events - An array with site events
  */
-function downloadPath(uuid, height, width, events) {
+function downloadPath(uuid, width, height, events) {
   // Download the session
-  const svg = createSvgDocument(height, width);
+  const svg = createSvgDocument(width, height);
 
   const path = createSvgPath(events.filter(event => event.type === 'mousemove'));
   const clicks = createSvgCircles(events.filter(event => event.type === 'mousedown' || event.type === 'mouseup'));
@@ -269,7 +255,12 @@ function downloadPath(uuid, height, width, events) {
   // 'Convert' svg object to string and 'minify'
   const svgString = svg.outerHTML.replace(/\r?\n|\r/g, ' ').replace(/\s\s+/g, ' ');
 
-  downloadData(svgString, `etave-path-${uuid}.svg`, { type: 'image/svg+xml;charset=utf-8' });
+  // Convert to dataUrl
+  const file = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
+  const svgUrl = URL.createObjectURL(file);
+
+  // Download it
+  downloadData(svgUrl, `etave-path-${uuid}.svg`);
 }
 
 /**
@@ -316,7 +307,7 @@ function actions(e) {
   loadStorage(uuid)
     .then(events => events.filter(event => options.includes(event.type)))
     .then((events) => {
-      tasks[form.dataset.task](uuid, site.height, site.width, events);
+      tasks[form.dataset.task](uuid, site.width, site.height, events);
     });
 }
 

@@ -419,7 +419,6 @@ const tasks = {
  * @param {function} sendResponse - Function to send a response
  */
 function messageListener(msg, sender, sendResponse) {
-  console.log(msg);
   if ('task' in msg) {
     tasks[msg.task](msg)
       .catch((err) => {

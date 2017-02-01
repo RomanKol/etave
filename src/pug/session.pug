@@ -84,6 +84,29 @@ html
           section#site.row
             .overlay
 
+    #delete-modal.modal(tabindex='-1', role='dialog')
+      .modal-dialog
+        .modal-content
+          .modal-header.bg-danger
+            h5.modal-title.text-white Delete Session
+          .modal-body
+            p.lead Do you really want to delete this session and its recordings?
+            p.text-muted After the session has been deleted, this tab closes automatically.
+          .modal-footer
+            button.btn.btn-secondary(data-dismiss='modal') Cancel
+            button.btn.btn-danger Delete session
+
+    #error-modal.modal(tabindex='-1', role='dialog')
+      .modal-dialog
+        .modal-content
+          .modal-header.bg-danger
+            h5.modal-title.text-white Error
+          .modal-body
+            p.lead The session could not be loaded.
+          .modal-footer
+            button.btn.btn-primary Quit
+
+  script(src='utils.js')
   script(src='svg.js')
   script(src='heatmap.js')
   script(src='session.js')

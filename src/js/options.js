@@ -1,3 +1,5 @@
+/* global loadStorage, downloadSession */
+
 /**
  * Dom elements
  */
@@ -9,72 +11,7 @@ const navList = document.querySelector('nav > ul');
  * Global application variables
  */
 let sessions;
-
-/**
- * Function to load data from the chrome.storage api
- * @param {string} key - The key of the data
- * @return {Promise<any, false>} - The saved data or false, if no data was found
- */
-function loadStorage(key) {
-  return new Promise((resolve, reject) => {
-    chrome.storage.local.get(key, (items) => {
-      if (Object.keys(items).length === 0) reject(false);
-      if (chrome.runtime.lastError) reject(new Error('Runtime error'));
-      resolve(items[key]);
-    });
-  });
-}
-
-/**
- * Function to download a file with chrome.downloads.download
- * @param {any} data - The file data
- * @param {string} filename - The filename
- */
-function downloadData(data, filename) {
-  const file = new Blob([JSON.stringify(data)]);
-  const urlObj = URL.createObjectURL(file);
-
-  chrome.downloads.download({
-    url: urlObj,
-    filename: `${filename}.json`,
-  });
-}
-
-/**
- * Function to download a session
- * @param {object} e - The click event object
- */
-async function downloadSession(e) {
-  let element = e.target;
-
-  // If it is the image, select the parent button
-  if (element.nodeName === 'IMG') element = element.parentElement;
-
-  // If it is the button and it has a uuid
-  if (element.nodeName === 'BUTTON' && element.dataset.uuid) {
-    // Load the session
-    const session = sessions.filter(_session => _session.uuid === element.dataset.uuid)[0];
-
-    // Load the session sites
-    const sites = await Promise.all(session.sites.map(_site => loadStorage(_site.uuid)
-      .then((site) => {
-        const res = {
-          uuid: _site.uuid,
-          events: site,
-        };
-        return res;
-      })));
-
-    // Merge the session with the sites
-    session.sites.forEach((site, i) => {
-      const index = sites.findIndex(_site => _site.uuid === site.uuid);
-      session.sites[i].events = sites[index].events;
-    });
-
-    // Download the session
-    downloadData(session, `etave-${session.uuid}`);
-  }
-}
+let settings;
 
 /**
  * Function to create a session elements
@@ -104,7 +41,7 @@ function createSessionElement(session) {
       </button>
     </td>
     <td>
-      <a href='session.html#${session.uuid}' class='btn btn-primary btn-icon' title='Details' target='_blank'>
+      <a href='session.html#${session.uuid}' class='btn btn-primary btn-icon' title='Details'>
         <img src='details.svg' alt='details'>
       </a>
     </td>`;
@@ -116,9 +53,8 @@ function createSessionElement(session) {
 
 /**
  * Function to initialize settings ui
- * @param {array} settings - The settings
  */
-function initSettings(settings) {
+function initSettings() {
   settings.forEach((setting) => {
     document.getElementById(setting).checked = true;
   });
@@ -141,9 +77,9 @@ function updateNav() {
 }
 
 /**
- * Function to load additional sessions
+ * Function to insert additional sessions in table
  */
-function loadSessions() {
+function insertSessions() {
   const tableBody = sessionsList.querySelector('tbody');
   const from = tableBody.children.length;
 
@@ -171,20 +107,31 @@ function loadSessions() {
 }
 
 /**
+ * Function to initialize session download
+ * @param {object} e - Button click event
+ */
+function download(e) {
+  let element = e.target;
+
+  // If it is the image, select the parent button
+  if (element.nodeName === 'IMG') element = element.parentElement;
+
+  // If it is the button and it has a uuid
+  if (element.nodeName === 'BUTTON' && element.dataset.uuid) {
+    downloadSession(element.dataset.uuid);
+  }
+}
+
+/**
  * Function to initialize options page
  */
 async function init() {
-  loadStorage('settings')
-    .catch(() => ['mouse', 'key', 'scroll'])
-    .then((_settings) => {
-      initSettings(_settings);
-    });
-
+  settings = await loadStorage('settings');
   sessions = await loadStorage('sessions')
-    .catch(() => [])
     .then(_sessions => _sessions.sort((a, b) => a.start < b.start));
 
-  loadSessions();
+  initSettings();
+  insertSessions();
   updateNav();
 }
 
@@ -194,5 +141,5 @@ async function init() {
 document.addEventListener('DOMContentLoaded', init);
 window.addEventListener('hashchange', updateNav);
 
-sessionsList.addEventListener('click', downloadSession);
-sessionsBtn.addEventListener('click', loadSessions);
+sessionsList.addEventListener('click', download);
+sessionsBtn.addEventListener('click', insertSessions);

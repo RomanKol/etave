@@ -3,12 +3,15 @@ html
     title #{name} Session
     meta(charset='utf-8')
     meta(name='viewport', content='width=device-width, initial-scale=1, shrink-to-fit=no')
-    meta(name='description', content='etave dashboard')
     link(href='styles.css', rel='stylesheet')
 
   body#session.page
 
     header.navbar-inverse.bg-inverse
+
+      button.btn.btn-primary.btn-icon.mr-2
+        img(src='chevron-left.svg', alt='Back')
+
       span.navbar-brand etave session details
 
       button#download.btn.btn-primary.btn-icon.float-right

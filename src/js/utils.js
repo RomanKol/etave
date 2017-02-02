@@ -99,3 +99,26 @@ async function removeSession(uuid) {
   // Update the sessions
   await saveStorage({ sessions });
 }
+
+/**
+ * Function to add a leading null
+ * @param {number} num - A number
+ * @return {string} - The number as a string with leading null
+ */
+function leadingZero(num) {
+  return num < 10 ? `0${num}` : `${num}`;
+}
+
+/**
+ * Function to convert milliseconds into iso daytime format
+ * @param {number} duration - The duration/milliseconds
+ * @return {string} - The milliseconds in iso daytime format
+ */
+function millisecondsToIso(duration) {
+  const ms = Math.floor((duration % 1000));
+  const sec = Math.floor((duration / 1000) % 60);
+  const min = Math.floor((duration / (1000 * 60)) % 60);
+  const hr = Math.floor((duration / (1000 * 60 * 60)) % 24);
+
+  return `${leadingZero(hr)}:${leadingZero(min)}:${leadingZero(sec)},${ms}`;
+}

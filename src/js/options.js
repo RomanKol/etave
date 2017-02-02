@@ -1,4 +1,4 @@
-/* global loadStorage, downloadSession */
+/* global loadStorage, downloadSession, millisecondsToIso*/
 
 /**
  * Dom elements
@@ -24,27 +24,52 @@ function createSessionElement(session) {
   tableRow.dataset.uuid = session.uuid;
 
   const start = new Date(session.start);
-  const end = new Date(session.end);
-  const duration = Math.floor((end - start) / 1000);
-  const sec = duration % 60;
-  const min = Math.floor(duration / 60) % 60;
-  const hr = Math.floor(duration / 60 / 60) % 60;
+  const duration = millisecondsToIso(session.end - session.start)
 
   const template = `
-    <td>${session.name}</td>
-    <td>${session.descr}</td>
-    <td>${start.toLocaleDateString()}</td>
-    <td>${hr}:${min}:${sec}</td>
     <td>
+      <div class='form-group'>
+        <label>Name</label>
+        <input class='form-control' type='text' value='${session.name}' readonly>
+      </div>
+      <div class='form-group'>
+        <label>Description</label>
+        <input class='form-control' type='text' value='${session.descr}' readonly>
+      </div>
+    <td>
+      <div class='form-group'>
+        <label>Date</label>
+        <input class='form-control' type='text' value='${start.toLocaleDateString()}' readonly>
+      </div>
+      <div class='form-group'>
+        <label>Duration</label>
+        <input class='form-control' type='text' value='${duration}' readonly>
+      </div>
+    </td>
+    <td>
+      <label>Download</label>
+      <br>
       <button class='btn btn-primary btn-icon' data-uuid='${session.uuid}' title='Download'>
         <img src='download.svg' alt='download'>
       </button>
     </td>
     <td>
+      <label>Inspect</label>
+      <br>
       <a href='session.html#${session.uuid}' class='btn btn-primary btn-icon' title='Details'>
         <img src='details.svg' alt='details'>
       </a>
-    </td>`;
+    </td>
+    <td>
+      <label>Replay</label>
+      <br>
+      <a href='replay.html?session=${session.uuid}'>
+        <button class='btn btn-icon btn-success' title='Play'>
+          <img src='play.svg' alt='Play'>
+        </button>
+      </a>
+    </td>
+    `;
 
   tableRow.innerHTML = template;
 

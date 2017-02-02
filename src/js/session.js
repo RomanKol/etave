@@ -1,5 +1,5 @@
 /* global loadStorage, downloadData, downloadSession, removeSession, createHeatmap,
-  createSvgDocument, createSvgPath, createSvgCircles  */
+  createSvgDocument, createSvgPath, createSvgCircles, millisecondsToIso  */
 
 /**
  * DOM elements
@@ -129,9 +129,7 @@ function createSitesListItem(site) {
             <input class='form-check-input' type='checkbox' name='path' value='click' checked> Click
           </label>
         </div>
-
       </form>
-
     </td>
   `;
 
@@ -159,11 +157,7 @@ function buildSidebar() {
   sidebar.querySelector('#start').value = timestampToLocal(session.start);
   sidebar.querySelector('#end').value = timestampToLocal(session.end);
 
-  const duration = Math.floor((session.end - session.start) / 1000);
-  const sec = duration % 60;
-  const min = Math.floor(duration / 60) % 60;
-  const hr = Math.floor(duration / 60 / 60) % 60;
-  sidebar.querySelector('#duration').value = `${hr}:${min}:${sec}`;
+  sidebar.querySelector('#duration').value = millisecondsToIso(session.end - session.start);
 
   sidebar.querySelector('#width').value = session.viewport.width;
   sidebar.querySelector('#height').value = session.viewport.height;

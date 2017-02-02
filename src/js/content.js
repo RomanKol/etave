@@ -439,24 +439,6 @@ function messageListener(msg, sender, sendResponse) {
 }
 
 /**
- * Function to handle port messages for scrolling
- * @param {object} port - The port object
- */
-function connectListener(port) {
-  if (port.name === 'scroll') {
-    port.onMessage.addListener(({ width, height }) => {
-      window.scrollBy(width, height);
-      const msg = {
-        scrollY,
-        scrollX,
-      };
-      port.postMessage(msg);
-    });
-  }
-}
-
-/**
  * Chrome runtime message listener
  */
-chrome.runtime.onConnect.addListener(connectListener);
 chrome.runtime.onMessage.addListener(messageListener);

@@ -40,7 +40,7 @@ function getCurrentTab() {
  */
 function getTabThumbnail() {
   return new Promise((resolve) => {
-    chrome.tabs.captureVisibleTab(null, { format: 'jpeg', quality: 50 }, (capture) => {
+    chrome.tabs.captureVisibleTab({ format: 'jpeg', quality: 50 }, (capture) => {
       resolve(capture);
     });
   });
@@ -154,10 +154,6 @@ function createSession(data, tab) {
   };
   return session;
 }
-
-const port = chrome.runtime.connect({ name: 'scroll' });
-
-
 
 /**
  * Function to handle tab events
@@ -315,6 +311,5 @@ function init() {
 /**
  * Chrome runtime listeners
  */
-
 chrome.runtime.onMessage.addListener(messageListener);
 chrome.runtime.onInstalled.addListener(init);

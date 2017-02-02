@@ -41,7 +41,6 @@
 
   "background": {
     "scripts": [
-      "utils.js",
       "background.js"
     ]
   },

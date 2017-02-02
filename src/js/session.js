@@ -209,10 +209,9 @@ function navigateBack() {
  * Function to delete a session
  */
 function deleteSession() {
-  removeSession(session.uuid)
-    .then(() => {
-      navigateBack();
-    });
+  removeSession(session.uuid);
+  toggleDeleteModal();
+  navigateBack();
 }
 
 /**

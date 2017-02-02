@@ -6434,17 +6434,6 @@ input.form-control:focus {
       flex: 1;
       overflow-y: auto; }
 
-.modal-open .modal.show {
-  display: -ms-flexbox;
-  display: flex;
-  box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  -ms-flex-pack: center;
-  justify-content: center;
-  box-pack: center;
-  background-color: rgba(0, 0, 0, 0.3); }
-
 body#popup {
   font-size: 14px;
   min-width: 256px;

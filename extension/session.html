@@ -91,7 +91,40 @@
         </div>
       </main>
     </div>
+    <div class="modal" id="delete-modal" tabindex="-1" role="dialog">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header bg-danger">
+            <h5 class="modal-title text-white">Delete Session</h5>
+          </div>
+          <div class="modal-body">
+            <p class="lead">Do you really want to delete this session and its recordings?</p>
+            <p class="text-muted">After the session has been deleted, this tab closes automatically.</p>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+            <button class="btn btn-danger">Delete session</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal" id="error-modal" tabindex="-1" role="dialog">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header bg-danger">
+            <h5 class="modal-title text-white">Error</h5>
+          </div>
+          <div class="modal-body">
+            <p class="lead">The session could not be loaded.</p>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-primary">Quit</button>
+          </div>
+        </div>
+      </div>
+    </div>
   </body>
+  <script src="utils.js"></script>
   <script src="svg.js"></script>
   <script src="heatmap.js"></script>
   <script src="session.js"></script>

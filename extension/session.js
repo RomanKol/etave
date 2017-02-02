@@ -1,42 +1,26 @@
-/* global createHeatmap, createSvgDocument, createSvgPath, createSvgCircles  */
+/* global loadStorage, downloadData, downloadSession, removeSession, createHeatmap,
+  createSvgDocument, createSvgPath, createSvgCircles  */
 
 /**
  * DOM elements
  */
 const downloadBtn = document.querySelector('#download');
-const deleteBtn = document.querySelector('#delete');
+
+// Delete Modal
+const openDeleteModalBtn = document.querySelector('#delete');
+
+const deleteModal = document.querySelector('#delete-modal');
+const deleteModalCancelBtn = deleteModal.querySelector('button');
+const deleteModalDeleteBtn = deleteModal.querySelectorAll('button')[1];
+
+const errorModal = document.querySelector('#error-modal');
+const errorModalQuitBtn = errorModal.querySelector('button');
 
 const sidebar = document.querySelector('.sidebar');
 const main = document.querySelector('main');
 
+
 let session;
-
-/**
- * Function to load data from the chrome.storage api
- * @param {string} key - The key of the data
- * @return {Promise<any, false>} - The saved data or false, if no data was found
- */
-function loadStorage(key) {
-  return new Promise((resolve, reject) => {
-    chrome.storage.local.get(key, (items) => {
-      if (Object.keys(items).length === 0) reject(false);
-      if (chrome.runtime.lastError) reject(new Error('Runtime error'));
-      resolve(items[key]);
-    });
-  });
-}
-
-/**
- * Function to download a file with chrome.downloads.download
- * @param {any} data - The file data
- * @param {string} filename - The filename
- */
-function downloadData(url, filename) {
-  chrome.downloads.download({
-    url,
-    filename,
-  });
-}
 
 /**
  * Function to convert a timestamp to an local time string
@@ -61,7 +45,7 @@ function createSitesListItem(site) {
 
   const template = `
     <td>
-      <img src='${site.preview ? site.preview : 'delete.svg'}' width='100'>
+      <img src='${site.preview ? site.preview : 'delete.svg'}' width='100' class='bg-primary'>
     </td>
     <td>
       <div class='form-group'>
@@ -96,14 +80,13 @@ function createSitesListItem(site) {
       </div>
     </td>
     <td>
-      <form data-task='replay' data-uuid='${site.uuid}'>
-       <label>Open replay</label>
-        <br>
+      <label>Open replay</label>
+      <br>
+      <a href='replay.html?session=${session.uuid}&site=${site.uuid}'>
         <button class='btn btn-icon btn-success' title='Play'>
           <img src='play.svg' alt='Play'>
         </button>
-        <input type='hidden' name='uuid' value='${site.uuid}'>
-      </form>
+      </a>
     </td>
     <td>
       <form data-task='downloadHeatmap' data-uuid='${site.uuid}'>
@@ -192,35 +175,43 @@ function buildSidebar() {
 }
 
 /**
- * Function to initialize session replay
- */
-function init() {
-  const hash = location.hash.substr(1);
-
-  loadStorage('sessions')
-    .then(_sessions => _sessions.find(_session => _session.uuid === hash))
-    .then((_session) => {
-      session = _session;
-      buildSidebar();
-    });
-}
-
-/**
  * Function to download the session
  */
-function downloadSession() {
-  console.log('download Session');
-
-  // ToDo
+function download() {
+  downloadSession(session.uuid);
 }
 
 /**
  * Function te delete the session
+ * @param {element} modal - The modal element
+ */
+function toggleModal(modal) {
+  document.querySelector('body').classList.toggle('modal-open');
+  modal.classList.toggle('show');
+}
+
+/**
+ * Function to toggle error modal
+ */
+function toggleDeleteModal() {
+  toggleModal(deleteModal);
+}
+
+/**
+ * Function to navigate back to options
+ */
+function navigateBack() {
+  window.history.back();
+}
+
+/**
+ * Function to delete a session
  */
 function deleteSession() {
-  console.log('delete Session');
-
-  // ToDo
+  removeSession(session.uuid)
+    .then(() => {
+      navigateBack();
+    });
 }
 
 /**
@@ -264,16 +255,6 @@ function downloadPath(uuid, width, height, events) {
 }
 
 /**
- * Function to start a sites replay
- * @param {string} uuid - The uuid of the site
- */
-function replay(uuid) {
-  // Replay the site
-  console.log(uuid);
-}
-
-
-/**
  * Site tasks
  * @prop {function} downloadHeatmap - The downloadHeatmap function
  * @prop {function} downloadPath - The downloadPath function
@@ -282,7 +263,6 @@ function replay(uuid) {
 const tasks = {
   downloadHeatmap,
   downloadPath,
-  replay,
 };
 
 /**
@@ -312,6 +292,25 @@ function actions(e) {
 }
 
 /**
+ * Function to initialize session details
+ */
+function init() {
+  const hash = location.hash.substr(1);
+
+  loadStorage('sessions')
+    .then(_sessions => _sessions.find(_session => _session.uuid === hash))
+    .then((_session) => {
+      if (_session) {
+        session = _session;
+        buildSidebar();
+      } else {
+        toggleModal(errorModal);
+      }
+    });
+}
+
+
+/**
  * Event listeners
  */
 document.addEventListener('DOMContentLoaded', init);
@@ -320,5 +319,10 @@ document.addEventListener('submit', actions);
 /**
  * User event listeners
  */
-downloadBtn.addEventListener('click', downloadSession);
-deleteBtn.addEventListener('click', deleteSession);
+downloadBtn.addEventListener('click', download);
+
+openDeleteModalBtn.addEventListener('click', toggleDeleteModal);
+deleteModalCancelBtn.addEventListener('click', toggleDeleteModal);
+deleteModalDeleteBtn.addEventListener('click', deleteSession);
+
+errorModalQuitBtn.addEventListener('click', navigateBack);

@@ -1,0 +1,84 @@
+html
+  head
+    title #{name} Replay
+    meta(charset='utf-8')
+    meta(name='viewport', content='width=device-width, initial-scale=1, shrink-to-fit=no')
+    link(href='styles.css', rel='stylesheet')
+
+  body#replay.page
+
+    header.navbar-inverse.bg-inverse
+
+      button#back.btn.btn-primary.btn-icon.mr-2
+        img(src='chevron-left.svg', alt='Back')
+
+      span.navbar-brand etave session details
+
+      a#next.btn.btn-primary.btn-icon.float-right.hidden
+        img(src='chevron-right.svg' alt='Next')
+
+      a#prev.btn.btn-primary.btn-icon.float-right.hidden
+        img(src='chevron-left.svg' alt='Previous')
+
+    .main
+
+      aside.sidebar.bg-faded
+        ul.nav.nav-pills.flex-column
+          li.nav-item
+            p.nav-link.active Session
+
+            .nav-item-content
+              .form-group.col-12
+                label(for='name') Session name
+                input(type='text' name='name' readonly)#name.form-control
+
+              .form-group.col-12
+                label(for='descr') Session description
+                input(type='text' name='descr' readonly)#descr.form-control
+
+          li.nav-item
+            p.nav-link.active Sites
+
+            .nav-item-content
+              ul.list-unstyled.col-12
+
+      main#player
+        //- section#player
+           .player-wrapper.mt-4.hidden
+        iframe(sandbox='allow-same-origin allow-scripts allow-forms' scrolling='no' frameborder=0).hidden
+
+    section#player-controls
+
+      section.timeline
+        input(type='text' name='name' readonly)#duration.form-control
+        progress(value=0)
+        input(type='text' name='name' readonly)#timeleft.form-control
+
+      section.controls
+        button#backward.btn.btn-primary.btn-icon
+          img(src='backward.svg' alt='-10sec')
+
+        button#play.btn.btn-primary.btn-icon
+          img(src='play.svg' alt='Play')
+
+        button#forward.btn.btn-primary.btn-icon
+          img(src='forward.svg' alt='+10sec')
+
+        button.player-speed.btn.btn-primary.btn-circle(data-speed=1) 1x
+        button.player-speed.btn.btn-primary.btn-circle(data-speed=2) 2x
+        button.player-speed.btn.btn-primary.btn-circle(data-speed=4) 4x
+
+
+
+    #error-modal.modal(tabindex='-1', role='dialog')
+      .modal-dialog
+        .modal-content
+          .modal-header.bg-danger
+            h5.modal-title.text-white Error
+          .modal-body
+            p.lead The session could not be loaded.
+          .modal-footer
+            button.btn.btn-primary Quit
+
+  script(src='utils.js')
+  script(src='replay.js')

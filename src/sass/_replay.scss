@@ -1,0 +1,68 @@
+#replay {
+
+  .sidebar {
+    flex: 0 0 16em;
+  }
+
+  main {
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+  }
+
+  /*
+   * Replay section
+   */
+  #player {
+    // .player-wrapper {
+    //   padding: 0 15px;
+    //   overflow: hidden;
+    //   display: flex;
+    //   align-items: flex-end;
+    // }
+    iframe {
+      display: flex;
+      // transform-origin: top center;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
+    }
+  }
+
+  /*
+   * Player section
+   */
+  #player-controls {
+    display: flex;
+    flex: 0 0 8rem;
+    flex-direction: column;
+    background-color: #ccc;
+
+    section {
+      display: flex;
+      flex-direction: row;
+      padding: 0.75rem;
+    }
+
+    .timeline {
+      align-items: stretch;
+
+      input {
+        flex: 1 1 3rem;
+      }
+      progress {
+        flex: 5;
+      }
+    }
+
+    .controls {
+      justify-content: center;
+
+      button {
+        margin: 0 10px;
+
+        &:nth-of-type(4) {
+          margin-left: 80px;
+        }
+      }
+    }
+  }
+}

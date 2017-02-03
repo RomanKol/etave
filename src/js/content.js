@@ -42,7 +42,7 @@ let previousSavedScroll = {
 let uuid;
 let intervalID;
 
-let ts;
+let isRecording = false;
 
 /**
  * local events db
@@ -381,6 +381,7 @@ function startRecording(data) {
     })
     .then(() => {
       addDot();
+      isRecording = true;
     });
 }
 
@@ -398,6 +399,7 @@ function stopRecording() {
     })
     .then(() => {
       removeDot();
+      isRecording = false;
     });
 }
 
@@ -435,6 +437,8 @@ function messageListener(msg, sender, sendResponse) {
     };
 
     sendResponse(response);
+  } else if ('status' in msg) {
+    sendResponse({ isRecording });
   }
 }
 

@@ -164,7 +164,12 @@ function createSession(data, tab) {
 function tabListener(tabId, info, tab) {
   if (info.status === 'complete') {
     // Find the session object of the tab
-    loadStorage('recordingSessions')
+    sendTabMessage(tab, { status: true })
+      .then((response) => {
+        console.log(response)
+        if (response.isRecording) return Promise.reject(new Error('Tab is already recording'))
+        return loadStorage('recordingSessions');
+      })
       .then((_sessions) => {
         const session = _sessions.find(_session => _session.tabId === tabId);
 

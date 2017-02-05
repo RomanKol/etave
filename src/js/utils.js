@@ -51,10 +51,10 @@ function removeStorage(key) {
  */
 function loadSession(uuid) {
   return loadStorage('sessions')
-    .then((_sessions) => _sessions.filter(_session => _session.uuid === uuid)[0])
+    .then(_sessions => _sessions.filter(_session => _session.uuid === uuid)[0])
     .then((_session) => {
       if (_session) return Promise.resolve(_session);
-      Promise.reject(new Error('no session found'));
+      return Promise.reject(new Error('no session found'));
     });
 }
 

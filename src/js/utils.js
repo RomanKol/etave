@@ -45,6 +45,20 @@ function removeStorage(key) {
 }
 
 /**
+ * Function to load a session by uuid
+ * @param {string} uuid - The uuid of the session
+ * @return {Promise<session, Error>} A Promise that returns a session if fullfilled, else an error
+ */
+function loadSession(uuid) {
+  return loadStorage('sessions')
+    .then((_sessions) => _sessions.filter(_session => _session.uuid === uuid)[0])
+    .then((_session) => {
+      if (_session) return Promise.resolve(_session);
+      Promise.reject(new Error('no session found'));
+    });
+}
+
+/**
  * Function to download a file with chrome.downloads.download
  * @param {any} data - The file data
  * @param {string} filename - The filename

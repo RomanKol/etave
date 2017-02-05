@@ -105,4 +105,21 @@ function createSvgDocument(width, height) {
   return svg;
 }
 
+/**
+ * Function to create a svg with path
+ * @param {number} width - The width of the svg
+ * @param {number} height - The height of the svg
+ * @param {object[]} events - Array of events with pageX and pageY properties
+ * @return {elemnt} Returns an svg element;
+ */
+function createPath(width, height, events) {
+  const svg = createSvgDocument(width, height);
 
+  const path = createSvgPath(events.filter(event => event.type === 'mousemove'));
+  const clicks = createSvgCircles(events.filter(event => event.type === 'mousedown' || event.type === 'mouseup'));
+
+  svg.appendChild(path);
+  svg.appendChild(clicks);
+
+  return svg;
+}

@@ -1,5 +1,5 @@
 /* global loadStorage, downloadData, downloadSession, removeSession, createHeatmap,
-  createSvgDocument, createSvgPath, createSvgCircles, millisecondsToIso  */
+  createPath, millisecondsToIso  */
 
 /**
  * DOM elements
@@ -19,9 +19,63 @@ const errorModalQuitBtn = errorModal.querySelector('button');
 const sidebar = document.querySelector('.sidebar');
 const main = document.querySelector('main');
 
-
-
 let session;
+
+/**
+ * Function to create a new tab
+ * @param {string} url - Url for the new tab
+ * @return {Promise<tab>} - Returns a promise, if fulfilled, returns a tab object
+ */
+function createTab(url) {
+  return new Promise((resolve) => {
+    chrome.tabs.create({ url }, (tab) => {
+      resolve(tab);
+    });
+  });
+}
+
+/**
+ * Function to inject a script in a tab
+ * @param {number} tabId - The id of the tab
+ * @param {string=} file - The file to inject
+ * @param {string=} code - The code to inject
+ * @param {string} [runAt=document_start] description
+ * @return {Promise<any>} - Returns a promise, if fulfilled, return the result of the exec script
+ */
+function injectScript(tabId, file, code, runAt = 'document_start') {
+  const details = {
+    runAt,
+  };
+
+  if (file) details.file = file;
+  if (code) details.code = code;
+
+  return new Promise((resolve) => {
+    chrome.tabs.executeScript(tabId, details, (res) => {
+      resolve(res);
+    });
+  });
+}
+
+/**
+ * Array with the scripts required for replay
+ */
+const replayFiles = [
+  'utils.js',
+  'svg.js',
+  'heatmap.js',
+  'replay.js',
+];
+
+/**
+ * Function to initialize a replay
+ */
+function initReplay() {
+  createTab(this.dataset.url)
+    .then(tab => Promise.all(replayFiles.map(file => injectScript(tab.id, file)))
+      .then(() => injectScript(tab.id, false, `initReplay(${JSON.stringify(this.dataset)});`, 'document_end'))
+    );
+}
 
 /**
  * Function to convert a timestamp to an local time string
@@ -83,10 +137,10 @@ function createSitesListItem(site) {
     <td>
       <label>Open replay</label>
       <br>
+      <button class='btn btn-icon btn-success replay' title='Play' data-uuid='${session.uuid}' data-site='${site.uuid}' data-url='${site.url}'>
+        <img src='play.svg' alt='Play'>
+      </button>
       <a href='replay.html?session=${session.uuid}&site=${site.uuid}'>
-        <button class='btn btn-icon btn-success' title='Play'>
-          <img src='play.svg' alt='Play'>
-        </button>
       </a>
     </td>
     <td>
@@ -134,6 +188,8 @@ function createSitesListItem(site) {
   `;
 
   item.innerHTML = template;
+
+  item.querySelector('.replay').addEventListener('click', initReplay);
 
   return item;
 }
@@ -229,17 +285,11 @@ function downloadHeatmap(uuid, width, height, events) {
  * @param {array} events - An array with site events
  */
 function downloadPath(uuid, width, height, events) {
-  // Download the session
-  const svg = createSvgDocument(width, height);
-
-  const path = createSvgPath(events.filter(event => event.type === 'mousemove'));
-  const clicks = createSvgCircles(events.filter(event => event.type === 'mousedown' || event.type === 'mouseup'));
-
-  svg.appendChild(path);
-  svg.appendChild(clicks);
+  // Crate the path
+  const path = createPath(width, height, events);
 
   // 'Convert' svg object to string and 'minify'
-  const svgString = svg.outerHTML.replace(/\r?\n|\r/g, ' ').replace(/\s\s+/g, ' ');
+  const svgString = path.outerHTML.replace(/\r?\n|\r/g, ' ').replace(/\s\s+/g, ' ');
 
   // Convert to dataUrl
   const file = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });

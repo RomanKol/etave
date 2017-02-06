@@ -19,7 +19,7 @@
  * Initial mouse move object
  * @param {number} pageX - X position
  * @param {number} pageY - Y position
- * @param {number} stimeStamp - Timestamp
+ * @param {number} timeStamp - Timestamp
  */
 let previousSavedMousemove = {
   pageX: -25,
@@ -41,6 +41,7 @@ let previousSavedScroll = {
 
 let uuid;
 let intervalID;
+let ts;
 
 let isRecording = false;
 
@@ -170,7 +171,7 @@ function createDomPath(target) {
     element = element.parentElement;
   }
 
-  // Return the reveserd array, starting from top/document
+  // Return the reversed array, starting from top/document
   return elements.reverse(); // .join('/');
 }
 
@@ -288,7 +289,7 @@ const keyup = keydown;
 
 
 /**
- * New MutationObersver
+ * New MutationObserver
  */
 const observer = new MutationObserver((mutations) => {
   mutations.forEach(({ attribute, target, type }) => {
@@ -382,6 +383,7 @@ function startRecording(data) {
     .then(() => {
       addDot();
       isRecording = true;
+      ts = Date.now();
     });
 }
 
@@ -427,13 +429,12 @@ function messageListener(msg, sender, sendResponse) {
         console.error(err);
       });
 
-    const height = Math.round(document.documentElement.getBoundingClientRect().height);
-    const width = Math.round(document.documentElement.getBoundingClientRect().width);
+    const { height, width } = document.documentElement.getBoundingClientRect();
 
     const response = {
-      height,
+      height: Math.round(height),
       timeStamp: Date.now(),
-      width,
+      width: Math.round(width),
     };
 
     sendResponse(response);

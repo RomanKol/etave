@@ -1,203 +1,70 @@
-// /* global loadStorage, millisecondsToIso */
+/* global millisecondsToIso, loadSession, loadStorage, createHeatmap, createPath */
+let session;
+let siteEvents;
+let site;
+let ui;
 
-// /**
-//  * DOM elements
-//  */
-// const backBtn = document.querySelector('#back');
-// const nextBtn = document.querySelector('#next');
-// const prevBtn = document.querySelector('#prev');
+let timeLeft;
+let progress;
 
-// // Modal
-// const errorModal = document.querySelector('#error-modal');
-// const errorModalQuitBtn = errorModal.querySelector('button');
+function loadUi() {
+  const uiPath = chrome.extension.getURL('replay.html');
+  ui = document.createElement('aside');
+  ui.id = 'etave-replay';
 
-// // Site sections
-// const sidebar = document.querySelector('.sidebar');
-// const player = document.querySelector('#player');
-// const iframe = document.querySelector('iframe');
-// const playerControls = document.querySelector('#player-controls');
+  return fetch(uiPath)
+    .then(res => res.text())
+    .then((html) => {
+      ui.innerHTML = html;
 
-// // Player
-// const wrapper = player.querySelector('.player-wrapper');
-// const durationInp = playerControls.querySelector('#duration');
-// const timeLeft = playerControls.querySelector('#timeLeft');
+      timeLeft = ui.querySelectorAll('.timeline input')[1];
+      progress = ui.querySelector('.timeline progress');
 
-// const backwardBtn = playerControls.querySelector('#backward');
-// const playBtn = playerControls.querySelector('#play');
-// const forwardBtn = playerControls.querySelector('#forward');
+      return ui;
+    });
+}
 
-// const speedBtns = playerControls.querySelectorAll('.player-speed');
+function toggleUi() {
+  ui.classList.toggle('open');
+}
 
-// // Sidebat
-// const heatmapBtn = document.querySelector('#heatmap');
-
-// let params = {};
-// let currentSession = {};
-// let currentSite = {};
-// let currentEvents = [];
-
-// /**
-//  * Function to initialize the sidebar after init
-//  * @param {object} session - Session object
-//  */
-// function initializeSidebar(session) {
-//   sidebar.querySelector('#name').value = session.name;
-//   sidebar.querySelector('#descr').value = session.descr;
-// }
-
-// /**
-//  * Function to initialize the header with prev, next buttons
-//  * @param {object} session - Session object
-//  */
-// function initializeHeader(session) {
-//   const siteIndex = params.site ? session.sites.findIndex(site => site.uuid === params.site) : 0;
-
-//   if (siteIndex > 0) {
-//     prevBtn.classList.remove('hidden');
-//     prevBtn.href = `?session=${session.uuid}&site=${session.sites[siteIndex - 1].uuid}`;
-//   }
-
-//   if (siteIndex < session.sites.length - 1) {
-//     nextBtn.classList.remove('hidden');
-//     nextBtn.href = `?session=${session.uuid}&site=${session.sites[siteIndex + 1].uuid}`;
-//   }
-// }
-
-// /**
-//  * Function to initialize player
-//  * @param {object} session - A session object
-//  * @param {obj} session.viewport - Object containing width and height
-//  * @param {number} session.viewport.width - The width of the viewport
-//  * @param {number} session.viewport.height - The height of the viewport
-//  */
-// function initializePlayer({ viewport: { width: vWidth, height: vHeight } }, site) {
-//   iframe.src = site.url;
-//   iframe.width = currentSite.width;
-//   iframe.height = currentSite.height;
-
-//   const { height: pHeight, width: pWidth } = player.getBoundingClientRect();
-//   const scale = Math.min((pWidth - 40) / vWidth, (pHeight - 40) / vHeight);
-
-//   wrapper.style.cssText = `width: ${vWidth}px; height: ${vHeight}px`;
-//   wrapper.style.transform = `scale(${scale})`;
-//   iframe.classList.remove('hidden');
-// }
-
-
-// /**
-//  * Function to initialize the play ui
-//  * @param {object} site
-//  * @param {number} site.end - Ending timestamp
-//  * @param {number} site.start - Starting timestamp
-//  */
-// function initializePlayerControls({ end, start }) {
-//   const timeStr = millisecondsToIso(end - start);
-//   durationInp.value = timeStr;
-//   timeLeft.value = timeStr;
-// }
-
-// /**
-//  * Function te delete the session
-//  * @param {element} modal - The modal element
-//  */
-// function toggleModal(modal) {
-//   document.querySelector('body').classList.toggle('modal-open');
-//   modal.classList.toggle('show');
-// }
-
-// /**
-//  * Function to navigate back to options
-//  */
-// function navigateBack() {
-//   window.history.back();
-// }
-
-// /**
-//  * Function to get the get parameters form the url
-//  */
-// function getGetParameters() {
-//   const parameters = {};
-
-//   location.search.substring(1).replace(/([^=&]+)=([^&]*)/g, (m, key, value) => {
-//     parameters[key] = value;
-//   });
-
-//   return parameters;
-// }
-
-// function heatmap() {
-//   const map = createHeatmap(currentSite.width, currentSite.height, currentEvents);
-//   // console.log(map);
-//   wrapper.appendChild(map);
-// }
-
-// /**
-//  * Function to initialize session details
-//  */
-// function init() {
-//   params = getGetParameters();
-
-//   if (params.session) {
-//     loadStorage('sessions')
-//       .then(_sessions => _sessions.find(_session => _session.uuid === params.session))
-//       .then((_session) => {
-//         if (_session) {
-//           currentSession = _session;
-//           initializeSidebar(_session);
-//           initializeHeader(_session);
-
-//           const siteIndex = params.site ? _session.sites.findIndex(site => site.uuid === params.site) : 0;
-//           currentSite = _session.sites[siteIndex];
-
-//           initializePlayer(_session, _session.sites[siteIndex]);
-//           initializePlayerControls(_session.sites[siteIndex]);
-
-//           loadStorage(_session.sites[siteIndex].uuid)
-//             .then((_events) => {
-//               currentEvents = _events;
-//             });
-//         } else {
-//           toggleModal(errorModal);
-//         }
-//       });
-//   }
-// }
-
-// /**
-//  * Event listeners
-//  */
-// document.addEventListener('DOMContentLoaded', init);
-
-// /**
-//  * User event listeners
-//  */
-// backBtn.addEventListener('click', navigateBack)
-// errorModalQuitBtn.addEventListener('click', navigateBack);
-
-// heatmapBtn.addEventListener('click', heatmap);
+function initUi() {
+  const duration = (site.end - site.start);
+  ui.querySelector('.timeline input').value = millisecondsToIso(duration);
+  timeLeft.value = millisecondsToIso(duration);
+  progress.max = duration;
+}
 
 /**
  * Function to init replay
  * @param {string} site - Site uuid string
- * @param {string} session - Session uuid string
- * @param {string} url - Url string
+ * @param {string} uuid - Session uuid string
  */
-function initReplay({ site, url, uuid }) {
-  console.log(site);
-  Promise.all([loadSession(uuid), loadStorage(site)])
+function initReplay({ siteUuid, sessionUuid }) {
+  loadUi()
+    .then((el) => {
+      ui = el;
+      ui.querySelector('#replay').addEventListener('click', toggleUi);
+      document.body.appendChild(ui);
+    })
+    .then(() => Promise.all([loadSession(sessionUuid), loadStorage(siteUuid)]))
     .then(([_session, _events]) => {
-      const { width, height } = _session.sites.find(_site => _site.uuid === site);
+      session = _session;
+      siteEvents = _events;
 
-      const styles = 'display: block; position: absolute; top: 0; left: 0; z-index: 1000;';
+      site = session.sites.find(_site => _site.uuid === siteUuid);
 
-      const heatmap = createHeatmap(width, height, _events);
-      heatmap.style.cssText = styles;
+      const heatmap = createHeatmap(site.width, site.height, siteEvents);
+      heatmap.classList.add('etave-heatmap');
 
-      const path = createPath(width, height, _events);
-      path.style.cssText = styles;
+      const path = createPath(site.width, site.height, siteEvents);
+      path.classList.add('etave-path');
 
-      document.documentElement.appendChild(heatmap);
-      document.documentElement.appendChild(path);
+      document.body.appendChild(heatmap);
+      document.body.appendChild(path);
+    })
+    .then(() => {
+      initUi();
     })
     .catch((err) => { console.error(err); });
 }

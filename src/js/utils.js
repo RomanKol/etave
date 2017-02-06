@@ -47,7 +47,7 @@ function removeStorage(key) {
 /**
  * Function to load a session by uuid
  * @param {string} uuid - The uuid of the session
- * @return {Promise<session, Error>} A Promise that returns a session if fullfilled, else an error
+ * @return {Promise<session, Error>} A Promise that returns a session if fulfilled, else an error
  */
 function loadSession(uuid) {
   return loadStorage('sessions')

@@ -1,55 +1,130 @@
-#replay {
+$blue: #0275d8;
 
-  .sidebar {
-    flex: 0 0 16em;
-  }
+#etave-replay {
 
-  main {
-    overflow: hidden;
-    display: flex;
-    align-items: center;
+  display: flex;
+  position: fixed;
+  bottom: 0rem;
+  left: 0rem;
+  width: 100%;
+  height: 12rem;
+  z-index: 1001;
+  transform: translateY(12rem);
+  transition: transform 300ms ease;
+
+  &.open {
+    transform: translateY(0);
   }
 
   /*
-   * Replay section
+   * Base styles
    */
-  #player {
-    // .player-wrapper {
-    //   padding: 0 15px;
-    //   overflow: hidden;
-    //   display: flex;
-    //   align-items: flex-end;
-    // }
-    iframe {
-      display: flex;
-      // transform-origin: top center;
-      box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
+  .btn {
+    background-color: $blue;
+    color: white;
+    height: 2.5rem;
+    padding: 0.5rem;
+    border: none;
+    border-radius: 0;
+  }
+
+  .btn-icon {
+    width: 2.5rem;
+    svg {
+      height: 100%;
+      width: auto;
     }
+  }
+
+  .btn-circle {
+    width: 2.5rem;
+    border-radius: 50%;
+  }
+
+  #replay {
+    position: absolute;
+    top: -2.5rem;
+    left: 0;
+  }
+
+  #options,
+  #player {
+    height: 12rem;
+    width: 100%;
+    padding: 1rem;
+    display: flex;
+    align-items: stretch;
+    align-content: strecht;
+  }
+
+  /*
+   * Options section
+   */
+  #options {
+    flex-direction: column;
+    flex: 0 0 12rem;
+    background: rgba(225,225,225,.9);
+  }
+
+  input[type="checkbox"] {
+    margin-right: .25rem;
+  }
+
+  input[type="checkbox"]:checked + label {
+    filter: grayscale(0);
+  }
+
+  input[type="checkbox"] + label {
+    filter: grayscale(1);
+    transform: filter 300ms ease;
+    color: white;
+    line-height: 1.5rem;
+  }
+
+  label svg {
+    height: 1.5rem;
+    width: 1.5rem;
+    margin-right: .5rem;
+    float: left;
   }
 
   /*
    * Player section
    */
-  #player-controls {
-    display: flex;
-    flex: 0 0 8rem;
+  #player {
+    flex: 1 1 12rem;
+    background-color: rgba(255,255,255,.9);
     flex-direction: column;
-    background-color: #ccc;
 
-    section {
+    .timeline,
+    .controls {
       display: flex;
       flex-direction: row;
-      padding: 0.75rem;
+      flex-grow: 1;
     }
 
     .timeline {
-      align-items: stretch;
 
-      input {
-        flex: 1 1 3rem;
+      input,
+      input[readonly] {
+        padding: 0.5rem;
+        border: 0;
+        border-bottom: 2px solid #aaa;
+        background-color: #e6e6e6;
+        transition: all 300ms ease;
+        border-radius: 0;
+        height: 2.5rem;
+        width: 120px;
       }
+
+      input:focus {
+        background: #f7f7f7;
+        border-color: $blue;
+      }
+
       progress {
-        flex: 5;
+        height: 2.5rem;
+        flex-grow: 1;
       }
     }
 
@@ -65,4 +140,21 @@
       }
     }
   }
+
+  .text-right {
+    text-align: right;
+  }
+
+  .hidden {
+    display: none;
+  }
+
+}
+
+.etave-heatmap,
+.etave-path {
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
 }

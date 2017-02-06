@@ -77,7 +77,13 @@ const replayFiles = [
 function initReplay() {
   createTab(this.dataset.url)
     .then(tab => Promise.all(replayFiles.map(file => injectScript(tab.id, file)))
-      .then(() => injectScript(tab.id, false, `initReplay(${JSON.stringify(this.dataset)});`, 'document_end'))
+      .then(() => {
+        const replayObj = {
+          siteUuid: this.dataset.site,
+          sessionUuid: this.dataset.session,
+        };
+        return injectScript(tab.id, false, `initReplay(${JSON.stringify(replayObj)});`, 'document_end');
+      })
     );
 }
 
@@ -143,7 +149,7 @@ function createSitesListItem(site) {
     <td>
       <label>Replay</label>
       <br>
-      <button class='btn btn-icon btn-success replay' title='Play' data-uuid='${session.uuid}' data-site='${site.uuid}' data-url='${site.url}'>
+      <button class='btn btn-icon btn-success replay' title='Play' data-session='${session.uuid}' data-site='${site.uuid}' data-url='${site.url}'>
         <img src='play.svg' alt='Play'>
       </button>
       <a href='replay.html?session=${session.uuid}&site=${site.uuid}'>

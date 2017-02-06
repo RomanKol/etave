@@ -60,15 +60,6 @@ function createSessionElement(session) {
         <img src='details.svg' alt='details'>
       </a>
     </td>
-    <td>
-      <label>Replay</label>
-      <br>
-      <a href='replay.html?session=${session.uuid}'>
-        <button class='btn btn-icon btn-success' title='Play'>
-          <img src='play.svg' alt='Play'>
-        </button>
-      </a>
-    </td>
     `;
 
   tableRow.innerHTML = template;

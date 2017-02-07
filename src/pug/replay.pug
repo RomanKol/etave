@@ -1,5 +1,5 @@
 button#replay.btn.btn-icon
-  include ../../extension/path.svg
+  include ../../extension/play.svg
 
 section#options
   fieldset
@@ -8,26 +8,29 @@ section#options
       include ../../extension/heatmap.svg
       | Heatmap
 
-    input(type='checkbox' name='path')#path.hidden
+    input(type='checkbox' name='path' checked)#path.hidden
     label(for='path').btn
       include ../../extension/path.svg
       | Path
 
   fieldset
     label
-      input(type='checkbox' name='clicks')
-      | Clicks
-
-    br
+      input(type='checkbox' name='mousedown')
+      | Mousedowns
 
     label
-      input(type='checkbox' name='moves')
-      | Moves
+      input(type='checkbox' name='mouseup')
+      | Mouseups
+
+    label
+      input(type='checkbox' name='mousemove' checked)
+      | Mousemoves
 
 section#player
   section.timeline
-    input(type='text' name='name' readonly).text-right
-    progress(value=0)
+    input(type='text' name='name' value=0 readonly)
+    //- progress(value=0)
+    input(type='range' min=0 step=1)
     input(type='text' name='name' readonly)
 
   section.controls

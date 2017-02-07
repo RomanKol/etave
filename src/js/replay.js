@@ -9,6 +9,15 @@ let timeInp;
 let timeLeftInp;
 let progressInp;
 
+let playBtn;
+let backwardBtn;
+let forwardBtn;
+let speedBtns;
+
+let playIndex;
+let speed = 1;
+let playing = false;
+
 let optionsEl;
 const options = [];
 
@@ -61,27 +70,38 @@ function updatePath(events) {
 }
 
 /**
+ * Function to check if event has can be drawn
+ * @param {Object} event - The event to check
+ * @param {Number} progression - The current timestamp ot the replay
+ * @return {Boolean} - If the event can be drawn
+ */
+function checkEvent(event, progression) {
+  return event.timeStamp <= progression && inArray(options, event.type);
+}
+
+/**
  * Function to update the replay
  */
-function updateReplay() {
   // Parse the range input value to int
+function updateReplay(heatmap = true, path = true) {
   const progression = parseInt(progressInp.value, 10);
 
   // Filter the events by time and then by options
-  const timedEvents = sessionEvents.filter(event => event.timeStamp <= progression);
-  const filteredEvents = timedEvents.filter(event => inArray(options, event.type));
+  const filteredEvents = sessionEvents.filter(event => checkEvent(event, progression));
 
   // Update the heatmap and path
-  updateHeatmap(filteredEvents);
-  updatePath(filteredEvents);
+  if (heatmap) updateHeatmap(filteredEvents);
+  if (path) updatePath(filteredEvents);
 }
 
 /**
  * Function to update the timeLeft input value
  */
 function updateDuration() {
-  timeInp.value = millisecondsToIso(parseInt(this.value, 10));
-  timeLeftInp.value = millisecondsToIso(parseInt(this.max, 10) - parseInt(this.value, 10));
+  const time = parseInt(progressInp.value, 10);
+  const timeLeft = parseInt(progressInp.max, 10);
+  timeInp.value = millisecondsToIso(time);
+  timeLeftInp.value = millisecondsToIso(timeLeft - time);
 }
 
 /**
@@ -98,7 +118,126 @@ function updateOptions() {
 }
 
 /**
- * Functin to load the etave replay ui
+ * Function to toggle the etave replay ui
+ */
+function toggleUi() {
+  ui.classList.toggle('open');
+}
+
+/**
+ * Function to add a background to the progress element
+ */
+function addProgressBackground() {
+  const canvas = document.createElement('canvas');
+  const { width, height } = progressInp.getBoundingClientRect();
+
+  canvas.width = width;
+  canvas.height = height;
+
+  const context = canvas.getContext('2d');
+  context.fillStyle = ('rgba(2, 117, 216, 0.3)');
+
+  const duration = parseInt(progressInp.max, 10);
+
+  sessionEvents.forEach((event) => {
+    const position = (event.timeStamp / duration) * width;
+    context.fillRect((position - 1), 0, 3, height);
+  });
+
+  progressInp.style.backgroundImage = `url('${canvas.toDataURL('image/png')}')`;
+}
+
+/**
+ * Function to pause/stop replay
+ */
+function pause() {
+  if (playIndex) {
+    cancelAnimationFrame(playIndex);
+  }
+}
+
+/**
+ * Function to start replay
+ */
+function play() {
+  const ts = parseInt(progressInp.value, 10);
+  const maxTs = parseInt(progressInp.max, 10);
+
+  if (ts < maxTs) {
+    playIndex = requestAnimationFrame(() => {
+      progressInp.value = ts + (16.67 * speed);
+      updateDuration();
+      updateReplay(false);
+      play();
+    });
+  } else {
+    pause();
+    playBtn.textContent = '►';
+    playing = false;
+    updateReplay(true, false);
+  }
+}
+
+/**
+ * Function to start/stop replay
+ */
+function start() {
+  if (playing) {
+    pause();
+    playBtn.textContent = '►';
+    playing = false;
+    updateReplay(true, false);
+  } else {
+    play();
+    playBtn.textContent = '❚ ❚';
+    playing = true;
+  }
+}
+
+/**
+ * Function to forward event replay
+ */
+function forward() {
+  const currProgress = parseInt(progressInp.value, 10);
+  const maxProgress = parseInt(progressInp.max, 10);
+
+  if ((currProgress + 2000) < maxProgress) {
+    progressInp.value = currProgress + 2000;
+  } else {
+    progressInp.value = maxProgress;
+  }
+
+  updateDuration();
+  updateReplay();
+}
+
+/**
+ * Function to backward event replay
+ */
+function backward() {
+  const currProgress = parseInt(progressInp.value, 10);
+
+  if ((currProgress - 2000) > 0) {
+    progressInp.value = currProgress - 2000;
+  } else {
+    progressInp.value = 0;
+  }
+
+  updateDuration();
+  updateReplay();
+}
+
+/**
+ * Function to toggle the playback speed
+ */
+function toggleSpeed() {
+  this.parentElement.querySelector('button:disabled').disabled = false;
+  speed = parseInt(this.dataset.speed, 10);
+  this.disabled = true;
+}
+
+/**
+ * Function to load the etave replay ui
  * @return {Promise<element>} - Returns a promise, if fulfilled returns the ui element
  */
 function loadUi() {
@@ -118,20 +257,25 @@ function loadUi() {
       timeLeftInp = ui.querySelectorAll('.timeline input[type="text"]')[1];
       progressInp = ui.querySelector('.timeline input[type="range"]');
 
+      playBtn = ui.querySelector('#play');
+      backwardBtn = ui.querySelector('#backward');
+      forwardBtn = ui.querySelector('#forward');
+      speedBtns = ui.querySelectorAll('.player-speed');
+
       progressInp.addEventListener('change', updateReplay);
       progressInp.addEventListener('mousemove', updateDuration);
 
       optionsEl.addEventListener('change', updateOptions);
 
+      playBtn.addEventListener('click', start);
+      backwardBtn.addEventListener('click', backward);
+      forwardBtn.addEventListener('click', forward);
+      speedBtns.forEach((btn) => {
+        btn.addEventListener('click', toggleSpeed);
+      });
+
       return ui;
     });
-}
-
-/**
- * Function to toggle the etave replay ui
- */
-function toggleUi() {
-  ui.classList.toggle('open');
 }
 
 /**
@@ -143,7 +287,7 @@ function initUi() {
   timeLeftInp.value = millisecondsToIso(duration);
   progressInp.max = duration;
   updateOptions();
-  createProgressBackground();
+  addProgressBackground();
 }
 
 /**
@@ -171,22 +315,24 @@ function initReplay({ siteUuid, sessionUuid }) {
     .catch((err) => { console.error(err); });
 }
 
-function createProgressBackground() {
-  const canvas = document.createElement('canvas');
-  const { width, height } = progressInp.getBoundingClientRect();
 
-  canvas.width = width;
-  canvas.height = height;
+  // // Play all itneractions
+  // play() {
+  //   if (this.index < this.length - 1) {
+  //     const prevTs = this.interactions[this.index + 1].timeStamp || 0;
+  //     const currTs = this.interactions[this.index].timeStamp;
+  //     const time = this.index === 0 ? 0 : (prevTs - currTs);
 
-  const context = canvas.getContext('2d');
-  context.fillStyle = ('rgba(2, 117, 216, 0.3)');
+  //     this.playIndex = setTimeout(() => {
+  //       this.next();
+  //       this.play();
+  //     }, time);
+  //   }
+  // }
 
-  const duration = parseInt(progressInp.max, 10);
-
-  sessionEvents.forEach((event) => {
-    const position = (event.timeStamp / duration) * width;
-    context.fillRect((position - 1), 0, 3, height);
-  });
-
-  progressInp.style.backgroundImage = `url('${canvas.toDataURL('image/png')}')`;
-}
+  // // Pauses the itneraction playback
+  // pause() {
+  //   if (this.playIndex) {
+  //     clearTimeout(this.playIndex);
+  //   }
+  // }

@@ -34,15 +34,14 @@ section#player
     input(type='text' name='name' readonly)
 
   section.controls
-    button#backward.btn.btn-icon
+    button#backward.btn.btn-icon(title='+2 seconds')
       include ../../extension/backward.svg
 
-    button#play.btn.btn-icon
-      include ../../extension/play.svg
+    button#play.btn.btn-icon ►
 
-    button#forward.btn.btn-icon
+    button#forward.btn.btn-icon(title='-2 seconds')
       include ../../extension/forward.svg
 
-    button(data-speed=1).player-speed.btn.btn-circle 1x
+    button(disabled data-speed=1).player-speed.btn.btn-circle 1x
     button(data-speed=2).player-speed.btn.btn-circle 2x
     button(data-speed=4).player-speed.btn.btn-circle 4x

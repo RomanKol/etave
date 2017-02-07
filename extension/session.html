@@ -4,11 +4,11 @@
     <title>etave Session</title>
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
-    <meta name="description" content="etave dashboard"/>
     <link href="styles.css" rel="stylesheet"/>
   </head>
   <body class="page" id="session">
-    <header class="navbar-inverse bg-inverse"><span class="navbar-brand">etave session details</span>
+    <header class="navbar-inverse bg-inverse">
+      <button class="btn btn-primary btn-icon mr-2" id="back"><img src="chevron-left.svg" alt="Back"/></button><span class="navbar-brand">etave session details</span>
       <button class="btn btn-primary btn-icon float-right" id="download"><img src="download.svg" alt="Download"/></button>
       <button class="btn btn-danger btn-icon float-right" id="delete"><img src="delete.svg" alt="Delete"/></button>
     </header>
@@ -74,11 +74,11 @@
               <table class="table table-striped" id="sites-table">
                 <thead>
                   <tr>
-                    <th class="w-10">Site Preview</th>
-                    <th class="w-25">Site Details</th>
+                    <th>Preview</th>
+                    <th class="w-25">Site</th>
+                    <th class="w-25">Times</th>
                     <th class="w-20">Size</th>
-                    <th class="w-10">Replay</th>
-                    <th class="w-25" colspan="2">Exports</th>
+                    <th>Replay</th>
                   </tr>
                 </thead>
                 <tbody></tbody>
@@ -91,7 +91,40 @@
         </div>
       </main>
     </div>
+    <div class="modal" id="delete-modal" tabindex="-1" role="dialog">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header bg-danger">
+            <h5 class="modal-title text-white">Delete Session</h5>
+          </div>
+          <div class="modal-body">
+            <p class="lead">Do you really want to delete this session and its recordings?</p>
+            <p class="text-muted">After the session has been deleted, this tab closes automatically.</p>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+            <button class="btn btn-danger">Delete session</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal" id="error-modal" tabindex="-1" role="dialog">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header bg-danger">
+            <h5 class="modal-title text-white">Error</h5>
+          </div>
+          <div class="modal-body">
+            <p class="lead">The session could not be loaded.</p>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-primary">Quit</button>
+          </div>
+        </div>
+      </div>
+    </div>
   </body>
+  <script src="utils.js"></script>
   <script src="svg.js"></script>
   <script src="heatmap.js"></script>
   <script src="session.js"></script>

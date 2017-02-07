@@ -1,0 +1,38 @@
+
+<button class="btn btn-icon" id="replay"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><path d="M8 6v20l16-10z" fill="#fff"/></svg></button>
+<section id="options">
+  <fieldset>
+    <input class="hidden" type="checkbox" name="heatmap" checked="checked" id="heatmap"/>
+    <label class="btn" for="heatmap">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><path d="M3.6 3v25.4H29" fill="none" stroke="#fff" stroke-width="2"/><circle cx="7.9" cy="7" r="2.5" fill="#fff"/><circle cx="16.5" cy="7" r="3.5" fill="#fff"/><circle cx="25.2" cy="7" r="2.5" fill="#fff"/><circle cx="7.9" cy="15.1" r="2.5" fill="#fff"/><circle cx="7.9" cy="23.2" r="2.5" fill="#fff"/><circle cx="16.5" cy="23.2" r="2.5" fill="#fff"/><circle cx="16.5" cy="15.1" r="3.5" fill="#fff"/><circle cx="25.2" cy="23.2" r="3.5" fill="#fff"/><circle cx="25.2" cy="15.1" r="2.5" fill="#fff"/></svg>Heatmap</label>
+    <input class="hidden" type="checkbox" name="path" checked="checked" id="path"/>
+    <label class="btn" for="path">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><path d="M4 4l4 4 14 2-12 12 14 2 4 4" fill="none" stroke="#fff" stroke-linejoin="bevel"/><circle cx="4" cy="4" r="1.5" fill="#fff"/><circle cx="8" cy="8" r="1.5" fill="#fff"/><circle cx="22" cy="10" r="1.5" fill="#fff"/><circle cx="10" cy="22" r="1.5" fill="#fff"/><circle cx="24" cy="24" r="1.5" fill="#fff"/><circle cx="28" cy="28" r="1.5" fill="#fff"/></svg>Path</label>
+  </fieldset>
+  <fieldset>
+    <label>
+      <input type="checkbox" name="mousedown" checked="checked"/>Mousedowns
+    </label>
+    <label>
+      <input type="checkbox" name="mouseup" checked="checked"/>Mouseups
+    </label>
+    <label>
+      <input type="checkbox" name="mousemove" checked="checked"/>Mousemoves
+    </label>
+  </fieldset>
+</section>
+<section id="player">
+  <section class="timeline">
+    <input type="text" name="name" value="0" readonly="readonly"/>
+    <input type="range" min="0" step="1"/>
+    <input type="text" name="name" readonly="readonly"/>
+  </section>
+  <section class="controls">
+    <button class="btn btn-icon" id="backward" title="+2 seconds"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><path d="M18 4.8L6.8 16 18 27.2" fill="none" stroke="#fff" stroke-width="2.3"/><path d="M24.4 4.8L13.2 16l11.2 11.2" fill="none" stroke="#fff" stroke-width="2.3"/></svg></button>
+    <button class="btn btn-icon" id="play">►</button>
+    <button class="btn btn-icon" id="forward" title="-2 seconds"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><path d="M6.8 27.2L18 16 6.8 4.8" fill="none" stroke="#fff" stroke-width="2.3"/><path d="M13.2 27.2L24.4 16 13.2 4.8" fill="none" stroke="#fff" stroke-width="2.3"/></svg></button>
+    <button class="player-speed btn btn-circle" disabled="disabled" data-speed="1">1x</button>
+    <button class="player-speed btn btn-circle" data-speed="2">2x</button>
+    <button class="player-speed btn btn-circle" data-speed="4">4x</button>
+  </section>
+</section>

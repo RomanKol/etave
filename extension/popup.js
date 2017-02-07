@@ -96,6 +96,7 @@ function getSessionSettings() {
 function saveSettings() {
   const settings = getSettings();
   saveStorage('settings', settings);
+  console.log(settings);
 }
 
 /**
@@ -138,6 +139,9 @@ function recording() {
   sendRuntimeMessage(msg)
     .then(() => {
       window.close();
+    })
+    .catch((err) => {
+      console.error(err);
     });
 }
 

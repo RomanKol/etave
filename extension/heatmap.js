@@ -70,26 +70,6 @@ function createHeatmap(width, height, points) {
   // Create cirlce
   const circle = createCanvasCircle(radius);
 
-  // Calculate bounding box of points
-  const bBox = {
-    left: width,
-    top: height,
-    right: 0,
-    bottom: 0,
-  };
-
-  points.forEach((point) => {
-    if (bBox.left > point.pageX) bBox.left = point.pageX;
-    if (bBox.top > point.pageY) bBox.top = point.pageY;
-    if (bBox.right < point.pageX) bBox.right = point.pageX;
-    if (bBox.bottom < point.pageY) bBox.bottom = point.pageY;
-  });
-
-  bBox.left -= radius;
-  bBox.top -= radius;
-  bBox.width = (bBox.right - bBox.left) + radius;
-  bBox.height = (bBox.bottom - bBox.top) + radius;
-
   // Draw points
   points.forEach((point) => {
     context.drawImage(circle, point.pageX - radius, point.pageY - radius);
@@ -100,7 +80,7 @@ function createHeatmap(width, height, points) {
   const gradientPixels = gradient.getContext('2d').getImageData(0, 0, 256, 1).data;
 
   // Get the context pixels
-  const pixels = context.getImageData(bBox.left, bBox.top, bBox.width, bBox.height);
+  const pixels = context.getImageData(0, 0, width, height);
 
   // Iterate over the alpha pixels
   for (let i = 0; i < pixels.data.length; i += 4) {
@@ -114,7 +94,7 @@ function createHeatmap(width, height, points) {
     }
   }
 
-  context.putImageData(pixels, bBox.left, bBox.top);
+  context.putImageData(pixels, 0, 0);
 
   return canvas;
 }

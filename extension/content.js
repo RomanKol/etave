@@ -19,7 +19,7 @@
  * Initial mouse move object
  * @param {number} pageX - X position
  * @param {number} pageY - Y position
- * @param {number} timeStamp - Timestamp
+ * @param {number} stimeStamp - Timestamp
  */
 let previousSavedMousemove = {
   pageX: -25,
@@ -41,9 +41,8 @@ let previousSavedScroll = {
 
 let uuid;
 let intervalID;
-let ts;
 
-let isRecording = false;
+let ts;
 
 /**
  * local events db
@@ -171,7 +170,7 @@ function createDomPath(target) {
     element = element.parentElement;
   }
 
-  // Return the reversed array, starting from top/document
+  // Return the reveserd array, starting from top/document
   return elements.reverse(); // .join('/');
 }
 
@@ -289,7 +288,7 @@ const keyup = keydown;
 
 
 /**
- * New MutationObserver
+ * New MutationObersver
  */
 const observer = new MutationObserver((mutations) => {
   mutations.forEach(({ attribute, target, type }) => {
@@ -382,8 +381,6 @@ function startRecording(data) {
     })
     .then(() => {
       addDot();
-      isRecording = true;
-      ts = Date.now();
     });
 }
 
@@ -401,7 +398,6 @@ function stopRecording() {
     })
     .then(() => {
       removeDot();
-      isRecording = false;
     });
 }
 
@@ -423,23 +419,23 @@ const tasks = {
  * @param {function} sendResponse - Function to send a response
  */
 function messageListener(msg, sender, sendResponse) {
+  console.log(msg);
   if ('task' in msg) {
     tasks[msg.task](msg)
       .catch((err) => {
         console.error(err);
       });
 
-    const { height, width } = document.documentElement.getBoundingClientRect();
+    const height = Math.round(document.documentElement.getBoundingClientRect().height);
+    const width = Math.round(document.documentElement.getBoundingClientRect().width);
 
     const response = {
-      height: Math.round(height),
+      height,
       timeStamp: Date.now(),
-      width: Math.round(width),
+      width,
     };
 
     sendResponse(response);
-  } else if ('status' in msg) {
-    sendResponse({ isRecording });
   }
 }
 

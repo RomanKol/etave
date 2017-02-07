@@ -40,7 +40,7 @@ function getCurrentTab() {
  */
 function getTabThumbnail() {
   return new Promise((resolve) => {
-    chrome.tabs.captureVisibleTab(null, { format: 'jpeg', quality: 50 }, (capture) => {
+    chrome.tabs.captureVisibleTab({ format: 'jpeg', quality: 50 }, (capture) => {
       resolve(capture);
     });
   });
@@ -166,6 +166,7 @@ function tabListener(tabId, info, tab) {
     // Find the session object of the tab
     sendTabMessage(tab, { status: true })
       .then((response) => {
+        console.log(response)
         if (response.isRecording) return Promise.reject(new Error('Tab is already recording'))
         return loadStorage('recordingSessions');
       })

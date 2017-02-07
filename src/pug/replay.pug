@@ -3,7 +3,7 @@ button#replay.btn.btn-icon
 
 section#options
   fieldset
-    input(type='checkbox' name='heatmap')#heatmap.hidden
+    input(type='checkbox' name='heatmap' checked)#heatmap.hidden
     label(for='heatmap').btn
       include ../../extension/heatmap.svg
       | Heatmap
@@ -15,11 +15,11 @@ section#options
 
   fieldset
     label
-      input(type='checkbox' name='mousedown')
+      input(type='checkbox' name='mousedown' checked)
       | Mousedowns
 
     label
-      input(type='checkbox' name='mouseup')
+      input(type='checkbox' name='mouseup' checked)
       | Mouseups
 
     label

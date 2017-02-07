@@ -143,6 +143,7 @@ function initUi() {
   timeLeftInp.value = millisecondsToIso(duration);
   progressInp.max = duration;
   updateOptions();
+  createProgressBackground();
 }
 
 /**
@@ -168,4 +169,24 @@ function initReplay({ siteUuid, sessionUuid }) {
       initUi();
     })
     .catch((err) => { console.error(err); });
+}
+
+function createProgressBackground() {
+  const canvas = document.createElement('canvas');
+  const { width, height } = progressInp.getBoundingClientRect();
+
+  canvas.width = width;
+  canvas.height = height;
+
+  const context = canvas.getContext('2d');
+  context.fillStyle = ('rgba(2, 117, 216, 0.3)');
+
+  const duration = parseInt(progressInp.max, 10);
+
+  sessionEvents.forEach((event) => {
+    const position = (event.timeStamp / duration) * width;
+    context.fillRect((position - 1), 0, 3, height);
+  });
+
+  progressInp.style.backgroundImage = `url('${canvas.toDataURL('image/png')}')`;
 }

@@ -314,25 +314,3 @@ function initReplay({ siteUuid, sessionUuid }) {
     })
     .catch((err) => { console.error(err); });
 }
-
-
-  // // Play all itneractions
-  // play() {
-  //   if (this.index < this.length - 1) {
-  //     const prevTs = this.interactions[this.index + 1].timeStamp || 0;
-  //     const currTs = this.interactions[this.index].timeStamp;
-  //     const time = this.index === 0 ? 0 : (prevTs - currTs);
-
-  //     this.playIndex = setTimeout(() => {
-  //       this.next();
-  //       this.play();
-  //     }, time);
-  //   }
-  // }
-
-  // // Pauses the itneraction playback
-  // pause() {
-  //   if (this.playIndex) {
-  //     clearTimeout(this.playIndex);
-  //   }
-  // }

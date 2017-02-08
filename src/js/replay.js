@@ -92,11 +92,32 @@ function updateScroll(events) {
   }
 }
 
+function updateKey(events) {
+  // Create an object with selector and inputs
+  const keys = events
+    .filter(event => event.type === 'keydown')
+    .reduce((_keys, _event) => {
+      const key = _event.domPath.join('>');
+      if (key in _keys) {
+        _keys[key] += _event.key;
+      } else {
+        _keys[key] = _event.key;
+      }
+      return _keys;
+    }, {});
+
+  // Iterate over keys and insert data
+  Object.keys(keys).forEach((key) => {
+    const element = document.querySelector(key);
+    if (element) element.value = keys[key];
+  });
+}
+
 /**
  * Function to update the replay
  */
   // Parse the range input value to int
-function updateReplay(heatmap = true, path = true) {
+function updateReplay(heatmap = true, path = true, scroll = true, key = true) {
   const progression = parseInt(progressInp.value, 10);
 
   // Filter the events by time and then by options
@@ -106,6 +127,7 @@ function updateReplay(heatmap = true, path = true) {
   if (heatmap) updateHeatmap(filteredEvents);
   if (path) updatePath(filteredEvents);
   if (scroll) updateScroll(filteredEvents);
+  if (key) updateKey(filteredEvents);
 }
 
 /**

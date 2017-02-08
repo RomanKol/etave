@@ -166,7 +166,6 @@ function tabListener(tabId, info, tab) {
     // Find the session object of the tab
     sendTabMessage(tab, { status: true })
       .then((response) => {
-        console.log(response)
         if (response.isRecording) return Promise.reject(new Error('Tab is already recording'))
         return loadStorage('recordingSessions');
       })
@@ -192,14 +191,11 @@ function tabListener(tabId, info, tab) {
               site.start = page.timeStamp;
               site.height = page.height;
               site.width = page.width;
-
-              return getTabThumbnail(tab.width, tab.height);
-            })
-            .then((image) => {
-              site.preview = image;
               session.sites.push(site);
               return updateRecordings(session);
-            });
+            })
+            .then(() => getTabThumbnail())
+            .then(image => saveStorage({ [`screenshot-${site.uuid}`]: image }));
         }
         // Else return false
         return false;
@@ -217,6 +213,7 @@ function startRecording(data) {
     .then((tab) => {
       // Create new session and site object
       const session = createSession(data, tab);
+
       const site = createSite(tab);
 
       // Add the tab listener
@@ -236,14 +233,12 @@ function startRecording(data) {
           site.start = page.timeStamp;
           site.height = page.height;
           site.width = page.width;
-
-          return getTabThumbnail(tab.width, tab.height);
-        })
-        .then((image) => {
-          site.preview = image;
           session.sites.push(site);
+
           return updateRecordings(session);
-        });
+        })
+        .then(() => getTabThumbnail())
+        .then(image => saveStorage({ [`screenshot-${site.uuid}`]: image }));
     });
 }
 

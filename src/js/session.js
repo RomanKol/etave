@@ -1,4 +1,4 @@
-/* global loadStorage, downloadData, downloadSession, removeSession, createHeatmap,
+/* global loadStorage, loadSession, downloadData, downloadSession, removeSession, createHeatmap,
   createPath, millisecondsToIso  */
 
 /**
@@ -110,7 +110,7 @@ function createSitesListItem(site) {
 
   const template = `
     <td>
-      <img src='${site.preview ? site.preview : 'delete.svg'}' width='100' class='bg-primary'>
+      <img src='delete.svg' width='100' class='bg-primary'>
     </td>
     <td>
       <div class='form-group'>
@@ -160,6 +160,13 @@ function createSitesListItem(site) {
   item.innerHTML = template;
 
   item.querySelector('.replay').addEventListener('click', initReplay);
+
+  const preview = item.querySelector('img');
+
+  loadStorage(`screenshot-${site.uuid}`)
+    .then((img) => {
+      preview.src = img;
+    });
 
   return item;
 }
@@ -239,10 +246,9 @@ function deleteSession() {
  * Function to initialize session details
  */
 function init() {
-  const hash = location.hash.substr(1);
+  const uuid = location.hash.substr(1);
 
-  loadStorage('sessions')
-    .then(_sessions => _sessions.find(_session => _session.uuid === hash))
+  loadSession(uuid)
     .then((_session) => {
       if (_session) {
         session = _session;

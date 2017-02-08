@@ -23,7 +23,7 @@ function saveStorage(data) {
 function loadStorage(key) {
   return new Promise((resolve, reject) => {
     chrome.storage.local.get(key, (items) => {
-      if (Object.keys(items).length === 0) reject(false);
+      if (Object.keys(items).length === 0) reject(new Error(`No item "${key}" was found!`));
       if (chrome.runtime.lastError) reject(new Error('Runtime error'));
       resolve(items[key]);
     });
@@ -53,8 +53,8 @@ function loadSession(uuid) {
   return loadStorage('sessions')
     .then(_sessions => _sessions.filter(_session => _session.uuid === uuid)[0])
     .then((_session) => {
-      if (_session) return Promise.resolve(_session);
-      return Promise.reject(new Error('no session found'));
+      if (!_session) Promise.reject(new Error(`No session "${uuid}" was found!`));
+      return Promise.resolve(_session);
     });
 }
 
@@ -76,8 +76,7 @@ function downloadData(url, filename) {
  */
 async function downloadSession(uuid) {
   // Load the session
-  const session = await loadStorage('sessions')
-    .then(_sessions => _sessions.filter(_session => _session.uuid === uuid)[0]);
+  const session = await loadSession(uuid);
 
   // Merge site events with into session
   await Promise.all(session.sites.map(_site => loadStorage(_site.uuid)

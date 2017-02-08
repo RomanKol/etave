@@ -185,7 +185,7 @@ function mousedown({ pageX, pageY, target, timeStamp, type }) {
     pageX: Math.round(pageX),
     pageY: Math.round(pageY),
     target: createElementSelector(target),
-    timeStamp: Math.round(timeStamp),
+    timeStamp: Math.round(Date.now() - ts),
     type,
   };
 
@@ -203,7 +203,7 @@ function mouseup({ pageX, pageY, target, timeStamp, type }) {
     pageY: Math.round(pageY),
     selection: getSelection().toString(),
     target: createElementSelector(target),
-    timeStamp: Math.round(timeStamp),
+    timeStamp: Math.round(Date.now() - ts),
     type,
   };
 
@@ -218,7 +218,7 @@ function mousemove({ pageX, pageY, timeStamp, type }) {
   const data = {
     pageX: Math.round(pageX),
     pageY: Math.round(pageY),
-    timeStamp: Math.round(timeStamp),
+    timeStamp: Math.round(Date.now() - ts),
     type,
   };
 
@@ -238,7 +238,7 @@ function mouseover({ pageX, pageY, target, timeStamp, type }) {
     pageX: Math.round(pageX),
     pageY: Math.round(pageY),
     target: createElementSelector(target),
-    timeStamp: Math.round(timeStamp),
+    timeStamp: Math.round(Date.now() - ts),
     type,
   };
 
@@ -253,7 +253,7 @@ function scroll({ timeStamp, type }) {
   const data = {
     scrollY: Math.round(scrollY),
     scrollX: Math.round(scrollX),
-    timeStamp: Math.round(timeStamp),
+    timeStamp: Math.round(Date.now() - ts),
     type,
   };
 
@@ -275,7 +275,7 @@ function keydown({ altKey, ctrlKey, metaKey, key, target, timeStamp, type }) {
     key: (target.nodeName.toLowerCase() !== 'input' || ((target.nodeName.toLowerCase() === 'input') && (target.type !== 'password'))) ? key : '*',
     metaKey,
     target: createElementSelector(target),
-    timeStamp: Math.round(timeStamp),
+    timeStamp: Math.round(Date.now() - ts),
     type,
   };
   events.push(data);

@@ -1,5 +1,7 @@
 $blue: #0275d8;
 
+$height: 14rem;
+
 #etave-replay {
 
   display: flex;
@@ -7,9 +9,9 @@ $blue: #0275d8;
   bottom: 0rem;
   left: 0rem;
   width: 100%;
-  height: 12rem;
+  height: $height;
   z-index: 1003;
-  transform: translateY(12rem);
+  transform: translateY($height);
   transition: transform 300ms ease;
 
   &.open {
@@ -53,7 +55,7 @@ $blue: #0275d8;
 
   #options,
   #player {
-    height: 12rem;
+    height: 100%;
     width: 100%;
     padding: 1rem;
     display: flex;

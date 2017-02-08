@@ -179,7 +179,7 @@ function createDomPath(target) {
  * Function to record mouse down events
  * @param {eventObj} - Event object
  */
-function mousedown({ pageX, pageY, target, timeStamp, type }) {
+function mousedown({ pageX, pageY, target, type }) {
   const data = {
     domPath: createDomPath(target),
     pageX: Math.round(pageX),
@@ -196,7 +196,7 @@ function mousedown({ pageX, pageY, target, timeStamp, type }) {
  * Function to record mouse up events
  * @param {eventObj} - Event object
  */
-function mouseup({ pageX, pageY, target, timeStamp, type }) {
+function mouseup({ pageX, pageY, target, type }) {
   const data = {
     domPath: createDomPath(target),
     pageX: Math.round(pageX),
@@ -214,7 +214,7 @@ function mouseup({ pageX, pageY, target, timeStamp, type }) {
  * Function to record mouse move events
  * @param {eventObj} - Event object
  */
-function mousemove({ pageX, pageY, timeStamp, type }) {
+function mousemove({ pageX, pageY, type }) {
   const data = {
     pageX: Math.round(pageX),
     pageY: Math.round(pageY),
@@ -232,7 +232,7 @@ function mousemove({ pageX, pageY, timeStamp, type }) {
  * Function to record mouse over events
  * @param {eventObj} - Event object
  */
-function mouseover({ pageX, pageY, target, timeStamp, type }) {
+function mouseover({ pageX, pageY, target, type }) {
   const data = {
     domPath: createDomPath(target),
     pageX: Math.round(pageX),
@@ -249,7 +249,7 @@ function mouseover({ pageX, pageY, target, timeStamp, type }) {
  * Function to record scroll events
  * @param {eventObj} - Event object
  */
-function scroll({ timeStamp, type }) {
+function scroll({ type }) {
   const data = {
     scrollY: Math.round(scrollY),
     scrollX: Math.round(scrollX),
@@ -267,7 +267,7 @@ function scroll({ timeStamp, type }) {
  * Function to record key down events
  * @param {eventObj} - Event object
  */
-function keydown({ altKey, ctrlKey, metaKey, key, target, timeStamp, type }) {
+function keydown({ altKey, ctrlKey, metaKey, key, target, type }) {
   const data = {
     altKey,
     ctrlKey,

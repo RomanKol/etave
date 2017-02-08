@@ -10,9 +10,6 @@ let timeLeftInp;
 let progressInp;
 
 let playBtn;
-let backwardBtn;
-let forwardBtn;
-let speedBtns;
 
 let playIndex;
 let speed = 1;
@@ -80,6 +77,22 @@ function checkEvent(event, progression) {
 }
 
 /**
+ * Function to update the scroll position
+ * @param {Object[]} events - Array of event objects
+ */
+function updateScroll(events) {
+  // Search for the last index
+  const event = events
+    .reverse()
+    .find(_event => _event.type === 'scroll');
+
+  // Scroll
+  if (event) {
+    scrollTo(event.scrollX, event.scrollY);
+  }
+}
+
+/**
  * Function to update the replay
  */
   // Parse the range input value to int
@@ -92,6 +105,7 @@ function updateReplay(heatmap = true, path = true) {
   // Update the heatmap and path
   if (heatmap) updateHeatmap(filteredEvents);
   if (path) updatePath(filteredEvents);
+  if (scroll) updateScroll(filteredEvents);
 }
 
 /**
@@ -252,25 +266,21 @@ function loadUi() {
 
       // Get all the ui elements
       optionsEl = ui.querySelector('#options');
+      optionsEl.addEventListener('change', updateOptions);
 
       timeInp = ui.querySelectorAll('.timeline input[type="text"]')[0];
       timeLeftInp = ui.querySelectorAll('.timeline input[type="text"]')[1];
+
       progressInp = ui.querySelector('.timeline input[type="range"]');
-
-      playBtn = ui.querySelector('#play');
-      backwardBtn = ui.querySelector('#backward');
-      forwardBtn = ui.querySelector('#forward');
-      speedBtns = ui.querySelectorAll('.player-speed');
-
       progressInp.addEventListener('change', updateReplay);
       progressInp.addEventListener('mousemove', updateDuration);
 
-      optionsEl.addEventListener('change', updateOptions);
-
+      playBtn = ui.querySelector('#play');
       playBtn.addEventListener('click', start);
-      backwardBtn.addEventListener('click', backward);
-      forwardBtn.addEventListener('click', forward);
-      speedBtns.forEach((btn) => {
+
+      ui.querySelector('#backward').addEventListener('click', backward);
+      ui.querySelector('#forward').addEventListener('click', forward);
+      ui.querySelectorAll('.player-speed').forEach((btn) => {
         btn.addEventListener('click', toggleSpeed);
       });
 

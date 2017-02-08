@@ -141,7 +141,7 @@ function createElementSelector(element) {
   let selector = element.nodeName.toLowerCase();
 
   // Join all classes and add them
-  if (element.classList.length > 0) Array.from(element.classList.value).join('.');
+  if (element.classList.length > 0) selector += `.${Array.from(element.classList).join('.')}`;
 
   // Check if there are siblings of the same element
   if (element.parentElement) {

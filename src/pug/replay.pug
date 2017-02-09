@@ -1,0 +1,55 @@
+button#replay.btn.btn-icon
+  include ../../extension/play.svg
+
+section#options
+  fieldset
+    input(type='checkbox' name='heatmap' checked)#heatmap.hidden
+    label(for='heatmap').btn
+      include ../../extension/heatmap.svg
+      | Heatmap
+
+    input(type='checkbox' name='path' checked)#path.hidden
+    label(for='path').btn
+      include ../../extension/path.svg
+      | Path
+
+  fieldset
+    label
+      input(type='checkbox' name='mousedown' checked)
+      | Mousedowns
+
+    label
+      input(type='checkbox' name='mouseup' checked)
+      | Mouseups
+
+    label
+      input(type='checkbox' name='mousemove' checked)
+      | Mousemoves
+
+    label
+      input(type='checkbox' name='scroll' checked)
+      | Scroll
+
+    label
+      input(type='checkbox' name='keydown' checked)
+      | Keys
+
+section#player
+  section.timeline
+    input(type='text' name='name' value=0 readonly)
+    //- progress(value=0)
+    input(type='range' min=0 step=1)
+    input(type='text' name='name' readonly)
+
+  section.controls
+    button#backward.btn.btn-icon(title='+2 seconds')
+      include ../../extension/backward.svg
+
+    button#play.btn.btn-icon ►
+
+    button#forward.btn.btn-icon(title='-2 seconds')
+      include ../../extension/forward.svg
+
+    button(disabled data-speed=1).player-speed.btn.btn-circle 1x
+    button(data-speed=2).player-speed.btn.btn-circle 2x
+    button(data-speed=4).player-speed.btn.btn-circle 4x

@@ -32,3 +32,12 @@
     }
   }
 }
+
+.modal-open .modal.show {
+  display: flex;
+  box-align: center;
+  align-items: center;
+  justify-content: center;
+  box-pack: center;
+  background-color: rgba(0,0,0,0.3);
+}

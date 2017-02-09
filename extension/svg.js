@@ -19,7 +19,7 @@ function createSvgCircle({ pageX, pageY, type }) {
   circleEl.setAttribute('cx', pageX);
   circleEl.setAttribute('cy', pageY);
   circleEl.setAttribute('r', 10);
-  circleEl.setAttribute('class', type);
+  circleEl.setAttribute('class', `${type} etave-circle`);
   return circleEl;
 }
 
@@ -45,16 +45,17 @@ function createSvgCircles(positions) {
  */
 function createSvgPath(positions) {
   const pathEl = createSvgElement('path');
+  pathEl.setAttribute('class', 'etave-path');
 
   let path = '';
   // Draw the beginning of the path
-  path += `M ${positions[0].pageX} ${positions[0].pageY} `;
+  path += `M${positions[0].pageX} ${positions[0].pageY}`;
 
   // Remove first element
   positions.shift();
 
   // Draw the rest of the path
-  path = positions.reduce((reduction, position) => `${reduction} L ${position.pageX} ${position.pageY} `, path);
+  path = positions.reduce((reduction, position) => `${reduction} L${position.pageX} ${position.pageY}`, path);
 
   pathEl.setAttribute('d', path);
 
@@ -68,11 +69,11 @@ function createSvgPath(positions) {
  */
 function createSvgDocument(width, height) {
   const svg = createSvgElement('svg');
+  svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
   svg.setAttribute('viewbox', `0 0 ${width} ${height}`);
   svg.setAttribute('width', width);
   svg.setAttribute('height', height);
   svg.setAttribute('version', '1.1');
-  svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
 
   // Add styles
   const styleEl = createSvgElement('style');
@@ -80,17 +81,18 @@ function createSvgDocument(width, height) {
 
   // Add styles
   styleEl.textContent = `
-    circle.mouseup {
+
+    circle.etave-circle.mouseup {
       fill: #ffeb3b;
       opacity: 0.5;
     }
 
-    circle.mousedown {
+    circle.etave-circle.mousedown {
       fill: #2196f3;
       opacity: 0.5;
     }
 
-    path {
+    path.etave-path {
       fill: none;
       stroke: #ff5722;
       stroke-width: 2;
@@ -105,3 +107,21 @@ function createSvgDocument(width, height) {
   return svg;
 }
 
+/**
+ * Function to create a svg with path
+ * @param {number} width - The width of the svg
+ * @param {number} height - The height of the svg
+ * @param {object[]} events - Array of events with pageX and pageY properties
+ * @return {elemnt} Returns an svg element;
+ */
+function createPath(width, height, events) {
+  const svg = createSvgDocument(width, height);
+
+  const path = createSvgPath(events.filter(event => event.type === 'mousemove'));
+  const clicks = createSvgCircles(events.filter(event => event.type === 'mousedown' || event.type === 'mouseup'));
+
+  svg.appendChild(path);
+  svg.appendChild(clicks);
+
+  return svg;
+}

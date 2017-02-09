@@ -1,50 +1,99 @@
-/* global createHeatmap, createSvgDocument, createSvgPath, createSvgCircles  */
+/* global loadStorage, loadSession, downloadData, downloadSession, removeSession, createHeatmap,
+  createPath, millisecondsToIso  */
 
 /**
  * DOM elements
  */
 const downloadBtn = document.querySelector('#download');
-const deleteBtn = document.querySelector('#delete');
+const backBtn = document.querySelector('#back')
 
+// Delete modal
+const openDeleteModalBtn = document.querySelector('#delete');
+
+const deleteModal = document.querySelector('#delete-modal');
+const deleteModalCancelBtn = deleteModal.querySelector('button');
+const deleteModalDeleteBtn = deleteModal.querySelectorAll('button')[1];
+
+// Error modal
+const errorModal = document.querySelector('#error-modal');
+const errorModalQuitBtn = errorModal.querySelector('button');
+
+// Container elements
 const sidebar = document.querySelector('.sidebar');
 const main = document.querySelector('main');
+
 
 let session;
 
 /**
- * Function to load data from the chrome.storage api
- * @param {string} key - The key of the data
- * @return {Promise<any, false>} - The saved data or false, if no data was found
+ * Function to create a new tab
+ * @param {string} url - Url for the new tab
+ * @return {Promise<tab>} - Returns a promise, if fulfilled, returns a tab object
  */
-function loadStorage(key) {
-  return new Promise((resolve, reject) => {
-    chrome.storage.local.get(key, (items) => {
-      if (Object.keys(items).length === 0) reject(false);
-      if (chrome.runtime.lastError) reject(new Error('Runtime error'));
-      resolve(items[key]);
+function createTab(url) {
+  return new Promise((resolve) => {
+    chrome.tabs.create({ url }, (tab) => {
+      resolve(tab);
     });
   });
 }
 
 /**
- * Function to download a file with chrome.downloads.download
- * @param {any} data - The file data
- * @param {string} filename - The filename
+ * Function to inject a script in a tab
+ * @param {number} tabId - The id of the tab
+ * @param {string=} file - The file to inject
+ * @param {string=} code - The code to inject
+ * @param {string} [runAt=document_start] description
+ * @return {Promise<any>} - Returns a promise, if fulfilled, return the result of the exec script
  */
-function downloadData(url, filename) {
-  chrome.downloads.download({
-    url,
-    filename,
+function injectScript(tabId, file, code, runAt = 'document_start') {
+  const details = {
+    runAt,
+  };
+
+  if (file) details.file = file;
+  if (code) details.code = code;
+
+  return new Promise((resolve) => {
+    chrome.tabs.executeScript(tabId, details, (res) => {
+      resolve(res);
+    });
   });
+}
+
+/**
+ * Array with the scripts required for replay
+ */
+const replayFiles = [
+  'utils.js',
+  'svg.js',
+  'heatmap.js',
+  'replay.js',
+];
+
+/**
+ * Function to initialize a replay
+ */
+function initReplay() {
+  createTab(this.dataset.url)
+    .then(tab => Promise.all(replayFiles.map(file => injectScript(tab.id, file)))
+      .then(() => {
+        const replayObj = {
+          siteUuid: this.dataset.site,
+          sessionUuid: this.dataset.session,
+        };
+        return injectScript(tab.id, false, `initReplay(${JSON.stringify(replayObj)});`, 'document_end');
+      })
+    );
 }
 
 /**
  * Function to convert a timestamp to an local time string
  * @param {number} timestamp - The timestamp
- * @return {string} - A local datetime string
+ * @return {string} - A local dateTime string
  */
 function timestampToLocal(timestamp) {
-  const date = new Date(timestamp)
+  const date = new Date(timestamp);
   return date.toLocaleString();
 }
 
@@ -61,7 +110,7 @@ function createSitesListItem(site) {
 
   const template = `
     <td>
-      <img src='${site.preview ? site.preview : 'delete.svg'}' width='100'>
+      <img src='delete.svg' width='100' class='bg-primary'>
     </td>
     <td>
       <div class='form-group'>
@@ -72,6 +121,8 @@ function createSitesListItem(site) {
         <label>Url</label>
         <input class='form-control' type='text' value='${site.url}' readonly>
       </div>
+    </td>
+    <td>
       <div class='form-group'>
         <label>Start</label>
         <input class='form-control' type='text' value='${timestampToLocal(site.start)}' readonly>
@@ -96,62 +147,26 @@ function createSitesListItem(site) {
       </div>
     </td>
     <td>
-      <form data-task='replay' data-uuid='${site.uuid}'>
-       <label>Open replay</label>
-        <br>
-        <button class='btn btn-icon btn-success' title='Play'>
-          <img src='play.svg' alt='Play'>
-        </button>
-        <input type='hidden' name='uuid' value='${site.uuid}'>
-      </form>
-    </td>
-    <td>
-      <form data-task='downloadHeatmap' data-uuid='${site.uuid}'>
-        <label>Heatmap</label>
-        <br>
-        <button type='submit' class='btn btn-icon btn-primary' title='Heatmap'>
-          <img src='heatmap.svg' alt='Heatmap'>
-        </button>
-        <br>
-        <strong class='mt-2'>Options:</strong>
-        <div class='form-check mt-2'>
-          <label class='form-check-label'>
-            <input class='form-check-input' type='radio' name='heatmap' value='mousemove' checked> Move
-          </label>
-        </div>
-        <div class='form-check'>
-          <label class='form-check-label'>
-            <input class='form-check-input' type='radio' name='heatmap' value='click'> Click
-          </label>
-        </div>
-      </form>
-    </td>
-    <td>
-      <form data-task='downloadPath' data-uuid='${site.uuid}'>
-        <label>Path</label>
-        <br>
-        <button type='submit' class='btn btn-icon btn-primary' title='Path'>
-          <img src='path.svg' alt='Path'>
-        </button>
-        <br>
-        <strong class='mt-2'>Options:</strong>
-        <div class='form-check mt-2'>
-          <label class='form-check-label'>
-            <input class='form-check-input' type='checkbox' name='path' value='mousemove' checked> Move
-          </label>
-        </div>
-        <div class='form-check'>
-          <label class='form-check-label'>
-            <input class='form-check-input' type='checkbox' name='path' value='click' checked> Click
-          </label>
-        </div>
-
-      </form>
-
+      <label>Replay</label>
+      <br>
+      <button class='btn btn-icon btn-success replay' title='Play' data-session='${session.uuid}' data-site='${site.uuid}' data-url='${site.url}'>
+        <img src='play.svg' alt='Play'>
+      </button>
+      <a href='replay.html?session=${session.uuid}&site=${site.uuid}'>
+      </a>
     </td>
   `;
 
   item.innerHTML = template;
+
+  item.querySelector('.replay').addEventListener('click', initReplay);
+
+  const preview = item.querySelector('img');
+
+  loadStorage(`screenshot-${site.uuid}`)
+    .then((img) => {
+      preview.src = img;
+    });
 
   return item;
 }
@@ -175,11 +190,7 @@ function buildSidebar() {
   sidebar.querySelector('#start').value = timestampToLocal(session.start);
   sidebar.querySelector('#end').value = timestampToLocal(session.end);
 
-  const duration = Math.floor((session.end - session.start) / 1000);
-  const sec = duration % 60;
-  const min = Math.floor(duration / 60) % 60;
-  const hr = Math.floor(duration / 60 / 60) % 60;
-  sidebar.querySelector('#duration').value = `${hr}:${min}:${sec}`;
+  sidebar.querySelector('#duration').value = millisecondsToIso(session.end - session.start);
 
   sidebar.querySelector('#width').value = session.viewport.width;
   sidebar.querySelector('#height').value = session.viewport.height;
@@ -192,122 +203,59 @@ function buildSidebar() {
 }
 
 /**
- * Function to initialize session replay
- */
-function init() {
-  const hash = location.hash.substr(1);
-
-  loadStorage('sessions')
-    .then(_sessions => _sessions.find(_session => _session.uuid === hash))
-    .then((_session) => {
-      session = _session;
-      buildSidebar();
-    });
-}
-
-/**
  * Function to download the session
  */
-function downloadSession() {
-  console.log('download Session');
-
-  // ToDo
+function download() {
+  downloadSession(session.uuid);
 }
 
 /**
  * Function te delete the session
+ * @param {element} modal - The modal element
+ */
+function toggleModal(modal) {
+  document.querySelector('body').classList.toggle('modal-open');
+  modal.classList.toggle('show');
+}
+
+/**
+ * Function to toggle error modal
+ */
+function toggleDeleteModal() {
+  toggleModal(deleteModal);
+}
+
+/**
+ * Function to navigate back to options
+ */
+function navigateBack() {
+  window.history.back();
+}
+
+/**
+ * Function to delete a session
  */
 function deleteSession() {
-  console.log('delete Session');
-
-  // ToDo
+  removeSession(session.uuid)
+    .then(() => {
+      navigateBack();
+    });
 }
 
 /**
- * Function to download a session
- * @param {string} uuid - The uuid of the site
- * @param {array} events - An array with site events
+ * Function to initialize session details
  */
-function downloadHeatmap(uuid, width, height, events) {
-  // Create the heatmap and convert to dataUrl
-  const heatmap = createHeatmap(width, height, events);
-  const heatmapUrl = heatmap.toDataURL('image/png');
+function init() {
+  const uuid = location.hash.substr(1);
 
-  // Download it
-  downloadData(heatmapUrl, `etave-heatmap-${uuid}.png`);
-}
-
-/**
- * Function to download a session
- * @param {string} uuid - The uuid of the site
- * @param {array} events - An array with site events
- */
-function downloadPath(uuid, width, height, events) {
-  // Download the session
-  const svg = createSvgDocument(width, height);
-
-  const path = createSvgPath(events.filter(event => event.type === 'mousemove'));
-  const clicks = createSvgCircles(events.filter(event => event.type === 'mousedown' || event.type === 'mouseup'));
-
-  svg.appendChild(path);
-  svg.appendChild(clicks);
-
-  // 'Convert' svg object to string and 'minify'
-  const svgString = svg.outerHTML.replace(/\r?\n|\r/g, ' ').replace(/\s\s+/g, ' ');
-
-  // Convert to dataUrl
-  const file = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
-  const svgUrl = URL.createObjectURL(file);
-
-  // Download it
-  downloadData(svgUrl, `etave-path-${uuid}.svg`);
-}
-
-/**
- * Function to start a sites replay
- * @param {string} uuid - The uuid of the site
- */
-function replay(uuid) {
-  // Replay the site
-  console.log(uuid);
-}
-
-
-/**
- * Site tasks
- * @prop {function} downloadHeatmap - The downloadHeatmap function
- * @prop {function} downloadPath - The downloadPath function
- * @prop {function} replay - The replay function
- */
-const tasks = {
-  downloadHeatmap,
-  downloadPath,
-  replay,
-};
-
-/**
- * Function to handle submit events
- * @param {object} e - Submit event object
- */
-function actions(e) {
-  e.preventDefault();
-  const form = e.target;
-  const uuid = form.dataset.uuid;
-
-  const site = session.sites.find(_site => _site.uuid === uuid);
-
-  // Get options
-  const options = Array.from(form.querySelectorAll(':checked'))
-    .map(element => element.value);
-
-  // Replace click option with mousedown/up
-  if (options.includes('click')) options.splice(options.indexOf('click'), 1, 'mousedown', 'mouseup');
-
-  // ToDo
-  loadStorage(uuid)
-    .then(events => events.filter(event => options.includes(event.type)))
-    .then((events) => {
-      tasks[form.dataset.task](uuid, site.width, site.height, events);
+  loadSession(uuid)
+    .then((_session) => {
+      if (_session) {
+        session = _session;
+        buildSidebar();
+      } else {
+        toggleModal(errorModal);
+      }
     });
 }
 
@@ -315,10 +263,15 @@ function actions(e) {
  * Event listeners
  */
 document.addEventListener('DOMContentLoaded', init);
-document.addEventListener('submit', actions);
 
 /**
  * User event listeners
  */
-downloadBtn.addEventListener('click', downloadSession);
-deleteBtn.addEventListener('click', deleteSession);
+downloadBtn.addEventListener('click', download);
+backBtn.addEventListener('click', navigateBack);
+
+openDeleteModalBtn.addEventListener('click', toggleDeleteModal);
+deleteModalCancelBtn.addEventListener('click', toggleDeleteModal);
+deleteModalDeleteBtn.addEventListener('click', deleteSession);
+
+errorModalQuitBtn.addEventListener('click', navigateBack);

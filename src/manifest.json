@@ -3,7 +3,7 @@
 
   "name": "etave",
   "description": "event tracking and visualization extension",
-  "version": "0.0.2",
+  "version": "0.0.3",
 
   "browser_action": {
     "default_icon": "icon.png",
@@ -41,6 +41,7 @@
 
   "background": {
     "scripts": [
+      "utils.js",
       "background.js"
     ]
   },
@@ -48,5 +49,9 @@
   "options_ui": {
     "page": "options.html",
     "open_in_tab": true
-  }
+  },
+
+  "web_accessible_resources": [
+    "replay.html"
+  ]
 }

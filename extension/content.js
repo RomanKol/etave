@@ -19,7 +19,7 @@
  * Initial mouse move object
  * @param {number} pageX - X position
  * @param {number} pageY - Y position
- * @param {number} stimeStamp - Timestamp
+ * @param {number} timeStamp - Timestamp
  */
 let previousSavedMousemove = {
   pageX: -25,
@@ -41,8 +41,9 @@ let previousSavedScroll = {
 
 let uuid;
 let intervalID;
-
 let ts;
+
+let isRecording = false;
 
 /**
  * local events db
@@ -140,7 +141,7 @@ function createElementSelector(element) {
   let selector = element.nodeName.toLowerCase();
 
   // Join all classes and add them
-  if (element.classList.length > 0) Array.from(element.classList.value).join('.');
+  if (element.classList.length > 0) selector += `.${Array.from(element.classList).join('.')}`;
 
   // Check if there are siblings of the same element
   if (element.parentElement) {
@@ -170,7 +171,7 @@ function createDomPath(target) {
     element = element.parentElement;
   }
 
-  // Return the reveserd array, starting from top/document
+  // Return the reversed array, starting from top/document
   return elements.reverse(); // .join('/');
 }
 
@@ -178,13 +179,13 @@ function createDomPath(target) {
  * Function to record mouse down events
  * @param {eventObj} - Event object
  */
-function mousedown({ pageX, pageY, target, timeStamp, type }) {
+function mousedown({ pageX, pageY, target, type }) {
   const data = {
     domPath: createDomPath(target),
     pageX: Math.round(pageX),
     pageY: Math.round(pageY),
     target: createElementSelector(target),
-    timeStamp: Math.round(timeStamp),
+    timeStamp: Math.round(Date.now() - ts),
     type,
   };
 
@@ -195,14 +196,14 @@ function mousedown({ pageX, pageY, target, timeStamp, type }) {
  * Function to record mouse up events
  * @param {eventObj} - Event object
  */
-function mouseup({ pageX, pageY, target, timeStamp, type }) {
+function mouseup({ pageX, pageY, target, type }) {
   const data = {
     domPath: createDomPath(target),
     pageX: Math.round(pageX),
     pageY: Math.round(pageY),
     selection: getSelection().toString(),
     target: createElementSelector(target),
-    timeStamp: Math.round(timeStamp),
+    timeStamp: Math.round(Date.now() - ts),
     type,
   };
 
@@ -213,11 +214,11 @@ function mouseup({ pageX, pageY, target, timeStamp, type }) {
  * Function to record mouse move events
  * @param {eventObj} - Event object
  */
-function mousemove({ pageX, pageY, timeStamp, type }) {
+function mousemove({ pageX, pageY, type }) {
   const data = {
     pageX: Math.round(pageX),
     pageY: Math.round(pageY),
-    timeStamp: Math.round(timeStamp),
+    timeStamp: Math.round(Date.now() - ts),
     type,
   };
 
@@ -231,13 +232,13 @@ function mousemove({ pageX, pageY, timeStamp, type }) {
  * Function to record mouse over events
  * @param {eventObj} - Event object
  */
-function mouseover({ pageX, pageY, target, timeStamp, type }) {
+function mouseover({ pageX, pageY, target, type }) {
   const data = {
     domPath: createDomPath(target),
     pageX: Math.round(pageX),
     pageY: Math.round(pageY),
     target: createElementSelector(target),
-    timeStamp: Math.round(timeStamp),
+    timeStamp: Math.round(Date.now() - ts),
     type,
   };
 
@@ -248,11 +249,11 @@ function mouseover({ pageX, pageY, target, timeStamp, type }) {
  * Function to record scroll events
  * @param {eventObj} - Event object
  */
-function scroll({ timeStamp, type }) {
+function scroll({ type }) {
   const data = {
     scrollY: Math.round(scrollY),
     scrollX: Math.round(scrollX),
-    timeStamp: Math.round(timeStamp),
+    timeStamp: Math.round(Date.now() - ts),
     type,
   };
 
@@ -266,7 +267,7 @@ function scroll({ timeStamp, type }) {
  * Function to record key down events
  * @param {eventObj} - Event object
  */
-function keydown({ altKey, ctrlKey, metaKey, key, target, timeStamp, type }) {
+function keydown({ altKey, ctrlKey, metaKey, key, target, type }) {
   const data = {
     altKey,
     ctrlKey,
@@ -274,7 +275,7 @@ function keydown({ altKey, ctrlKey, metaKey, key, target, timeStamp, type }) {
     key: (target.nodeName.toLowerCase() !== 'input' || ((target.nodeName.toLowerCase() === 'input') && (target.type !== 'password'))) ? key : '*',
     metaKey,
     target: createElementSelector(target),
-    timeStamp: Math.round(timeStamp),
+    timeStamp: Math.round(Date.now() - ts),
     type,
   };
   events.push(data);
@@ -288,7 +289,7 @@ const keyup = keydown;
 
 
 /**
- * New MutationObersver
+ * New MutationObserver
  */
 const observer = new MutationObserver((mutations) => {
   mutations.forEach(({ attribute, target, type }) => {
@@ -381,6 +382,8 @@ function startRecording(data) {
     })
     .then(() => {
       addDot();
+      isRecording = true;
+      ts = Date.now();
     });
 }
 
@@ -398,6 +401,7 @@ function stopRecording() {
     })
     .then(() => {
       removeDot();
+      isRecording = false;
     });
 }
 
@@ -419,23 +423,23 @@ const tasks = {
  * @param {function} sendResponse - Function to send a response
  */
 function messageListener(msg, sender, sendResponse) {
-  console.log(msg);
   if ('task' in msg) {
     tasks[msg.task](msg)
       .catch((err) => {
         console.error(err);
       });
 
-    const height = Math.round(document.documentElement.getBoundingClientRect().height);
-    const width = Math.round(document.documentElement.getBoundingClientRect().width);
+    const { height, width } = document.documentElement.getBoundingClientRect();
 
     const response = {
-      height,
+      height: Math.round(height),
       timeStamp: Date.now(),
-      width,
+      width: Math.round(width),
     };
 
     sendResponse(response);
+  } else if ('status' in msg) {
+    sendResponse({ isRecording });
   }
 }
 

@@ -6361,24 +6361,24 @@ a.text-gray-dark:focus, a.text-gray-dark:hover {
   .navbar button {
     margin-left: auto; }
 
-/*
- * Sidebar
- */
 /**
  * Button with icon/image
  */
-.btn-icon {
-  padding: 0.5rem;
-  width: 2.5rem;
-  height: 2.5rem;
-  cursor: pointer;
-  -ms-flex-item-align: end;
-  align-self: flex-end; }
-  .btn-icon img {
-    width: 100%;
-    height: 100%; }
-  .btn-icon + .btn-icon {
-    margin-right: 1em; }
+.btn {
+  cursor: pointer; }
+  .btn.btn-icon {
+    padding: 0.5rem;
+    width: 2.5rem;
+    height: 2.5rem; }
+    .btn.btn-icon img {
+      width: 100%;
+      height: 100%; }
+    .btn.btn-icon:not(.hidden) + .btn-icon {
+      margin-right: 1em; }
+  .btn.btn-circle {
+    border-radius: 50%;
+    width: 2.5rem;
+    padding: 0; }
 
 /**
  * Input fields
@@ -6402,11 +6402,8 @@ input.form-control:focus {
   background: #f7f7f7;
   border-color: #0275d8; }
 
-/**
- * List-groups
- */
-.list-group-striped .list-group-item:nth-child(odd) {
-  background: rgba(0, 0, 0, 0.05); }
+.hidden {
+  display: none; }
 
 .page {
   display: -ms-flexbox;
@@ -6433,6 +6430,17 @@ input.form-control:focus {
       -ms-flex: 1;
       flex: 1;
       overflow-y: auto; }
+
+.modal-open .modal.show {
+  display: -ms-flexbox;
+  display: flex;
+  box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+  box-pack: center;
+  background-color: rgba(0, 0, 0, 0.3); }
 
 body#popup {
   font-size: 14px;
@@ -6515,8 +6523,7 @@ body#options {
     padding-bottom: 2rem; }
   body#options .session-list-item button {
     cursor: pointer;
-    display: block;
-    margin: 0 auto; }
+    display: block; }
 
 body#session {
   display: -ms-flexbox;
@@ -6552,3 +6559,163 @@ body#session {
     margin-bottom: 0; }
   body#session .sidebar .nav-item-content {
     padding-top: 1rem; }
+
+#etave-replay {
+  display: -ms-flexbox;
+  display: flex;
+  position: fixed;
+  bottom: 0rem;
+  left: 0rem;
+  width: 100%;
+  height: 16rem;
+  z-index: 1003;
+  transform: translateY(16rem);
+  transition: transform 300ms ease;
+  /*
+   * Base styles
+   */
+  /*
+   * Options section
+   */
+  /*
+   * Player section
+   */ }
+  #etave-replay.open {
+    transform: translateY(0); }
+  #etave-replay .btn {
+    background-color: #0275d8;
+    color: white;
+    height: 2.5rem;
+    padding: 0.5rem;
+    border: none;
+    border-radius: 0;
+    transition: filter 300ms ease; }
+    #etave-replay .btn:disabled {
+      filter: grayscale(0); }
+  #etave-replay .btn-icon {
+    width: 2.5rem; }
+    #etave-replay .btn-icon svg {
+      height: 100%;
+      width: auto; }
+  #etave-replay .btn-circle {
+    width: 2.5rem;
+    border-radius: 50%; }
+  #etave-replay #replay {
+    position: absolute;
+    top: -2.5rem;
+    left: 0; }
+  #etave-replay #options,
+  #etave-replay #player {
+    height: 100%;
+    width: 100%;
+    padding: 1rem;
+    display: -ms-flexbox;
+    display: flex;
+    -ms-flex-align: stretch;
+    align-items: stretch;
+    -ms-flex-line-pack: strecht;
+    align-content: strecht; }
+  #etave-replay #options {
+    -ms-flex-direction: column;
+    flex-direction: column;
+    -ms-flex: 0 0 12rem;
+    flex: 0 0 12rem;
+    background: rgba(225, 225, 225, 0.9); }
+  #etave-replay input[type="checkbox"] {
+    margin-right: .25rem; }
+  #etave-replay input[type="checkbox"]:checked + label {
+    filter: grayscale(0); }
+  #etave-replay input[type="checkbox"] + label {
+    filter: grayscale(1);
+    transform: filter 300ms ease;
+    color: white;
+    line-height: 1.5rem;
+    width: 100%; }
+  #etave-replay label svg {
+    height: 1.5rem;
+    width: 1.5rem;
+    margin-right: .5rem;
+    float: left; }
+  #etave-replay fieldset:nth-child(2) label {
+    display: block;
+    margin-bottom: 0.25rem; }
+  #etave-replay #player {
+    -ms-flex: 1 1 12rem;
+    flex: 1 1 12rem;
+    background-color: rgba(255, 255, 255, 0.9);
+    -ms-flex-direction: column;
+    flex-direction: column; }
+    #etave-replay #player .timeline,
+    #etave-replay #player .controls {
+      display: -ms-flexbox;
+      display: flex;
+      -ms-flex-direction: row;
+      flex-direction: row;
+      -ms-flex-positive: 1;
+      flex-grow: 1; }
+    #etave-replay #player .timeline input {
+      transition: all 300ms ease; }
+    #etave-replay #player .timeline input[readonly] {
+      padding: 0.5rem;
+      border: 0;
+      border-bottom: 2px solid #aaa;
+      background-color: #e6e6e6;
+      border-radius: 0;
+      height: 2.5rem;
+      width: 120px; }
+    #etave-replay #player .timeline input:focus {
+      background-color: #f7f7f7;
+      border-color: #0275d8; }
+    #etave-replay #player .timeline input[type=range] {
+      padding: 0;
+      height: 2.5rem;
+      width: 100%;
+      -ms-flex-positive: 1;
+      flex-grow: 1;
+      -webkit-appearance: none;
+      background-color: #e6e6e6; }
+    #etave-replay #player .timeline input[type=range]:focus {
+      outline: none; }
+    #etave-replay #player .timeline input[type=range]::-webkit-slider-runnable-track {
+      width: 100%;
+      height: 100%;
+      cursor: pointer;
+      background-color: transparent;
+      border-width: 0px 2px 2px 2px;
+      border-color: #aaaaaa;
+      border-style: solid; }
+    #etave-replay #player .timeline input[type=range]::-webkit-slider-thumb {
+      height: 100%;
+      width: 0.3rem;
+      background-color: rgba(0, 0, 0, 0.8);
+      cursor: pointer;
+      -webkit-appearance: none;
+      margin-top: 0;
+      transition: all 300ms ease; }
+    #etave-replay #player .timeline input[type=range]:hover::-webkit-slider-thumb {
+      width: 0.5rem;
+      background-color: rgba(0, 0, 0, 0.4); }
+    #etave-replay #player .controls {
+      -ms-flex-pack: center;
+      justify-content: center; }
+      #etave-replay #player .controls button {
+        margin: 0 10px; }
+        #etave-replay #player .controls button:nth-of-type(4) {
+          margin-left: 80px; }
+  #etave-replay .text-right {
+    text-align: right; }
+  #etave-replay .hidden {
+    display: none; }
+
+#etave-heatmap,
+#etave-path {
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0; }
+
+#etave-heatmap {
+  z-index: 1001; }
+
+#etave-path {
+  z-index: 1002; }

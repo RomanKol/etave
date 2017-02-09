@@ -5,7 +5,7 @@
  * DOM elements
  */
 const downloadBtn = document.querySelector('#download');
-const backBtn = document.querySelector('#back')
+const backBtn = document.querySelector('#back');
 
 // Delete modal
 const openDeleteModalBtn = document.querySelector('#delete');
@@ -74,7 +74,7 @@ const replayFiles = [
 /**
  * Function to initialize a replay
  */
-function initReplay() {
+function openReplay() {
   createTab(this.dataset.url)
     .then(tab => Promise.all(replayFiles.map(file => injectScript(tab.id, file)))
       .then(() => {
@@ -149,17 +149,23 @@ function createSitesListItem(site) {
     <td>
       <label>Replay</label>
       <br>
-      <button class='btn btn-icon btn-success replay' title='Play' data-session='${session.uuid}' data-site='${site.uuid}' data-url='${site.url}'>
-        <img src='play.svg' alt='Play'>
+      <button class='btn btn-icon btn-success replay mb-2' title='Replay' data-session='${session.uuid}' data-site='${site.uuid}' data-url='${site.url}'>
+        <img src='play.svg' alt='Replay'>
       </button>
-      <a href='replay.html?session=${session.uuid}&site=${site.uuid}'>
+      <br>
+      <label>Interactions</label>
+      <br>
+      <a href='interactions.html?session=${session.uuid}&site=${site.uuid}' alt='Interactions'>
+        <button class='btn btn-icon btn-success interactions' title='Interactions'>
+          <img src='play.svg' alt='Play'>
+        </button>
       </a>
     </td>
   `;
 
   item.innerHTML = template;
 
-  item.querySelector('.replay').addEventListener('click', initReplay);
+  item.querySelector('.replay').addEventListener('click', openReplay);
 
   const preview = item.querySelector('img');
 

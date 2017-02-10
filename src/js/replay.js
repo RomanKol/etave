@@ -15,7 +15,7 @@ let playIndex;
 let speed = 1;
 let playing = false;
 
-let optionsEl;
+let optionsEls;
 const options = [];
 
 /**
@@ -146,8 +146,8 @@ function updateDuration() {
 function updateOptions() {
   // Reset the options and set them
   options.length = 0;
-  optionsEl.querySelectorAll(':checked').forEach((element) => {
-    options.push(element.name);
+  optionsEls.forEach((optionEl) => {
+    if (optionEl.checked) options.push(optionEl.name);
   });
 
   updateReplay();
@@ -287,8 +287,10 @@ function loadUi() {
       ui.innerHTML = html;
 
       // Get all the ui elements
-      optionsEl = ui.querySelector('#options');
-      optionsEl.addEventListener('change', updateOptions);
+      optionsEls = ui.querySelectorAll('.option');
+      optionsEls.forEach((optionEl) => {
+        optionEl.addEventListener('change', updateOptions);
+      });
 
       timeInp = ui.querySelectorAll('.timeline input[type="text"]')[0];
       timeLeftInp = ui.querySelectorAll('.timeline input[type="text"]')[1];

@@ -2,37 +2,25 @@ button#replay.btn.btn-icon
   include ../../extension/play.svg
 
 section#options
-  fieldset
-    input(type='checkbox' name='heatmap' checked)#heatmap.hidden
-    label(for='heatmap').btn
-      include ../../extension/heatmap.svg
-      | Heatmap
+  label
+    input.option(type='checkbox' name='mousedown' checked)
+    | Mousedowns
 
-    input(type='checkbox' name='path' checked)#path.hidden
-    label(for='path').btn
-      include ../../extension/path.svg
-      | Path
+  label
+    input.option(type='checkbox' name='mouseup' checked)
+    | Mouseups
 
-  fieldset
-    label
-      input(type='checkbox' name='mousedown' checked)
-      | Mousedowns
+  label
+    input.option(type='checkbox' name='mousemove' checked)
+    | Mousemoves
 
-    label
-      input(type='checkbox' name='mouseup' checked)
-      | Mouseups
+  label
+    input.option(type='checkbox' name='scroll' checked)
+    | Scroll
 
-    label
-      input(type='checkbox' name='mousemove' checked)
-      | Mousemoves
-
-    label
-      input(type='checkbox' name='scroll' checked)
-      | Scroll
-
-    label
-      input(type='checkbox' name='keydown' checked)
-      | Keys
+  label
+    input.option(type='checkbox' name='keydown' checked)
+    | Keys
 
 section#player
   section.timeline
@@ -42,14 +30,29 @@ section#player
     input(type='text' name='name' readonly)
 
   section.controls
-    button#backward.btn.btn-icon(title='+2 seconds')
-      include ../../extension/backward.svg
 
-    button#play.btn.btn-icon ►
+    section
 
-    button#forward.btn.btn-icon(title='-2 seconds')
-      include ../../extension/forward.svg
+      input#heatmap.hidden.option(type='checkbox' name='heatmap' checked)
+      label.btn.btn-icon(for='heatmap')
+        include ../../extension/heatmap.svg
 
-    button(disabled data-speed=1).player-speed.btn.btn-circle 1x
-    button(data-speed=2).player-speed.btn.btn-circle 2x
-    button(data-speed=4).player-speed.btn.btn-circle 4x
+      input#path.hidden.option(type='checkbox' name='path' checked)
+      label.btn.btn-icon(for='path')
+        include ../../extension/path.svg
+
+    section
+
+      button#backward.btn.btn-icon(title='+2 seconds')
+        include ../../extension/backward.svg
+
+      button#play.btn.btn-icon ►
+
+      button#forward.btn.btn-icon(title='-2 seconds')
+        include ../../extension/forward.svg
+
+    section
+
+      button.player-speed.btn.btn-circle(disabled data-speed=1) 1x
+      button.player-speed.btn.btn-circle(data-speed=2) 2x
+      button.player-speed.btn.btn-circle(data-speed=4) 4x

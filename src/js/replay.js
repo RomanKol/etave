@@ -3,6 +3,11 @@ let session;
 let sessionEvents;
 let site;
 let ui;
+let browser;
+let browserContent;
+let iframe;
+let iframeDocument;
+let urlbar;
 
 // Play ui elements
 let timeInp;
@@ -17,6 +22,7 @@ let playing = false;
 
 let optionsEls;
 const options = [];
+
 
 /**
  * Function to check if a array contains a element
@@ -34,7 +40,7 @@ function inArray(arr, needle) {
  */
 function updateHeatmap(events) {
   // Check if there is an previous heatmap in the dom, remove it
-  const oldHeatmap = document.querySelector('#etave-heatmap');
+  const oldHeatmap = iframeDocument.querySelector('#etave-heatmap');
   if (oldHeatmap) {
     oldHeatmap.parentElement.removeChild(oldHeatmap);
   }
@@ -43,7 +49,8 @@ function updateHeatmap(events) {
   if (inArray(options, 'heatmap') && events.length > 0) {
     const newHeatmap = createHeatmap(site.width, site.height, events);
     newHeatmap.id = 'etave-heatmap';
-    document.body.appendChild(newHeatmap);
+    newHeatmap.style.cssText = `display: block; position: absolute; top: 0; left: 0; z-index: 1001; width: ${site.width}px; height: ${site.height}`;
+    iframeDocument.body.appendChild(newHeatmap);
   }
 }
 
@@ -53,7 +60,7 @@ function updateHeatmap(events) {
  */
 function updatePath(events) {
    // Check if there is an previous path in the dom, remove it
-  const oldPath = document.querySelector('#etave-path');
+  const oldPath = iframeDocument.querySelector('#etave-path');
   if (oldPath) {
     oldPath.parentElement.removeChild(oldPath);
   }
@@ -62,7 +69,8 @@ function updatePath(events) {
   if (inArray(options, 'path') && events.length > 0) {
     const newPath = createPath(site.width, site.height, events);
     newPath.id = 'etave-path';
-    document.body.appendChild(newPath);
+    newPath.style.cssText = `display: block; position: absolute; top: 0; left: 0; z-index: 1002; width: ${site.width}px; height: ${site.height}`;
+    iframeDocument.body.appendChild(newPath);
   }
 }
 
@@ -88,10 +96,13 @@ function updateScroll(events) {
 
   // Scroll
   if (event) {
-    scrollTo(event.scrollX, event.scrollY);
+    iframe.contentWindow.scrollTo(event.scrollX, event.scrollY);
   }
 }
 
+/**
+ * Function to simulate key input on replay
+ */
 function updateKey(events) {
   // Create an object with selector and inputs
   const keys = events
@@ -108,7 +119,7 @@ function updateKey(events) {
 
   // Iterate over keys and insert data
   Object.keys(keys).forEach((key) => {
-    const element = document.querySelector(key);
+    const element = iframeDocument.querySelector(key);
     if (element) element.value = keys[key];
   });
 }
@@ -143,21 +154,14 @@ function updateDuration() {
 /**
  * Function to update the options array
  */
-function updateOptions() {
+function updateOptions(replay = true) {
   // Reset the options and set them
   options.length = 0;
   optionsEls.forEach((optionEl) => {
     if (optionEl.checked) options.push(optionEl.name);
   });
 
-  updateReplay();
-}
-
-/**
- * Function to toggle the etave replay ui
- */
-function toggleUi() {
-  ui.classList.toggle('open');
+  if (replay) updateReplay();
 }
 
 /**
@@ -278,13 +282,18 @@ function toggleSpeed() {
  */
 function loadUi() {
   const uiPath = chrome.extension.getURL('replay.html');
-  ui = document.createElement('aside');
+  ui = document.createElement('div');
   ui.id = 'etave-replay';
 
   return fetch(uiPath)
     .then(res => res.text())
     .then((html) => {
       ui.innerHTML = html;
+
+      browser = ui.querySelector('#etave-browser');
+      browserContent = ui.querySelector('#etave-browser .browser-content');
+      iframe = ui.querySelector('iframe');
+      urlbar = ui.querySelector('.urlbar input');
 
       // Get all the ui elements
       optionsEls = ui.querySelectorAll('.option');
@@ -316,12 +325,46 @@ function loadUi() {
  * Function to initialize the etave replay ui
  */
 function initUi() {
+  // Set player values
   const duration = (site.end - site.start);
   timeInp.value = millisecondsToIso(0);
   timeLeftInp.value = millisecondsToIso(duration);
   progressInp.max = duration;
-  updateOptions();
+
+  urlbar.value = site.url;
+
+  updateOptions(false);
   addProgressBackground();
+}
+
+/**
+ * Function to scale browser
+ */
+function scaleBrowser() {
+  // Scale session viewport for current window
+  const tab = browser.querySelector('.browser');
+  const browserDim = browser.getBoundingClientRect();
+  const width = (browserDim.width - 80) / session.viewport.width;
+  const height = (browserDim.height - 80) / session.viewport.height;
+  const scale = Math.min(width, height).toFixed(2);
+  tab.style.setProperty('transform', `scale(${scale})`);
+
+  const tabDim = tab.getBoundingClientRect();
+  tab.style.setProperty('top', `${((browserDim.height - tabDim.height) / 2).toFixed(2)}px`);
+}
+
+/**
+ * Function to initalize iframe
+ */
+function initIframe() {
+  // Set iframe to session viewport size
+  iframe.width = session.viewport.width;
+  iframe.height = session.viewport.height;
+  browserContent.style.cssText = `height: ${session.viewport.height}px; width: ${session.viewport.width}px;`;
+  iframe.onload = () => {
+    iframeDocument = iframe.contentDocument;
+  };
+  iframe.src = site.url;
 }
 
 /**
@@ -330,21 +373,26 @@ function initUi() {
  * @param {string} uuid - Session uuid string
  */
 function initReplay({ siteUuid, sessionUuid }) {
-  loadUi()
-    .then((el) => {
-      ui = el;
-      ui.querySelector('#replay').addEventListener('click', toggleUi);
-      document.body.appendChild(ui);
-    })
-    .then(() => Promise.all([loadSession(sessionUuid), loadStorage(siteUuid)]))
-    .then(([_session, _events]) => {
+  Promise.all([loadSession(sessionUuid), loadStorage(siteUuid), loadUi()])
+    .then(([_session, _events, _ui]) => {
+      /** Hide all elements */
+      document.querySelectorAll('body > *').forEach((element) => {
+        element.style.setProperty('display', 'none');
+      });
+
+      // set global variables
       session = _session;
       sessionEvents = _events;
-
+      ui = _ui;
       site = session.sites.find(_site => _site.uuid === siteUuid);
     })
     .then(() => {
+      initIframe();
+      document.body.appendChild(ui);
       initUi();
+      scaleBrowser();
     })
     .catch((err) => { console.error(err); });
 }
+
+window.addEventListener('resize', scaleBrowser);

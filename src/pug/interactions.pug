@@ -17,25 +17,10 @@ html
       button#download.btn.btn-primary.btn-icon.float-right
         img(src='download.svg', alt='Download')
 
-      button#delete.btn.btn-danger.btn-icon.float-right
-        img(src='delete.svg', alt='Delete')
-
     main
-      .container-fluid
+      .container
         section#interactions.row
-          ul.list-group(style='font-family: monospace;')
-
-    #delete-modal.modal(tabindex='-1', role='dialog')
-      .modal-dialog
-        .modal-content
-          .modal-header.bg-danger
-            h5.modal-title.text-white Delete Session
-          .modal-body
-            p.lead Do you really want to delete this session and its recordings?
-            p.text-muted After the session has been deleted, this tab closes automatically.
-          .modal-footer
-            button.btn.btn-secondary(data-dismiss='modal') Cancel
-            button.btn.btn-danger Delete session
+          ul.list-group.col-12.mt-4.mb-4(style='font-family: monospace;')
 
     #error-modal.modal(tabindex='-1', role='dialog')
       .modal-dialog

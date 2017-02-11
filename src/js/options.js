@@ -1,4 +1,4 @@
-/* global loadStorage, downloadSession, millisecondsToIso*/
+/* global loadStorage, loadSettings, downloadSession, millisecondsToIso*/
 
 /**
  * Dom elements
@@ -70,8 +70,8 @@ function createSessionElement(session) {
 /**
  * Function to initialize settings ui
  */
-function initSettings() {
-  settings.forEach((setting) => {
+function initEventSettings() {
+  settings.events.forEach((setting) => {
     document.getElementById(setting).checked = true;
   });
 }
@@ -142,11 +142,11 @@ function download(e) {
  * Function to initialize options page
  */
 async function init() {
-  settings = await loadStorage('settings');
+  settings = await loadSettings();
   sessions = await loadStorage('sessions')
     .then(_sessions => _sessions.sort((a, b) => a.start < b.start));
 
-  initSettings();
+  initEventSettings();
   insertSessions();
   updateNav();
 }

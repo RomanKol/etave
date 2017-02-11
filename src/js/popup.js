@@ -1,3 +1,5 @@
+/* globals loadStorage, saveStorage, loadSettings, updateSettings */
+
 /**
  * DOM elements user can interact with
  */
@@ -8,36 +10,6 @@ const navTabs = document.querySelector('.nav-tabs');
 
 const nameInp = document.querySelector('#name');
 const descrInp = document.querySelector('#descr');
-
-/**
- * Function to load data from the chrome.storage api
- * @param {string} key - The key of the data
- * @return {Promise.<boolean, Error>} - The saved data, else an error
- */
-function loadStorage(key) {
-  return new Promise((resolve, reject) => {
-    chrome.storage.local.get(key, (items) => {
-      if (chrome.runtime.lastError) reject(new Error('Runtime error'));
-      if (Object.keys(items).length === 0) reject(false);
-      resolve(items[key]);
-    });
-  });
-}
-
-/**
- * Function to save data with the chrome.storage api
- * @param {string} key - Key for the data
- * @param {any} data - Data to be saved
- * @returns {Promise.<boolean, Error>} - True, else an error
- */
-function saveStorage(key, data) {
-  return new Promise((resolve, reject) => {
-    chrome.storage.local.set({ [key]: data }, () => {
-      if (chrome.runtime.lastError) reject(new Error('Runtime error'));
-      resolve(true);
-    });
-  });
-}
 
 /**
  * Function to get the current settings
@@ -95,8 +67,9 @@ function getSessionSettings() {
  */
 function saveSettings() {
   const settings = getSettings();
-  saveStorage('settings', settings);
+  updateSettings({ events: settings });
 }
+
 
 /**
  * Function to extract domain from url string
@@ -162,7 +135,7 @@ function updateNav() {
  */
 function initPopup() {
   // Load settings from storage, else use default settings
-  loadStorage('settings')
+  loadSettings('events')
     .then((settings) => {
       settings.forEach((setting) => {
         document.getElementById(setting).checked = true;

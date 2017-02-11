@@ -59,6 +59,35 @@ function loadSession(uuid) {
 }
 
 /**
+ * Function to load settings
+ * @param {string} setting - The setting to load
+ * @return {Promise<session, Error>} A Promise that returns settings if fulfilled
+ */
+function loadSettings(setting) {
+  return loadStorage('settings')
+    .then((_settings) => {
+      if (typeof setting === 'undefined') return _settings;
+      return _settings[setting];
+    });
+}
+
+/**
+ * Function to update the settings
+ * @param {Object} updates - The updates
+ * @return {Promise<true, error>} - Returns a promise with true if fulfilled, else an error
+ */
+function updateSettings(updates) {
+  return loadSettings()
+    .then((_settings) => {
+      const settings = _settings;
+      Object.keys(updates).forEach((key) => {
+        settings[key] = updates[key];
+      });
+      return saveStorage({ settings });
+    });
+}
+
+/**
  * Function to download a file with chrome.downloads.download
  * @param {any} data - The file data
  * @param {string} filename - The filename

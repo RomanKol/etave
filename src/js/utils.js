@@ -109,6 +109,9 @@ async function removeSession(uuid) {
   // Remove all session sites
   await Promise.all(session.sites.map(_site => removeStorage(_site.uuid)));
 
+ // Remove all session sites screenshots
+  await Promise.all(session.sites.map(_site => removeStorage(`screenshot-${_site.uuid}`)));
+
   // Update the sessions
   await saveStorage({ sessions });
 }

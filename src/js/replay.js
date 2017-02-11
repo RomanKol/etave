@@ -373,12 +373,17 @@ function initIframe() {
  * @param {string} uuid - Session uuid string
  */
 function initReplay({ siteUuid, sessionUuid }) {
+
   Promise.all([loadSession(sessionUuid), loadStorage(siteUuid), loadUi()])
     .then(([_session, _events, _ui]) => {
-      /** Hide all elements */
+      /** Reset site*/
       document.querySelectorAll('body > *').forEach((element) => {
         element.style.setProperty('display', 'none');
       });
+      document.head.querySelectorAll('style, [type="text/css"]').forEach(element => {
+        element.parentElement.removeChild(element);
+      });
+      document.documentElement.classList.add('etave-reset');
 
       // set global variables
       session = _session;

@@ -1,14 +1,14 @@
 section#etave-browser
   .browser
     section.browser-nav
-      svg(viewbox='0 0 40 40')
+      svg(xmlns='http://www.w3.org/2000/svg' viewbox='0 0 40 40')
         path(d='M28.3 18.3H15.7l3.8-3.8c.7-.6.7-1.7 0-2.3s-1.7-.7-2.3 0l-8 7.8 8 7.8c.3.4.7.5 1 .5s1 0 1.3-.5c.7-.6.7-1.7 0-2.3l-3.8-3.8h12.6c1 0 1.7-.8 1.7-1.7s-.8-1.7-1.7-1.7z', fill='#808080')
 
-      svg(viewbox='0 0 40 40')
+      svg(xmlns='http://www.w3.org/2000/svg' viewbox='0 0 40 40')
         path(d='M22.2 12.2c-.7.6-.7 1.7 0 2.3l3.8 3.8H13.3c-1 0-1.6.8-1.6 1.7s.7 1.7 1.6 1.7H26l-3.8 3.8c-.7.6-.7 1.7 0 2.3.3.4.7.5 1 .5s1 0 1.3-.5l8-7.8-8-7.8c-.6-.7-1.7-.7-2.3 0z', fill='#808080')
 
       div.urlbar
-        svg(viewbox='0 0 40 40')
+        svg(xmlns='http://www.w3.org/2000/svg' viewbox='0 0 40 40')
           path(d='M16.3 15L10 21.3l6.3 6.2 2.5-2.5-3.8-3.7 3.8-3.8-2.5-2.5zm5 2.5l3.7 3.8-3.7 3.7 2.5 2.5 6.2-6.2-6.2-6.3-2.5 2.5zm6.2-15H5v35h30V10l-7.5-7.5zm5 32.5h-25V5H25l7.5 7.5V35z', fill='#808080')
         input(value='/')
     section.browser-content
@@ -16,7 +16,7 @@ section#etave-browser
         iframe
 
 section#etave-player
-  section#options
+  section.options
     label
       input.option(type='checkbox' name='mousedown' checked)
       | Mousedowns
@@ -37,7 +37,7 @@ section#etave-player
       input.option(type='checkbox' name='keydown' checked)
       | Keys
 
-  section#player
+  section.player
     section.timeline
       input(type='text' name='name' value=0 readonly)
       //- progress(value=0)

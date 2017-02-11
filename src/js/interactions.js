@@ -140,9 +140,8 @@ function init() {
     uuid = searchParams.get('session');
     siteUuid = searchParams.get('site');
 
-    Promise.all([loadSession(uuid), loadStorage(siteUuid)])
-      .then(([_session, _site]) => {
-        console.log(_session);
+    loadStorage(siteUuid)
+      .then((_site) => {
         interactions = _site
           .reduce((_events, _event, i) => {
             if (_events.length > 0 && _site[i - 1].type === _event.type) {

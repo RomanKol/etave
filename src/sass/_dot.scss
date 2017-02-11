@@ -2,8 +2,7 @@
   position: fixed;
   top: 5px;
   right: 5px;
-  // background-color: #e74c3c;
-  background-color: blue;
+  background-color: #e74c3c;
   height: 10px;
   width: 10px;
   display: block;
@@ -14,11 +13,14 @@
 @keyframes pulse {
   from {
     opacity: 0;
+    transform: scale(1);
   }
   50% {
     opacity: 1;
+    transform: scale(1.5);
   }
   to {
     opacity: 0;
+    transform: scale(1);
   }
 }

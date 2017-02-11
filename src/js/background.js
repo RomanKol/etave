@@ -70,20 +70,22 @@ function updateRecordings(session, remove = false) {
   return loadStorage('recordingSessions')
     .then((_sessions) => {
       // Search for session object, if found update it, else push it
-      const sessionIndex = _sessions.findIndex(_session => _session.uuid === session.uuid);
+      const sessions = [..._sessions];
+      const sessionIndex = sessions.findIndex(_session => _session.uuid === session.uuid);
+
 
       // If the session has to be removed, remove it
       if (remove) {
-        _sessions.splice(sessionIndex, 1);
-      // Elseif the position is not already in the sessions, push it
+        sessions.splice(sessionIndex, 1);
+        // Elseif the position is not already in the sessions, push it
       } else if (sessionIndex === -1) {
-        _sessions.push(session);
-      // Else update it
+        sessions.push(session);
+        // Else update it
       } else {
-        _sessions[sessionIndex] = session;
+        sessions[sessionIndex] = session;
       }
 
-      return _sessions;
+      return sessions;
     })
     // Save updated sessions
     .then(_sessions => saveStorage({ recordingSessions: _sessions }));
@@ -262,8 +264,8 @@ function stopRecording(data) {
 
       // Remove session from recordings, update session, send message
       return Promise.all([updateRecordings(session, true),
-        updateSessions(session),
-        sendTabMessage(tab, data),
+      updateSessions(session),
+      sendTabMessage(tab, data),
       ]);
     });
 }
@@ -300,12 +302,31 @@ function messageListener(msg, sender, sendResponse) {
 
  */
 function init() {
+  const recordingSessions = [];
+  const sessions = [];
+  const settings = {
+    events: [
+      'mousedown',
+      'mouseup',
+      'mousemove',
+      'keydown',
+      'keyup',
+      'scroll',
+    ],
+    throttle: {
+      distance: 25,
+      time: 50,
+    },
+    heatmap: {},
+    path: {},
+  };
+
   loadStorage('recordingSessions')
-    .catch(() => saveStorage({ recordingSessions: [] }));
+    .catch(() => saveStorage({ recordingSessions }));
   loadStorage('sessions')
-    .catch(() => saveStorage({ sessions: [] }));
+    .catch(() => saveStorage({ sessions }));
   loadStorage('settings')
-    .catch(() => saveStorage({ settings: ['mousedown', 'mouseup', 'mousemove', 'keydown', 'keyup', 'scroll'] }));
+    .catch(() => saveStorage({ settings }));
 }
 
 /**

@@ -45,6 +45,9 @@ let ts;
 
 let isRecording = false;
 
+let throttleDistance;
+let throttleTime;
+
 /**
  * local events db
  */
@@ -71,9 +74,9 @@ function loadStorage(key) {
  * @param {any} data - Data to be saved
  * @returns {Promise.<boolean, Error>} - If data was saved
  */
-function saveStorage(key, data) {
+function saveStorage(data) {
   return new Promise((resolve, reject) => {
-    chrome.storage.local.set({ [key]: data }, () => {
+    chrome.storage.local.set(data, () => {
       if (chrome.runtime.lastError) reject(new Error('Runtime error'));
       resolve(true);
     });
@@ -92,7 +95,7 @@ function loadSettings() {
  * Function to save events
  */
 function saveEvents() {
-  return saveStorage(uuid, events);
+  return saveStorage({ [uuid]: events });
 }
 
 /**
@@ -103,11 +106,11 @@ function saveEvents() {
  * @param {number} timeMin - The minimal time difference
  * @return {boolean} - Returns true,if event should be saved
  */
-function throttleMove(cur, prev, distanceMin = 25, timeMin = 50) {
+function throttleMove(cur, prev) {
   const distance = Math.sqrt(((cur.pageX - prev.pageX) ** 2) + ((cur.pageY - prev.pageY) ** 2));
   const time = Math.abs(cur.timeStamp - prev.timeStamp);
 
-  return distance > distanceMin || time > timeMin;
+  return distance > throttleDistance || time > throttleTime;
 }
 
 /**
@@ -118,12 +121,12 @@ function throttleMove(cur, prev, distanceMin = 25, timeMin = 50) {
  * @param {number} timeMin - The minimal time difference
  * @return {boolean} - Returns true,if event should be saved
  */
-function throttleScroll(cur, prev, distanceMin = 25, timeMin = 50) {
+function throttleScroll(cur, prev) {
   const distanceX = Math.abs(cur.scrollX - prev.scrollX);
   const distanceY = Math.abs(cur.scrollY - prev.scrollY);
   const time = Math.abs(cur.timeStamp - prev.timeStamp);
 
-  return distanceX > distanceMin || distanceY > distanceMin || time > timeMin;
+  return distanceX > throttleDistance || distanceY > throttleDistance || time > throttleTime;
 }
 
 /**
@@ -278,6 +281,9 @@ function keydown({ altKey, ctrlKey, metaKey, key, target, type }) {
     timeStamp: Math.round(Date.now() - ts),
     type,
   };
+
+  if (target.hasAttribute('value')) data.value = target.value;
+
   events.push(data);
 }
 
@@ -353,10 +359,14 @@ function removeDot() {
  */
 function startRecording(data) {
   // Load settings
-  return loadSettings()
-    .then((settings) => {
+  return loadStorage('settings')
+    .then((_settings) => {
       // Set uuid
       uuid = data.uuid;
+
+      const settings = _settings.events;
+      throttleDistance = _settings.throttle.distance;
+      throttleTime = _settings.throttle.time;
 
       // Check for mouse settings
       if (settings.includes('mousemove')) document.addEventListener('mousemove', mousemove);

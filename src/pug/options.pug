@@ -61,53 +61,75 @@ html
             legend Mouse events
             p.form-text.text-muted The mouse events includes #[code mousedown], #[code mouseup], #[code mousemove] and #[code mouseover] events.
 
-            input(type='checkbox' name='mousedown')#mousedown
-            label(for='mousedown' title='Mousedown') Mousedown
+            label
+              input(type='checkbox' name='mousedown' data-setting='events')
+              | Mousedown
 
-            br
+            label
+              input(type='checkbox' name='mouseup' data-setting='events')
+              | Mouseup
 
-            input(type='checkbox' name='mouseup')#mouseup
-            label(for='mouseup' title='Mouseup') Mouseup
+            label
+              input(type='checkbox' name='mousemove' data-setting='events')
+              | Mousemove
 
-            br
-
-            input(type='checkbox' name='mousemove')#mousemove
-            label(for='mousemove' title='Mousemove') Mousemove
-
-            br
-
-            input(type='checkbox' name='mouseover')#mouseover
-            label(for='mouseover' title='Mouseover') Mouseover
+            label
+              input(type='checkbox' name='mouseover' data-setting='events')
+              | Mouseover
 
           fieldset.form-group.form-check.col-6
             legend Key events
             p.form-text.text-muted The key events includes #[code keydown] and #[code keyup] events.
 
-            input(type='checkbox' name='keydown')#keydown
-            label(for='keydown' title='Keyup') Keydown
+            label
+              input(type='checkbox' name='keydown' data-setting='events')
+              | Keydown
 
-            br
-
-            input(type='checkbox' name='keyup')#keyup
-            label(for='keyup' title='Keyup') Keyup
+            label
+              input(type='checkbox' name='keyup' data-setting='events')
+              | Keyup
 
           fieldset.form-group.form-check.col-6
             legend  Scroll events
             p.form-text.text-muted The scroll events includes #[code scroll] events of any source (keyboard, scrollwheel, scrollbar) of the window.
 
-            input(type='checkbox' name='scroll')#scroll
-            label(for='scroll' title='Scroll') Scroll
+            label
+              input(type='checkbox' name='scroll' data-setting='events')
+              | Scroll
 
           fieldset.form-group.form-check.col-sm-6
             legend DOM events
             p.form-text.text-muted The dom events includes changes in the dom like adding/removing elements, changing attributes (classes, data) or changing nodes.
 
-            input(type='checkbox' name='dom')#dom
-            label(for='dom' title='DOM') DOM
+            label
+              input(type='checkbox' name='dom' data-setting='events')
+              | DOM
+
+          fieldset.form-group.form-check.col-sm-6
+            legend Throttling
+            p.form-text.text-muted To prevent too much data beeing recorded, #[code mousemove] and #[code scroll] events are throttled by time and distance.
+
+            label Distance in pixels (min: 5, step: 5)
+            .input-group.mb-2
+              input.form-control.text-right(type='number' name='distance' min=5 step=5 data-setting='throttle')
+              span.input-group-addon px
+
+            label Time in milliseconds (min: 5, step: 5)
+            .input-group
+              input.form-control.text-right(type='number' name='time' min=5 step=5 data-setting='throttle')
+              span.input-group-addon ms
+
+          .col-12.mt-2.mb-2
+            .alert.alert-success.hidden(role='alert')
+              strong Settings saved!
+              |  The settings were successfully saved.
+
+            .alert.alert-danger.hidden(role='alert')
+              strong Error!
+              |  The settings could not be saved.
 
           .col-12
-            button.btn.btn-primary Save settings
-
+            button#settings-save.btn.btn-primary.float-right Save settings
 
         section#about.row
           header.col-12

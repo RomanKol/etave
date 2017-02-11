@@ -27,4 +27,11 @@ body#options {
       display: block;
     }
   }
+
+  label {
+    display: block;
+    input {
+      margin-right: 4px;
+    }
+  }
 }

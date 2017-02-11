@@ -1,4 +1,4 @@
-/* global loadStorage, loadSettings, downloadSession, millisecondsToIso*/
+/* global loadStorage, loadSettings, updateSettings, downloadSession, millisecondsToIso*/
 
 /**
  * Dom elements
@@ -6,12 +6,9 @@
 const sessionsList = document.querySelector('#sessions-list');
 const sessionsBtn = document.querySelector('#sessions-loader');
 const navList = document.querySelector('nav > ul');
-
-/**
- * Global application variables
- */
-let sessions;
-let settings;
+const saveEventsBtn = document.querySelector('#settings-save');
+const settingsSuccessAlert = document.querySelector('#settings .alert-success');
+const settingsErrorAlert = document.querySelector('#settings .alert-danger');
 
 /**
  * Function to create a session elements
@@ -39,7 +36,7 @@ function createSessionElement(session) {
     <td>
       <div class='form-group'>
         <label>Date</label>
-        <input class='form-control' type='text' value='${start.toLocaleDateString()}' readonly>
+        <input class='form-control' type='text' value='${start.toLocaleString()}' readonly>
       </div>
       <div class='form-group'>
         <label>Duration</label>
@@ -70,10 +67,45 @@ function createSessionElement(session) {
 /**
  * Function to initialize settings ui
  */
-function initEventSettings() {
+function initSettings(settings) {
   settings.events.forEach((setting) => {
-    document.getElementById(setting).checked = true;
+    document.querySelector(`[name=${setting}]`).checked = true;
   });
+
+  Object.keys(settings.throttle).forEach((setting) => {
+    document.querySelector(`[name=${setting}]`).value = settings.throttle[setting];
+  });
+}
+
+/**
+ * Function to toggle alerts
+ * @param {Element} alert - The alert to toggle
+*/
+function toggleAlert(alert) {
+  alert.classList.remove('hidden');
+  setTimeout(() => {
+    alert.classList.add('hidden');
+  }, 5000);
+}
+
+/**
+ * Function to save settings
+ */
+function saveSettings() {
+  const events = Array.from(document.querySelectorAll('[data-setting=events]:checked'))
+    .map(el => el.name);
+
+  const throttle = Array.from(document.querySelectorAll('[data-setting=throttle]'))
+    .reduce((obj, el) => Object.assign(obj, { [el.name]: parseInt(el.value, 10) }), {});
+
+  updateSettings({ events, throttle })
+    .then((res) => {
+      if (res) {
+        toggleAlert(settingsSuccessAlert);
+      } else {
+        toggleAlert(settingsErrorAlert);
+      }
+    });
 }
 
 /**
@@ -95,7 +127,7 @@ function updateNav() {
 /**
  * Function to insert additional sessions in table
  */
-function insertSessions() {
+function insertSessions(sessions) {
   const tableBody = sessionsList.querySelector('tbody');
   const from = tableBody.children.length;
 
@@ -141,13 +173,11 @@ function download(e) {
 /**
  * Function to initialize options page
  */
-async function init() {
-  settings = await loadSettings();
-  sessions = await loadStorage('sessions')
-    .then(_sessions => _sessions.sort((a, b) => a.start < b.start));
-
-  initEventSettings();
-  insertSessions();
+function init() {
+  loadSettings()
+    .then(settings => initSettings(settings));
+  loadStorage('sessions')
+    .then(sessions => insertSessions(sessions.reverse()));
   updateNav();
 }
 
@@ -159,3 +189,4 @@ window.addEventListener('hashchange', updateNav);
 
 sessionsList.addEventListener('click', download);
 sessionsBtn.addEventListener('click', insertSessions);
+saveEventsBtn.addEventListener('click', saveSettings);

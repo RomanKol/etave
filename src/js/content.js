@@ -84,14 +84,6 @@ function saveStorage(data) {
 }
 
 /**
- * Function to load settings from chrome.storage.local
- * @return {Promise<array, array>} - Returns a array with the settings, else default
- */
-function loadSettings() {
-  return loadStorage('settings');
-}
-
-/**
  * Function to save events
  */
 function saveEvents() {

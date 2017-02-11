@@ -79,7 +79,7 @@ function loadSettings(setting) {
 function updateSettings(updates) {
   return loadSettings()
     .then((_settings) => {
-      const settings = _settings;
+      const settings = Object.assign({}, _settings);
       Object.keys(updates).forEach((key) => {
         settings[key] = updates[key];
       });

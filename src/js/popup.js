@@ -18,8 +18,8 @@ const descrInp = document.querySelector('#descr');
 function getSettings() {
   const settings = [];
   document.querySelectorAll('#settings input[type="checkbox"]:checked')
-    .forEach((el) => {
-      settings.push(el.name || el.id);
+    .forEach((element) => {
+      settings.push(element.name);
     });
   return settings;
 }
@@ -138,7 +138,7 @@ function initPopup() {
   loadSettings('events')
     .then((settings) => {
       settings.forEach((setting) => {
-        document.getElementById(setting).checked = true;
+        document.querySelector(`[name=${setting}]`).checked = true;
       });
     });
 

@@ -11,8 +11,6 @@ const backBtn = document.querySelector('#back');
 const interactionList = document.querySelector('#interactions ul');
 
 let interactions;
-let uuid;
-let siteUuid;
 
 /**
  * Function te delete the session
@@ -30,12 +28,14 @@ function navigateBack() {
   window.history.back();
 }
 
+/**
+ * Function to download list
+ */
 function download() {
-  const interactionsBlob = new Blob([interactions.join('\n\r')]);
-  const interactionsUrl = URL.createObjectURL(interactionsBlob);
+  const blob = new Blob([interactions.join('\n\r')]);
 
   // Download the interactions
-  downloadData(interactionsUrl, `etave-interactions-${uuid}-${siteUuid}.txt`);
+  downloadData(URL.createObjectURL(blob), `etave-interactions-${this.dataset.site}.txt`);
 }
 
 /**
@@ -131,17 +131,37 @@ const createInteractionKnot = {
 };
 
 /**
+ * Function to create session intro and outro
+ * @param {Object} session - The session object
+ * @param {String} siteUUid - The uuid of the site
+ * @return {Object} Object containing the intro and outro string
+ */
+function createSessionInteraction(session, siteUuid) {
+  const site = session.sites.find(_site => _site.uuid === siteUuid);
+
+  const start = new Date(site.start);
+  const end = new Date(site.end);
+
+  const intro = `recording on [${site.url}] with id [${siteUuid}] started at [${start.toLocaleString()}]; screensize was [${session.viewport.width},${session.viewport.height}]`;
+  const outro = `recording on [${site.url}] with id [${siteUuid}] ended at [${end.toLocaleString()}] with a total duration of [${millisecondsToIso(end - start)}]`;
+
+  return { intro, outro };
+}
+
+/**
  * Function to initialize the interaction site
  */
 function init() {
   const searchParams = new URLSearchParams(location.search);
 
   if (searchParams.has('session') && searchParams.has('site')) {
-    uuid = searchParams.get('session');
-    siteUuid = searchParams.get('site');
+    const uuid = searchParams.get('session');
+    const siteUuid = searchParams.get('site');
 
-    loadStorage(siteUuid)
-      .then((_site) => {
+    downloadBtn.dataset.site = siteUuid;
+
+    Promise.all([loadStorage(siteUuid), loadSession(uuid)])
+      .then(([_site, _session]) => {
         interactions = _site
           .reduce((_events, _event, i) => {
             if (_events.length > 0 && _site[i - 1].type === _event.type) {
@@ -191,10 +211,17 @@ function init() {
           })
           .map(_event => createInteractionKnot[_event.type](_event));
 
-        const html = `<li class='list-group-item'>${interactions.join("</li><li class='list-group-item'>")}</li>`;
+        const { intro, outro } = createSessionInteraction(_session, siteUuid);
+
+        const html = `
+          <li class='list-group-item'>***<br> ${intro} <br>***</li>
+          <li class='list-group-item'>${interactions.join('</li><li class="list-group-item">')}</li>
+          <li class='list-group-item'>***<br> ${outro} <br>***</li>
+        `;
 
         interactionList.innerHTML = html;
-      });
+      })
+      .catch(() => toggleModal(errorModal));
   } else {
     toggleModal(errorModal);
   }

@@ -2,7 +2,7 @@
 
 /**
  * Function to insert data in the chrome.storage api
- * @param {object} data - The data as an object
+ * @param {Object} data - The data as an object
  * @return {Promise<true, error>} - The saved data or false, if no data was found
  */
 function saveStorage(data) {
@@ -89,7 +89,7 @@ function updateSettings(updates) {
 
 /**
  * Function to download a file with chrome.downloads.download
- * @param {any} data - The file data
+ * @param {string} url - The file string/objectURL
  * @param {string} filename - The filename
  */
 function downloadData(url, filename) {

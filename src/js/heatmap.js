@@ -3,7 +3,7 @@
 /**
  * Function to create a canvas circle
  * @param {number} radius - The radius of the circle
- * @return {element} - A canvas element containing the circle
+ * @return {Element} - A canvas element containing the circle
  */
 function createCanvasCircle(radius) {
   const canvas = document.createElement('canvas');
@@ -24,7 +24,7 @@ function createCanvasCircle(radius) {
 
 /**
  * Function to create a canvas linear gradient
- * @return {element} - A canvas element containing the linear gradient
+ * @return {Element} - A canvas element containing the linear gradient
  */
 function createCanvasGradient() {
   const canvas = document.createElement('canvas');
@@ -54,8 +54,8 @@ function createCanvasGradient() {
  * Function to create a heatmap
  * @param {number} width - The width of the heatmap
  * @param {number} height - The height of the heatmap
- * @param {event[]} points - An array with object containing pageX and pageY coordinates
- * @return {element} - A canvas element containing the heatmap
+ * @param {Event[]} points - An array with object containing pageX and pageY coordinates
+ * @return {Element} - A canvas element containing the heatmap
  */
 function createHeatmap(width, height, points) {
   const canvas = document.createElement('canvas');

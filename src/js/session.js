@@ -27,7 +27,7 @@ let session;
 /**
  * Function to create a new tab
  * @param {string} url - Url for the new tab
- * @return {Promise<tab>} - Returns a promise, if fulfilled, returns a tab object
+ * @return {Promise<Object>} - Returns a promise, if fulfilled, returns a tab object
  */
 function createTab(url) {
   return new Promise((resolve) => {
@@ -40,8 +40,8 @@ function createTab(url) {
 /**
  * Function to inject a script in a tab
  * @param {number} tabId - The id of the tab
- * @param {string=} file - The file to inject
- * @param {string=} code - The code to inject
+ * @param {string} [file] - The file to inject
+ * @param {string} [code] - The code to inject
  * @param {string} [runAt=document_start] description
  * @return {Promise<any>} - Returns a promise, if fulfilled, return the result of the exec script
  */
@@ -129,9 +129,9 @@ function timestampToLocal(timestamp) {
 
 /**
  * Function to create a item fot the sites list
- * @param {object} site - A site object
+ * @param {Object} site - A site object
  * @param {number} index - Index of the site in the array
- * @return {element} - A site element
+ * @return {Element} - A site element
  */
 function createSitesListItem(site) {
   const item = document.createElement('tr');
@@ -224,8 +224,8 @@ function createSitesListItem(site) {
 
 /**
  * Function to create a list item elements
- * @param {array} sites - Array with sites objects
- * @return {array} - Array with sites elements
+ * @param {Event[]} sites - Array with sites objects
+ * @return {Element[]} - Array with sites elements
  */
 function createSitesList(sites) {
   return sites.map(site => createSitesListItem(site));
@@ -247,8 +247,7 @@ function buildSidebar() {
   sidebar.querySelector('#height').value = session.viewport.height;
 
   const sitesList = main.querySelector('#sites-table tbody');
-  const sites = createSitesList(session.sites);
-  sites.forEach((site) => {
+  createSitesList(session.sites).forEach((site) => {
     sitesList.appendChild(site);
   });
 }
@@ -262,7 +261,7 @@ function download() {
 
 /**
  * Function te delete the session
- * @param {element} modal - The modal element
+ * @param {Element} modal - The modal element
  */
 function toggleModal(modal) {
   document.querySelector('body').classList.toggle('modal-open');
@@ -312,7 +311,7 @@ function init() {
 }
 
 /**
- * Event listeners
+ * Page event listeners
  */
 document.addEventListener('DOMContentLoaded', init);
 

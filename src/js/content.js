@@ -1,18 +1,18 @@
 /**
- * @typedef {eventObj} Event object
+ * @typedef {Event} Event object
  * @param {string} type - Type of event
  * @param {number} timeStamp - Timestamp of event relative to site load
- * @param {number=} pageX - X-position on page of event
- * @param {number=} pageY - Y-position on page of event
- * @param {string=} target - The event target
- * @param {string=} selection - Selected text
- * @param {string[]=} domPath - Array of dom selectors
- * @param {number=} scrollX - X-position of scroll event
- * @param {number=} scrollY - Y-position of scroll event
- * @param {boolean=} altKey - True if altKey was pressed on key event
- * @param {boolean=} ctrlKey - True if ctrlKey was pressed on key event
- * @param {boolean=} metaKey - True if metaKey was pressed on key event
- * @param {string=} key - String representation of pressed key
+ * @param {number} [pageX] - X-position on page of event
+ * @param {number} [pageY] - Y-position on page of event
+ * @param {string} [target] - The event target
+ * @param {string} [selection] - Selected text
+ * @param {string[]} [domPath] - Array of dom selectors
+ * @param {number} [scrollX] - X-position of scroll event
+ * @param {number} [scrollY] - Y-position of scroll event
+ * @param {boolean} [altKey] - True if altKey was pressed on key event
+ * @param {boolean} [ctrlKey] - True if ctrlKey was pressed on key event
+ * @param {boolean} [metaKey] - True if metaKey was pressed on key event
+ * @param {string} [key] - String representation of pressed key
  */
 
 /**
@@ -70,9 +70,8 @@ function loadStorage(key) {
 
 /**
  * Function to save data in chrome.storage.local
- * @param {string} key - Key for the data
- * @param {any} data - Data to be saved
- * @returns {Promise.<boolean, Error>} - If data was saved
+ * @param {Object} data - Data to be saved
+ * @returns {Promise.<true, Error>} - If data was saved
  */
 function saveStorage(data) {
   return new Promise((resolve, reject) => {
@@ -85,6 +84,7 @@ function saveStorage(data) {
 
 /**
  * Function to save events
+ * @returns {Promise.<true, Error>}
  */
 function saveEvents() {
   return saveStorage({ [uuid]: events });
@@ -92,10 +92,8 @@ function saveEvents() {
 
 /**
  * Function to throttle mouse move event
- * @param {eventObj} cur - The current event object
- * @param {eventObj} prev - The previous event object
- * @param {number} distanceMin - The minimal distance
- * @param {number} timeMin - The minimal time difference
+ * @param {Event} cur - The current event object
+ * @param {Event} prev - The previous event object
  * @return {boolean} - Returns true,if event should be saved
  */
 function throttleMove(cur, prev) {
@@ -107,10 +105,8 @@ function throttleMove(cur, prev) {
 
 /**
  * Function to throttle mouse move event
- * @param {eventObj} cur - The current event object
- * @param {eventObj} prev - The previous event object
- * @param {number} distanceMin - The minimal distance
- * @param {number} timeMin - The minimal time difference
+ * @param {Event} cur - The current event object
+ * @param {Event} prev - The previous event object
  * @return {boolean} - Returns true,if event should be saved
  */
 function throttleScroll(cur, prev) {
@@ -123,7 +119,7 @@ function throttleScroll(cur, prev) {
 
 /**
  * Function to create a string of a dom element
- * @param {node} node - The dom element
+ * @param {Element} element - The dom element
  * @return {string} - String of the dom element
  */
 function createElementSelector(element) {
@@ -152,7 +148,7 @@ function createElementSelector(element) {
 
 /**
  * Function to get a dom path from an element
- * @param {node} target - Dom node element
+ * @param {Element} target - Dom node element
  * @return {string[]} - Array of element selector strings
  */
 function createDomPath(target) {
@@ -172,7 +168,7 @@ function createDomPath(target) {
 
 /**
  * Function to record mouse down events
- * @param {eventObj} - Event object
+ * @param {Event} - Event object
  */
 function mousedown({ pageX, pageY, target, type }) {
   const data = {
@@ -189,7 +185,7 @@ function mousedown({ pageX, pageY, target, type }) {
 
 /**
  * Function to record mouse up events
- * @param {eventObj} - Event object
+ * @param {Event} - Event object
  */
 function mouseup({ pageX, pageY, target, type }) {
   const data = {
@@ -207,7 +203,7 @@ function mouseup({ pageX, pageY, target, type }) {
 
 /**
  * Function to record mouse move events
- * @param {eventObj} - Event object
+ * @param {Event} - Event object
  */
 function mousemove({ pageX, pageY, type }) {
   const data = {
@@ -225,7 +221,7 @@ function mousemove({ pageX, pageY, type }) {
 
 /**
  * Function to record mouse over events
- * @param {eventObj} - Event object
+ * @param {Event} - Event object
  */
 function mouseover({ pageX, pageY, target, type }) {
   const data = {
@@ -242,7 +238,7 @@ function mouseover({ pageX, pageY, target, type }) {
 
 /**
  * Function to record scroll events
- * @param {eventObj} - Event object
+ * @param {Event} - Event object
  */
 function scroll({ type }) {
   const data = {
@@ -260,7 +256,7 @@ function scroll({ type }) {
 
 /**
  * Function to record key down events
- * @param {eventObj} - Event object
+ * @param {Event} - Event object
  */
 function keydown({ altKey, ctrlKey, metaKey, key, target, type }) {
   const data = {
@@ -281,7 +277,7 @@ function keydown({ altKey, ctrlKey, metaKey, key, target, type }) {
 
 /**
  * Function to record key down events, copy of mouse down
- * @param {eventObj} - Event object
+ * @param {Event} - Event object
  */
 const keyup = keydown;
 
@@ -392,7 +388,7 @@ function startRecording(data) {
 
 /**
  * Function to stop recording be removing event listeners
- * @param {any} msg - Message
+ * @returns {Promise.<true, Error>}
  */
 function stopRecording() {
   return saveEvents()
@@ -409,7 +405,7 @@ function stopRecording() {
 
 /**
  * Object that holds the tasks which can be called by messages
- * @typedef {object} tasks
+ * @typedef {Object} tasks
  * @param {function} startRecording - The startRecording function
  * @param {function} stopRecording - The stopRecording function
  */
@@ -421,7 +417,7 @@ const tasks = {
 /**
  * Function to handle messages
  * @param {any} msg - The messaged that was send
- * @param {obj} sender - The sender of the message
+ * @param {Object} sender - The sender of the message
  * @param {function} sendResponse - Function to send a response
  */
 function messageListener(msg, sender, sendResponse) {

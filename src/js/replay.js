@@ -1,4 +1,5 @@
 /* global millisecondsToIso, loadSession, loadStorage, createHeatmap, createPath */
+
 let session;
 let sessionEvents;
 let site;
@@ -28,7 +29,7 @@ const options = [];
  * Function to check if a array contains a element
  * @param {Array} arr - The array to check
  * @param {any} needle - The element to check forEach
- * @return {Boolean} If the array contains the element
+ * @return {boolean} If the array contains the element
  */
 function inArray(arr, needle) {
   return arr.indexOf(needle) !== -1;
@@ -36,7 +37,7 @@ function inArray(arr, needle) {
 
 /**
  * Function to update the heatmap
- * @param {event[]} events - The events to draw
+ * @param {Event[]} events - The events to draw
  */
 function updateHeatmap(events) {
   // Check if there is an previous heatmap in the dom, remove it
@@ -56,7 +57,7 @@ function updateHeatmap(events) {
 
 /**
  * Function to update the path
- * @param {event[]} events - The events to draw
+ * @param {Event[]} events - The events to draw
  */
 function updatePath(events) {
    // Check if there is an previous path in the dom, remove it
@@ -77,8 +78,8 @@ function updatePath(events) {
 /**
  * Function to check if event has can be drawn
  * @param {Object} event - The event to check
- * @param {Number} progression - The current timestamp ot the replay
- * @return {Boolean} - If the event can be drawn
+ * @param {number} progression - The current timestamp ot the replay
+ * @return {boolean} - If the event can be drawn
  */
 function checkEvent(event, progression) {
   return event.timeStamp <= progression && inArray(options, event.type);
@@ -102,6 +103,7 @@ function updateScroll(events) {
 
 /**
  * Function to simulate key input on replay
+ * @param {Object[]} events - Array of event objects
  */
 function updateKey(events) {
   // Create an object with selector and inputs
@@ -109,12 +111,13 @@ function updateKey(events) {
     .filter(event => event.type === 'keydown')
     .reduce((_keys, _event) => {
       const key = _event.domPath.join('>');
-      if (key in _keys) {
-        _keys[key] += _event.key;
+      const obj = Object.assign({}, _keys);
+      if (key in obj) {
+        obj[key] += _event.key;
       } else {
-        _keys[key] = _event.key;
+        obj[key] = _event.key;
       }
-      return _keys;
+      return obj;
     }, {});
 
   // Iterate over keys and insert data
@@ -126,6 +129,10 @@ function updateKey(events) {
 
 /**
  * Function to update the replay
+ * @param {boolean} [heatmap=true] - Option, whether the heatmap should be updated or not
+ * @param {boolean} [path=true] - Option, whether the path should be updated or not
+ * @param {boolean} [scroll=true] - Option, whether the scroll should be updated or not
+ * @param {boolean} [key=true] - Option, whether the key should be updated or not
  */
   // Parse the range input value to int
 function updateReplay(heatmap = true, path = true, scroll = true, key = true) {
@@ -153,6 +160,7 @@ function updateDuration() {
 
 /**
  * Function to update the options array
+ * @param {boolean} [replay=true] - Option, whether the replay should be updated
  */
 function updateOptions(replay = true) {
   // Reset the options and set them
@@ -278,7 +286,7 @@ function toggleSpeed() {
 
 /**
  * Function to load the etave replay ui
- * @return {Promise<element>} - Returns a promise, if fulfilled returns the ui element
+ * @return {Promise<Element>} - Returns a promise, if fulfilled returns the ui element
  */
 function loadUi() {
   const uiPath = chrome.extension.getURL('replay.html');
@@ -354,7 +362,7 @@ function scaleBrowser() {
 }
 
 /**
- * Function to initalize iframe
+ * Function to initialize iframe
  */
 function initIframe() {
   // Set iframe to session viewport size
@@ -373,7 +381,6 @@ function initIframe() {
  * @param {string} uuid - Session uuid string
  */
 function initReplay({ siteUuid, sessionUuid }) {
-
   Promise.all([loadSession(sessionUuid), loadStorage(siteUuid), loadUi()])
     .then(([_session, _events, _ui]) => {
       /** Reset site*/
@@ -400,4 +407,7 @@ function initReplay({ siteUuid, sessionUuid }) {
     .catch((err) => { console.error(err); });
 }
 
+/**
+ * Page event listener
+ */
 window.addEventListener('resize', scaleBrowser);

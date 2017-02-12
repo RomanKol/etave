@@ -11,9 +11,16 @@ const settingsSuccessAlert = document.querySelector('#settings .alert-success');
 const settingsErrorAlert = document.querySelector('#settings .alert-danger');
 
 /**
+ * Function to initialize session download
+ */
+function download() {
+  downloadSession(this.dataset.uuid);
+}
+
+/**
  * Function to create a session elements
- * @param {object} session - The session
- * @return {element} - The session element
+ * @param {Object} session - The session
+ * @return {Element} - The session element
  */
 function createSessionElement(session) {
   const tableRow = document.createElement('tr');
@@ -61,11 +68,14 @@ function createSessionElement(session) {
 
   tableRow.innerHTML = template;
 
+  tableRow.querySelector('button').addEventListener('click', download);
+
   return tableRow;
 }
 
 /**
  * Function to initialize settings ui
+ * @param {Object} settings - The settings object
  */
 function initSettings(settings) {
   settings.events.forEach((setting) => {
@@ -126,6 +136,7 @@ function updateNav() {
 
 /**
  * Function to insert additional sessions in table
+ * @param {Session[]} sessions - Array of session objects
  */
 function insertSessions(sessions) {
   const tableBody = sessionsList.querySelector('tbody');
@@ -155,22 +166,6 @@ function insertSessions(sessions) {
 }
 
 /**
- * Function to initialize session download
- * @param {object} e - Button click event
- */
-function download(e) {
-  let element = e.target;
-
-  // If it is the image, select the parent button
-  if (element.nodeName === 'IMG') element = element.parentElement;
-
-  // If it is the button and it has a uuid
-  if (element.nodeName === 'BUTTON' && element.dataset.uuid) {
-    downloadSession(element.dataset.uuid);
-  }
-}
-
-/**
  * Function to initialize options page
  */
 function init() {
@@ -187,6 +182,8 @@ function init() {
 document.addEventListener('DOMContentLoaded', init);
 window.addEventListener('hashchange', updateNav);
 
-sessionsList.addEventListener('click', download);
+/**
+ * User event listeners
+ */
 sessionsBtn.addEventListener('click', insertSessions);
 saveEventsBtn.addEventListener('click', saveSettings);

@@ -3,7 +3,7 @@
 /**
  * Function to create a svg element
  * @param {string} string - element name
- * @return {svgNode} - returns an svg node element
+ * @return {SVGElement} - returns an svg node element
  */
 function createSvgElement(string) {
   return document.createElementNS('http://www.w3.org/2000/svg', string);
@@ -11,8 +11,8 @@ function createSvgElement(string) {
 
 /**
  * Function to create circle
- * @param  {obj} x Position object
- * @return {svgNode} svg circle node element
+ * @param  {Event} x Position object
+ * @return {SVGElement} svg circle node element
  */
 function createSvgCircle({ pageX, pageY, type }) {
   const circleEl = createSvgElement('circle');
@@ -25,8 +25,8 @@ function createSvgCircle({ pageX, pageY, type }) {
 
 /**
  * Function to create multiple circles
- * @param {array} positions array with positions
- * @return {svgNode} svg g node element with circles
+ * @param {Event[]} positions array with positions
+ * @return {SVGElement} svg g node element with circles
  */
 function createSvgCircles(positions) {
   const groupEl = createSvgElement('g');
@@ -40,8 +40,8 @@ function createSvgCircles(positions) {
 
 /**
  * Function to create and draw an svg path element
- * @param {array} positions Array with positions
- * @return {svgNode} svg path svg node
+ * @param {Event[]} positions Array with positions
+ * @return {SVGElement} svg path svg node
  */
 function createSvgPath(positions) {
   const pathEl = createSvgElement('path');
@@ -64,8 +64,9 @@ function createSvgPath(positions) {
 
 /**
  * Function to create an SVG image of the mouse path
- * @param {obj} options Attributes that are to set
- * @return {svgDocument} svg node element
+ * @param {number} width - The width of the element
+ * @param {number} height - The height of the element
+ * @return {SVGElement} svg node element
  */
 function createSvgDocument(width, height) {
   const svg = createSvgElement('svg');
@@ -81,7 +82,6 @@ function createSvgDocument(width, height) {
 
   // Add styles
   styleEl.textContent = `
-
     circle.etave-circle.mouseup {
       fill: #ffeb3b;
       opacity: 0.5;
@@ -111,8 +111,8 @@ function createSvgDocument(width, height) {
  * Function to create a svg with path
  * @param {number} width - The width of the svg
  * @param {number} height - The height of the svg
- * @param {object[]} events - Array of events with pageX and pageY properties
- * @return {elemnt} Returns an svg element;
+ * @param {Event[]} events - Array of events with pageX and pageY properties
+ * @return {SVGElement} Returns an svg element;
  */
 function createPath(width, height, events) {
   const svg = createSvgDocument(width, height);

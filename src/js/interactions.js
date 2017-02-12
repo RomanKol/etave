@@ -1,7 +1,5 @@
 /* global loadSession, loadStorage, millisecondsToIso, downloadData */
 
-
-
 // Error modal
 const errorModal = document.querySelector('#error-modal');
 const errorModalQuitBtn = errorModal.querySelector('button');
@@ -14,7 +12,7 @@ let interactions;
 
 /**
  * Function te delete the session
- * @param {element} modal - The modal element
+ * @param {Element} modal - The modal element
  */
 function toggleModal(modal) {
   document.querySelector('body').classList.toggle('modal-open');
@@ -29,7 +27,7 @@ function navigateBack() {
 }
 
 /**
- * Function to download list
+ * Function to download the interaction list as a .txt file
  */
 function download() {
   const blob = new Blob([interactions.join('\n\r')]);
@@ -41,8 +39,8 @@ function download() {
 /**
  * Function to check if from/to properties are the same
  * @prop {Object} event - The event object
- * @prop {String} name - The property name
- * @return {Boolean} - If they're the same
+ * @prop {string} name - The property name
+ * @return {boolean} - If they're the same
  */
 function sameFromTo(event, name) {
   return event[`${name}To`] === event[`${name}From`];
@@ -50,8 +48,8 @@ function sameFromTo(event, name) {
 
 /**
  * Function to create a interaction knot
- * @prop {Object} name - The event object
- * @return {String} - The interaction knot text
+ * @prop {Object} event - The event object
+ * @return {string} - The interaction knot text
  */
 function createMousemoveInteraction(event) {
   const from = `moved pointer from [${event.pageXFrom},${event.pageYFrom}] at [${millisecondsToIso(event.timeStampFrom)}]`;
@@ -62,8 +60,8 @@ function createMousemoveInteraction(event) {
 
 /**
  * Function to create a interaction knot
- * @prop {Object} name - The event object
- * @return {String} - The interaction knot text
+ * @prop {Object} event - The event object
+ * @return {string} - The interaction knot text
  */
 function createScrollInteraction(event) {
   const from = `scrolled from [${event.scrollXFrom}, ${event.scrollYFrom}] at [${millisecondsToIso(event.timeStampFrom)}]`;
@@ -74,8 +72,8 @@ function createScrollInteraction(event) {
 
 /**
  * Function to create a interaction knot
- * @prop {Object} name - The event object
- * @return {String} - The interaction knot text
+ * @prop {Object} event - The event object
+ * @return {string} - The interaction knot text
  */
 function createKeydownInteraction(event) {
   const keys = `pressed [${event.keys.join(',')}] key(s) starting at [${millisecondsToIso(event.timeStampFrom)}]`;
@@ -86,8 +84,8 @@ function createKeydownInteraction(event) {
 
 /**
  * Function to create a interaction knot
- * @prop {Object} name - The event object
- * @return {String} - The interaction knot text
+ * @prop {Object} event - The event object
+ * @return {string} - The interaction knot text
  */
 function createKeyUpInteraction(event) {
   const keys = `released [${event.keys.join(',')}] key(s) starting at [${millisecondsToIso(event.timeStampFrom)}]`;
@@ -97,8 +95,8 @@ function createKeyUpInteraction(event) {
 
 /**
  * Function to create a interaction knot
- * @prop {Object} name - The event object
- * @return {String} - The interaction knot text
+ * @prop {Object} event - The event object
+ * @return {string} - The interaction knot text
  */
 function createMousedownInteraction(event) {
   const target = `pressed mouse on element [${event.domPath.join(' > ')}]`;
@@ -108,8 +106,8 @@ function createMousedownInteraction(event) {
 
 /**
  * Function to create a interaction knot
- * @prop {Object} name - The event object
- * @return {String} - The interaction knot text
+ * @prop {Object} event - The event object
+ * @return {string} - The interaction knot text
  */
 function createMouseUpInteraction(event) {
   const target = `released mouse on element [${event.domPath.join(' > ')}]`;
@@ -120,6 +118,13 @@ function createMouseUpInteraction(event) {
 
 /**
  * Object for the interaction knot functions
+ * @prop {funciton} mousemove - the createMousemoveInteraction function
+ * @prop {funciton} scroll - the createScrollInteraction function
+ * @prop {funciton} keydown - the createKeydownInteraction function
+ * @prop {funciton} keyup - the createKeyUpInteraction function
+ * @prop {funciton} mousedown - the createMousedownInteraction function
+ * @prop {funciton} mouseup - the createMouseUpInteraction function
+ *
  */
 const createInteractionKnot = {
   mousemove: createMousemoveInteraction,
@@ -133,7 +138,7 @@ const createInteractionKnot = {
 /**
  * Function to create session intro and outro
  * @param {Object} session - The session object
- * @param {String} siteUUid - The uuid of the site
+ * @param {string} siteUUid - The uuid of the site
  * @return {Object} Object containing the intro and outro string
  */
 function createSessionInteraction(session, siteUuid) {
@@ -149,6 +154,62 @@ function createSessionInteraction(session, siteUuid) {
 }
 
 /**
+ * Function to reduce the interactions
+ * @param {Event[]} events - An array of event objects
+ * @return {Array} - Reduced events as interactions
+ */
+function reduceInteractions(events) {
+  return events
+    .reduce((_events, _event, i) => {
+      if (_events.length > 0 && events[i - 1].type === _event.type) {
+        _events[_events.length - 1].push(_event);
+      } else {
+        _events.push([_event]);
+      }
+      return _events;
+    }, [])
+    .map((_event) => {
+      if (_event[0].type === 'mousemove') {
+        return {
+          pageXFrom: _event[0].pageX,
+          pageXTo: _event[_event.length - 1].pageX,
+          pageYFrom: _event[0].pageY,
+          pageYTo: _event[_event.length - 1].pageY,
+          timeStampFrom: _event[0].timeStamp,
+          timeStampTo: _event[_event.length - 1].timeStamp,
+          type: _event[0].type,
+        };
+      } else if (_event[0].type === 'scroll') {
+        return {
+          scrollXFrom: _event[0].scrollX,
+          scrollXTo: _event[_event.length - 1].scrollX,
+          scrollYFrom: _event[0].scrollY,
+          scrollYTo: _event[_event.length - 1].scrollY,
+          timeStampFrom: _event[0].timeStamp,
+          timeStampTo: _event[_event.length - 1].timeStamp,
+          type: _event[0].type,
+        };
+      } else if (_event[0].type === 'keydown' || _event[0].type === 'keyup') {
+        const keys = _event.reduce((_keys, __event) => {
+          _keys.push(__event.key);
+          return _keys;
+        }, []);
+        return {
+          keys,
+          timeStampFrom: _event[0].timeStamp,
+          timeStampTo: _event[_event.length - 1].timeStamp,
+          target: _event[0].target,
+          domPath: _event[0].domPath,
+          type: _event[0].type,
+        };
+      }
+
+      return _event[0];
+    })
+    .map(_event => createInteractionKnot[_event.type](_event));
+}
+
+/**
  * Function to initialize the interaction site
  */
 function init() {
@@ -161,55 +222,8 @@ function init() {
     downloadBtn.dataset.site = siteUuid;
 
     Promise.all([loadStorage(siteUuid), loadSession(uuid)])
-      .then(([_site, _session]) => {
-        interactions = _site
-          .reduce((_events, _event, i) => {
-            if (_events.length > 0 && _site[i - 1].type === _event.type) {
-              _events[_events.length - 1].push(_event);
-            } else {
-              _events.push([_event]);
-            }
-            return _events;
-          }, [])
-          .map((_event) => {
-            if (_event[0].type === 'mousemove') {
-              return {
-                pageXFrom: _event[0].pageX,
-                pageXTo: _event[_event.length - 1].pageX,
-                pageYFrom: _event[0].pageY,
-                pageYTo: _event[_event.length - 1].pageY,
-                timeStampFrom: _event[0].timeStamp,
-                timeStampTo: _event[_event.length - 1].timeStamp,
-                type: _event[0].type,
-              };
-            } else if (_event[0].type === 'scroll') {
-              return {
-                scrollXFrom: _event[0].scrollX,
-                scrollXTo: _event[_event.length - 1].scrollX,
-                scrollYFrom: _event[0].scrollY,
-                scrollYTo: _event[_event.length - 1].scrollY,
-                timeStampFrom: _event[0].timeStamp,
-                timeStampTo: _event[_event.length - 1].timeStamp,
-                type: _event[0].type,
-              };
-            } else if (_event[0].type === 'keydown' || _event[0].type === 'keyup') {
-              const keys = _event.reduce((_keys, __event) => {
-                _keys.push(__event.key);
-                return _keys;
-              }, []);
-              return {
-                keys,
-                timeStampFrom: _event[0].timeStamp,
-                timeStampTo: _event[_event.length - 1].timeStamp,
-                target: _event[0].target,
-                domPath: _event[0].domPath,
-                type: _event[0].type,
-              };
-            }
-
-            return _event[0];
-          })
-          .map(_event => createInteractionKnot[_event.type](_event));
+      .then(([_events, _session]) => {
+        interactions = reduceInteractions(_events);
 
         const { intro, outro } = createSessionInteraction(_session, siteUuid);
 
@@ -227,8 +241,14 @@ function init() {
   }
 }
 
+/**
+ * Page event listeners
+ */
 document.addEventListener('DOMContentLoaded', init);
 
+/**
+ * User event listeners
+ */
 errorModalQuitBtn.addEventListener('click', navigateBack);
 backBtn.addEventListener('click', navigateBack);
 downloadBtn.addEventListener('click', download);

@@ -27,7 +27,7 @@ function getSettings() {
 /**
  * Function to send a message
  * @param {any} msg - Message to send
- * @return {Promise<Tab, Error>} - Returns a tab, else an error
+ * @return {Promise<Object, Error>} - Returns a tab object, else an error
  */
 function getActiveTab() {
   return new Promise((resolve, reject) => {
@@ -41,7 +41,7 @@ function getActiveTab() {
 /**
  * Function to send a message to the active tab
  * @param {any} msg - The message to send
- * @return {Promise<response, Error>} - Returns the response, else an error
+ * @return {Promise<Object, Error>} - Returns the response object, else an error
  */
 function sendRuntimeMessage(msg) {
   return new Promise((resolve, reject) => {
@@ -54,7 +54,7 @@ function sendRuntimeMessage(msg) {
 
 /**
  * Function to get inserted user data for session
- * @return {obj} - Returns an object containing name and description as strings
+ * @return {Object} - Returns an object containing name and description as strings
  */
 function getSessionSettings() {
   const name = nameInp.value || nameInp.placeholder;
@@ -172,7 +172,7 @@ function initPopup() {
 
 /**
  * Function to open the options page in a new tab
- * @param {object} e - Event object
+ * @param {Object} e - Event object
  */
 function openDashboard(e) {
   e.preventDefault();

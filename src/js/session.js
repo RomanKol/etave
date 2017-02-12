@@ -22,7 +22,6 @@ const errorModalQuitBtn = errorModal.querySelector('button');
 const sidebar = document.querySelector('.sidebar');
 const main = document.querySelector('main');
 
-
 let session;
 
 /**
@@ -85,6 +84,37 @@ function openReplay() {
         return injectScript(tab.id, false, `initReplay(${JSON.stringify(replayObj)});`, 'document_end');
       })
     );
+}
+
+/**
+ * Function to download heatmap
+ */
+function downloadHeatmap() {
+  const site = this.dataset.site;
+  const height = parseInt(this.dataset.height, 10);
+  const width = parseInt(this.dataset.width, 10);
+
+  loadStorage(site)
+    .then(events => createHeatmap(width, height, events))
+    .then((heatmap) => {
+      downloadData(heatmap.toDataURL(), `etave-heatmap-${site}.png`);
+    });
+}
+
+/**
+ * Function to download path
+ */
+function downloadPath() {
+  const site = this.dataset.site;
+  const height = parseInt(this.dataset.height, 10);
+  const width = parseInt(this.dataset.width, 10);
+
+  loadStorage(site)
+    .then(events => createPath(width, height, events))
+    .then((path) => {
+      const blob = new Blob([path.outerHTML], { type: 'image/svg+xml' });
+      downloadData(URL.createObjectURL(blob), `etave-path-${site}.svg`);
+    });
 }
 
 /**
@@ -161,11 +191,26 @@ function createSitesListItem(site) {
         </button>
       </a>
     </td>
+    <td>
+      <label>Heatmap</label>
+      <br>
+      <button class='btn btn-icon btn-primary heatmap mb-2' title='Heatmap' data-site='${site.uuid}' data-width='${site.width}' data-height='${site.height}'>
+        <img src='heatmap.svg' alt='Heatmap'>
+      </button>
+      <br>
+      <label>Path</label>
+      <br>
+      <button class='btn btn-icon btn-primary path mb-2' title='Path' data-site='${site.uuid}' data-width='${site.width}' data-height='${site.height}'>
+        <img src='path.svg' alt='Path'>
+      </a>
+    </td>
   `;
 
   item.innerHTML = template;
 
-  item.querySelector('.replay').addEventListener('click', openReplay);
+  item.querySelector('button.replay').addEventListener('click', openReplay);
+  item.querySelector('button.heatmap').addEventListener('click', downloadHeatmap);
+  item.querySelector('button.path').addEventListener('click', downloadPath);
 
   const preview = item.querySelector('img');
 

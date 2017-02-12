@@ -53,7 +53,7 @@ function createSessionElement(session) {
     <td>
       <label>Inspect</label>
       <br>
-      <a href='session.html#${session.uuid}' class='btn btn-primary btn-icon' title='Details'>
+      <a href='session.html?session=${session.uuid}' class='btn btn-primary btn-icon' title='Details'>
         <img src='details.svg' alt='details'>
       </a>
     </td>

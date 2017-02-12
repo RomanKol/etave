@@ -297,17 +297,18 @@ function deleteSession() {
  * Function to initialize session details
  */
 function init() {
-  const uuid = location.hash.substr(1);
+  const searchParams = new URLSearchParams(location.search);
 
-  loadSession(uuid)
-    .then((_session) => {
-      if (_session) {
+  if (searchParams.has('session')) {
+    loadSession(searchParams.get('session'))
+      .then((_session) => {
         session = _session;
         buildSidebar();
-      } else {
-        toggleModal(errorModal);
-      }
-    });
+      })
+      .catch(() => toggleModal(errorModal));
+  } else {
+    toggleModal(errorModal)
+  }
 }
 
 /**

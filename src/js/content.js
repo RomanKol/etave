@@ -301,10 +301,27 @@ function change({ target, type }) {
   const event = {
     domPath: createDomPath(target),
     target: createElementSelector(target),
+    targetType: target.type,
     timeStamp: Math.round(Date.now() - ts),
     type,
-    value: (target.nodeName === 'INPUT') && (target.type !== 'password') ? target.value : target.value.replace('*'),
   };
+
+  // Add data depending on element type
+  if (target.nodeName === 'SELECT') {
+    // If target is select element, values are selected indices
+    event.selected = Array.from(target.querySelectorAll('option'))
+      .reduce((values, element, index) => {
+        if (element.selected) values.push(index);
+        return values;
+      }, []);
+  } else if (target.type === 'checkbox' || target.type === 'radio') {
+    // If target is a input select
+    event.checked = target.checked;
+  } else {
+    // Value for text/number/.. inputs fields, radios and text areas
+    event.value = target.value;
+    if (target.nodeName === 'INPUT' && target.type === 'password') event.value = Array(event.value.length).fill('*').join('');
+  }
 
   events.push(event);
 }
@@ -401,7 +418,7 @@ function startRecording(data) {
       if (settings.includes('scroll')) document.addEventListener('scroll', scroll);
 
       // Check for change events
-      if (settings.includes('change')) document.addEventListener('scroll', scroll);
+      if (settings.includes('change')) document.addEventListener('change', change);
 
       // Check for dom events
       if (settings.includes('dom')) addMutationObserver();

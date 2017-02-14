@@ -261,7 +261,6 @@ function init() {
 
     Promise.all([loadStorage(siteUuid), loadSession(uuid)])
       .then(([_events, _session]) => {
-    console.log(_events)
         interactions = reduceInteractions(_events);
 
         const { intro, outro } = createSessionInteraction(_session, siteUuid);

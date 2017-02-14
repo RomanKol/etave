@@ -281,7 +281,7 @@ function keydown({ altKey, ctrlKey, metaKey, key, target, type }) {
     altKey,
     ctrlKey,
     domPath: createDomPath(target),
-    key: (target.nodeName === 'INPUT') && (target.type !== 'password') ? key : '*',
+    key: ((target.nodeName === 'INPUT') && (target.type === 'password')) ? '*' : key,
     metaKey,
     target: createElementSelector(target),
     timeStamp: Math.round(Date.now() - ts),

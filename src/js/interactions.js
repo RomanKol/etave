@@ -144,23 +144,22 @@ function createClickInteraction(event) {
  * @return {string} - The interaction knot text
  */
 function createChangeInteraction(event) {
-  console.log(event);
-  const target = `changed value of element [${event.domPath.join(' > ')}]`;
-  const value = `to [${event.value}]`;
+  const target = `changed value of element [${event.domPath.join(' > ')}] of type [${event.targetType}]`;
+  const value = `to [${event.value || event.checked || event.selected.join(',')}]`;
   const time = `at [${millisecondsToIso(event.timeStamp)}]`;
   return `${target} ${value} ${time}`;
 }
 
 /**
  * Object for the interaction knot functions
- * @prop {funciton} mousemove - the createMousemoveInteraction function
- * @prop {funciton} scroll - the createScrollInteraction function
- * @prop {funciton} keydown - the createKeydownInteraction function
- * @prop {funciton} keyup - the createKeyUpInteraction function
- * @prop {funciton} mousedown - the createMousedownInteraction function
- * @prop {funciton} mouseup - the createMouseUpInteraction function
- * @prop {funciton} click - the createClickInteraction function
- * @prop {funciton} change - the createChangeInteraction function
+ * @prop {function} mousemove - the createMousemoveInteraction function
+ * @prop {function} scroll - the createScrollInteraction function
+ * @prop {function} keydown - the createKeydownInteraction function
+ * @prop {function} keyup - the createKeyUpInteraction function
+ * @prop {function} mousedown - the createMousedownInteraction function
+ * @prop {function} mouseup - the createMouseUpInteraction function
+ * @prop {function} click - the createClickInteraction function
+ * @prop {function} change - the createChangeInteraction function
  *
  */
 const createInteractionKnot = {
@@ -262,6 +261,7 @@ function init() {
 
     Promise.all([loadStorage(siteUuid), loadSession(uuid)])
       .then(([_events, _session]) => {
+    console.log(_events)
         interactions = reduceInteractions(_events);
 
         const { intro, outro } = createSessionInteraction(_session, siteUuid);
@@ -274,7 +274,7 @@ function init() {
 
         interactionList.innerHTML = html;
       })
-      .catch(() => toggleModal(errorModal));
+      .catch((e) => {toggleModal(errorModal); console.log(e)});
   } else {
     toggleModal(errorModal);
   }

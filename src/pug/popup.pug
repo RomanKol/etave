@@ -52,11 +52,13 @@ html
                 input(type='checkbox' name='mousedown')
                 | Mousedown
 
-
               label
                 input(type='checkbox' name='mouseup')
                 | Mouseup
 
+              label
+                input(type='checkbox' name='click')
+                | Click
 
               label
                 input(type='checkbox' name='mousemove')
@@ -77,12 +79,17 @@ html
                 input(type='checkbox' name='keyup')
                 | Keyup
 
-            fieldset.form-group.form-check.col-6
-              legend  Scroll events
+              legend Scroll events
 
               label
                 input(type='checkbox' name='scroll')
                 | Scroll
+
+              legend Form events
+
+              label
+                input(type='checkbox' name='change')
+                | Change
 
             fieldset.form-group.form-check.col-6
               legend DOM events

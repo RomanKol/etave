@@ -305,11 +305,13 @@ function init() {
   const sessions = [];
   const settings = {
     events: [
-      'mousedown',
-      'mouseup',
-      'mousemove',
+      'change',
+      'click',
       'keydown',
       'keyup',
+      'mousedown',
+      'mousemove',
+      'mouseup',
       'scroll',
     ],
     throttle: {

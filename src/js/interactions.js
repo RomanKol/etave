@@ -8,6 +8,14 @@ const downloadBtn = document.querySelector('#download');
 const backBtn = document.querySelector('#back');
 const interactionList = document.querySelector('#interactions ul');
 
+const mouseButtons = [
+  'left',
+  'middle',
+  'right',
+  'back',
+  'forward',
+];
+
 let interactions;
 
 /**
@@ -99,9 +107,10 @@ function createKeyUpInteraction(event) {
  * @return {string} - The interaction knot text
  */
 function createMousedownInteraction(event) {
-  const target = `pressed mouse on element [${event.domPath.join(' > ')}]`;
+  const button = `pressed [${mouseButtons[event.button]}] mouse button`;
+  const target = `on element [${event.domPath.join(' > ')}]`;
   const time = `at [${millisecondsToIso(event.timeStamp)}]`;
-  return `${target} ${time}`;
+  return `${button} ${target} ${time}`;
 }
 
 /**
@@ -110,10 +119,36 @@ function createMousedownInteraction(event) {
  * @return {string} - The interaction knot text
  */
 function createMouseUpInteraction(event) {
-  const target = `released mouse on element [${event.domPath.join(' > ')}]`;
+  const button = `released [${mouseButtons[event.button]}] mouse button`;
+  const target = `on element [${event.domPath.join(' > ')}]`;
   const time = `at [${millisecondsToIso(event.timeStamp)}]`;
-  const selection = event.selection.length > 0 ? `selected [${event.selection}]` : '';
-  return `${target} ${time} ${selection}`;
+  const selection = 'selection' in event > 0 ? `selected [${event.selection}]` : '';
+  return `${button} ${target} ${time} ${selection}`;
+}
+
+/**
+ * Function to create a interaction knot
+ * @prop {Object} event - The event object
+ * @return {string} - The interaction knot text
+ */
+function createClickInteraction(event) {
+  const button = `clicked with [${mouseButtons[event.button]}] mouse button`;
+  const target = `on element [${event.domPath.join(' > ')}]`;
+  const time = `at [${millisecondsToIso(event.timeStamp)}]`;
+  return `${button} ${target} ${time}`;
+}
+
+/**
+ * Function to create a interaction knot
+ * @prop {Object} event - The event object
+ * @return {string} - The interaction knot text
+ */
+function createChangeInteraction(event) {
+  console.log(event);
+  const target = `changed value of element [${event.domPath.join(' > ')}]`;
+  const value = `to [${event.value}]`;
+  const time = `at [${millisecondsToIso(event.timeStamp)}]`;
+  return `${target} ${value} ${time}`;
 }
 
 /**
@@ -124,6 +159,8 @@ function createMouseUpInteraction(event) {
  * @prop {funciton} keyup - the createKeyUpInteraction function
  * @prop {funciton} mousedown - the createMousedownInteraction function
  * @prop {funciton} mouseup - the createMouseUpInteraction function
+ * @prop {funciton} click - the createClickInteraction function
+ * @prop {funciton} change - the createChangeInteraction function
  *
  */
 const createInteractionKnot = {
@@ -133,6 +170,8 @@ const createInteractionKnot = {
   keyup: createKeyUpInteraction,
   mousedown: createMousedownInteraction,
   mouseup: createMouseUpInteraction,
+  click: createClickInteraction,
+  change: createChangeInteraction,
 };
 
 /**

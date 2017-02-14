@@ -16,54 +16,63 @@ section#etave-browser
         iframe
 
 section#etave-player
+
+  section.timeline
+    input(type='text' name='name' value=0 readonly)
+    //- progress(value=0)
+    input(type='range' min=0 step=1)
+    input(type='text' name='name' readonly)
+
+  section.controls
+    section
+      input#heatmap.hidden.option(type='checkbox' name='heatmap' checked)
+      label.btn.btn-icon(for='heatmap')
+        include ../../extension/heatmap.svg
+
+      input#path.hidden.option(type='checkbox' name='path' checked)
+      label.btn.btn-icon(for='path')
+        include ../../extension/path.svg
+
+    section
+      button#backward.btn.btn-icon(title='+2 seconds')
+        include ../../extension/backward.svg
+
+      button#play.btn.btn-icon ►
+
+      button#forward.btn.btn-icon(title='-2 seconds')
+        include ../../extension/forward.svg
+
+    section
+      button.player-speed.btn.btn-circle(disabled data-speed=1) 1x
+      button.player-speed.btn.btn-circle(data-speed=2) 2x
+      button.player-speed.btn.btn-circle(data-speed=4) 4x
+
   section.options
-    label
-      input.option(type='checkbox' name='mousedown' checked)
-      | Mousedowns
 
-    label
-      input.option(type='checkbox' name='mouseup' checked)
-      | Mouseups
+      label
+        input.option(type='checkbox' name='mousedown' checked)
+        | Mousedowns
 
-    label
-      input.option(type='checkbox' name='mousemove' checked)
-      | Mousemoves
+      label
+        input.option(type='checkbox' name='mouseup' checked)
+        | Mouseups
 
-    label
-      input.option(type='checkbox' name='scroll' checked)
-      | Scroll
+      label
+        input.option(type='checkbox' name='click' checked)
+        | Clicks
 
-    label
-      input.option(type='checkbox' name='keydown' checked)
-      | Keys
+      label
+        input.option(type='checkbox' name='mousemove' checked)
+        | Mousemoves
 
-  section.player
-    section.timeline
-      input(type='text' name='name' value=0 readonly)
-      //- progress(value=0)
-      input(type='range' min=0 step=1)
-      input(type='text' name='name' readonly)
+      label
+        input.option(type='checkbox' name='scroll' checked)
+        | Scroll
 
-    section.controls
-      section
-        input#heatmap.hidden.option(type='checkbox' name='heatmap' checked)
-        label.btn.btn-icon(for='heatmap')
-          include ../../extension/heatmap.svg
+      label
+        input.option(type='checkbox' name='keydown' checked)
+        | Keys
 
-        input#path.hidden.option(type='checkbox' name='path' checked)
-        label.btn.btn-icon(for='path')
-          include ../../extension/path.svg
-
-      section
-        button#backward.btn.btn-icon(title='+2 seconds')
-          include ../../extension/backward.svg
-
-        button#play.btn.btn-icon ►
-
-        button#forward.btn.btn-icon(title='-2 seconds')
-          include ../../extension/forward.svg
-
-      section
-        button.player-speed.btn.btn-circle(disabled data-speed=1) 1x
-        button.player-speed.btn.btn-circle(data-speed=2) 2x
-        button.player-speed.btn.btn-circle(data-speed=4) 4x
+      label
+        input.option(type='checkbox' name='change' checked)
+        | Change

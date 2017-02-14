@@ -170,8 +170,9 @@ function createDomPath(target) {
  * Function to record mouse down events
  * @param {Event} - Event object
  */
-function mousedown({ pageX, pageY, target, type }) {
-  const data = {
+function mousedown({ button, pageX, pageY, target, type }) {
+  const event = {
+    button,
     domPath: createDomPath(target),
     pageX: Math.round(pageX),
     pageY: Math.round(pageY),
@@ -180,25 +181,42 @@ function mousedown({ pageX, pageY, target, type }) {
     type,
   };
 
-  events.push(data);
+  events.push(event);
 }
 
 /**
  * Function to record mouse up events
  * @param {Event} - Event object
  */
-function mouseup({ pageX, pageY, target, type }) {
-  const data = {
+function mouseup({ button, pageX, pageY, target, type }) {
+  const event = {
+    button,
     domPath: createDomPath(target),
     pageX: Math.round(pageX),
     pageY: Math.round(pageY),
-    selection: getSelection().toString(),
     target: createElementSelector(target),
     timeStamp: Math.round(Date.now() - ts),
     type,
   };
 
-  events.push(data);
+  const selection = getSelection();
+  if (!selection.isCollapsed) event.selection = selection.toString();
+
+  events.push(event);
+}
+
+function click({ button, pageX, pageY, target, type }) {
+  const event = {
+    button,
+    domPath: createDomPath(target),
+    pageX: Math.round(pageX),
+    pageY: Math.round(pageY),
+    target: createElementSelector(target),
+    timeStamp: Math.round(Date.now() - ts),
+    type,
+  };
+
+  events.push(event);
 }
 
 /**
@@ -206,16 +224,16 @@ function mouseup({ pageX, pageY, target, type }) {
  * @param {Event} - Event object
  */
 function mousemove({ pageX, pageY, type }) {
-  const data = {
+  const event = {
     pageX: Math.round(pageX),
     pageY: Math.round(pageY),
     timeStamp: Math.round(Date.now() - ts),
     type,
   };
 
-  if (throttleMove(data, previousSavedMousemove)) {
-    previousSavedMousemove = data;
-    events.push(data);
+  if (throttleMove(event, previousSavedMousemove)) {
+    previousSavedMousemove = event;
+    events.push(event);
   }
 }
 
@@ -224,7 +242,7 @@ function mousemove({ pageX, pageY, type }) {
  * @param {Event} - Event object
  */
 function mouseover({ pageX, pageY, target, type }) {
-  const data = {
+  const event = {
     domPath: createDomPath(target),
     pageX: Math.round(pageX),
     pageY: Math.round(pageY),
@@ -233,7 +251,7 @@ function mouseover({ pageX, pageY, target, type }) {
     type,
   };
 
-  events.push(data);
+  events.push(event);
 }
 
 /**
@@ -241,16 +259,16 @@ function mouseover({ pageX, pageY, target, type }) {
  * @param {Event} - Event object
  */
 function scroll({ type }) {
-  const data = {
+  const event = {
     scrollY: Math.round(scrollY),
     scrollX: Math.round(scrollX),
     timeStamp: Math.round(Date.now() - ts),
     type,
   };
 
-  if (throttleScroll(data, previousSavedScroll)) {
-    previousSavedScroll = data;
-    events.push(data);
+  if (throttleScroll(event, previousSavedScroll)) {
+    previousSavedScroll = event;
+    events.push(event);
   }
 }
 
@@ -259,20 +277,18 @@ function scroll({ type }) {
  * @param {Event} - Event object
  */
 function keydown({ altKey, ctrlKey, metaKey, key, target, type }) {
-  const data = {
+  const event = {
     altKey,
     ctrlKey,
     domPath: createDomPath(target),
-    key: (target.nodeName.toLowerCase() !== 'input' || ((target.nodeName.toLowerCase() === 'input') && (target.type !== 'password'))) ? key : '*',
+    key: (target.nodeName === 'INPUT') && (target.type !== 'password') ? key : '*',
     metaKey,
     target: createElementSelector(target),
     timeStamp: Math.round(Date.now() - ts),
     type,
   };
 
-  if (target.hasAttribute('value')) data.value = target.value;
-
-  events.push(data);
+  events.push(event);
 }
 
 /**
@@ -281,20 +297,32 @@ function keydown({ altKey, ctrlKey, metaKey, key, target, type }) {
  */
 const keyup = keydown;
 
+function change({ target, type }) {
+  const event = {
+    domPath: createDomPath(target),
+    target: createElementSelector(target),
+    timeStamp: Math.round(Date.now() - ts),
+    type,
+    value: (target.nodeName === 'INPUT') && (target.type !== 'password') ? target.value : target.value.replace('*'),
+  };
+
+  events.push(event);
+}
+
 
 /**
  * New MutationObserver
  */
 const observer = new MutationObserver((mutations) => {
   mutations.forEach(({ attribute, target, type }) => {
-    const data = {
+    const event = {
       attribute,
       domPath: createDomPath(target),
       target: createElementSelector(target),
       timeStamp: Math.round(Date.now() - ts),
       type,
     };
-    events.push(data);
+    events.push(event);
   });
 });
 
@@ -314,10 +342,12 @@ function addMutationObserver() {
  * Function to remove all event listeners
  */
 function removeAllEvents() {
-  document.removeEventListener('mousemove', mousemove);
+  document.removeEventListener('change', change);
+  document.removeEventListener('click', click);
   document.removeEventListener('mousedown', mousedown);
-  document.removeEventListener('mouseup', mouseup);
+  document.removeEventListener('mousemove', mousemove);
   document.removeEventListener('mouseover', mouseover);
+  document.removeEventListener('mouseup', mouseup);
   document.removeEventListener('keydown', keydown);
   document.removeEventListener('keyup', keyup);
   document.removeEventListener('scroll', scroll);
@@ -356,20 +386,24 @@ function startRecording(data) {
       throttleDistance = _settings.throttle.distance;
       throttleTime = _settings.throttle.time;
 
-      // Check for mouse settings
-      if (settings.includes('mousemove')) document.addEventListener('mousemove', mousemove);
+      // Check for mouse events
+      if (settings.includes('click')) document.addEventListener('click', click);
       if (settings.includes('mousedown')) document.addEventListener('mousedown', mousedown);
-      if (settings.includes('mouseup')) document.addEventListener('mouseup', mouseup);
+      if (settings.includes('mousemove')) document.addEventListener('mousemove', mousemove);
       if (settings.includes('mouseover')) document.addEventListener('mouseover', mouseover);
+      if (settings.includes('mouseup')) document.addEventListener('mouseup', mouseup);
 
-      // Check for key settings
+      // Check for key events
       if (settings.includes('keydown')) document.addEventListener('keydown', keydown);
       if (settings.includes('keyup')) document.addEventListener('keyup', keyup);
 
-      // Check for scroll settings
+      // Check for scroll events
       if (settings.includes('scroll')) document.addEventListener('scroll', scroll);
 
-      // Check for dom settings
+      // Check for change events
+      if (settings.includes('change')) document.addEventListener('scroll', scroll);
+
+      // Check for dom events
       if (settings.includes('dom')) addMutationObserver();
 
       // Add event listener for data saving

@@ -167,7 +167,6 @@ function initPopup() {
     });
 
   location.hash = '#session';
-  updateNav();
 }
 
 /**

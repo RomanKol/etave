@@ -12,7 +12,7 @@ class ClickPathSVG {
    * @param {Object[]} [data=[]] - An array holding the events objects
    */
   constructor(width, height, data = []) {
-    this.data = data.filter(_data => ['mousemove', 'mousedown', 'mouseup'].includes(_data.type));
+    this.data = ClickPathSVG.filterData(data);
 
     this.style = document.createElementNS('http://www.w3.org/2000/svg', 'style');
     this.style.setAttribute('type', 'text/css');
@@ -43,6 +43,15 @@ class ClickPathSVG {
   }
 
   /**
+   * Function to filter incoming data
+   * @param {Object[]} [data] - Array with event data
+   * @return {Object[]} - Filtered array with event data
+   */
+  static filterData(data) {
+    return data.filter(_data => ['mousemove', 'mousedown', 'mouseup', 'click'].includes(_data.type));
+  }
+
+  /**
    * Function to clear/reset the svg
    */
   clear() {
@@ -54,18 +63,18 @@ class ClickPathSVG {
 
   /**
    * Function to update the svg
-   * @param {Object[]} data - Array with mousemove, mousedown and mouseup event data
+   * @param {Object[]} [data=[]] - Array with mousemove, mousedown and mouseup event data
    */
-  update(data) {
+  update(data = []) {
     this.updatePath(data.filter(_data => _data.type === 'mousemove'));
     this.updateClicks(data.filter(_data => _data.type === 'mousedown' || _data.type === 'mouseup'));
   }
 
   /**
    * Function to update the path
-   * @param {Object[]} [data=[]] - Array with mousemove event data
+   * @param {Object[]} data - Array with mousemove event data
    */
-  updatePath(data = []) {
+  updatePath(data) {
     if (data.length > 0) {
       let path = this.path.getAttribute('d');
       if (path.length === 0) {
@@ -79,9 +88,9 @@ class ClickPathSVG {
 
   /**
    * Function to update the clicks
-   * @param {Object[]} [data=[]] - Array with mousedown/mouseup event data
+   * @param {Object[]} data - Array with mousedown/mouseup event data
    */
-  updateClicks(data = []) {
+  updateClicks(data) {
     data.forEach(({ pageX, pageY, type }) => {
       const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
       circle.setAttribute('cx', pageX);
@@ -91,14 +100,15 @@ class ClickPathSVG {
       this.clicks.appendChild(circle);
     });
   }
+
   /**
    * Set method for setting the data
    * @param {Object[]} data - Array with mousemove, mousedown and mouseup event data
    */
   setData(data) {
-    this.data = data;
+    this.data = ClickPathSVG.filterData(data)
     this.clear();
-    this.update(data);
+    this.update(this.data);
   }
 
   /**
@@ -106,12 +116,13 @@ class ClickPathSVG {
    * @param {Object[]} data - Array with mousemove, mousedown and mouseup event data
    */
   addData(data) {
-    this.data = this.data.concat(...data);
-    this.update(data);
+    const adds = ClickPathSVG.filterData(data);
+    this.data = this.data.concat(...adds);
+    this.update(adds);
   }
 
   /**
-   * Function to append the path to an createElementNS
+   * Function to append the svg to an element
    * @param {Element} target - The target element to append svg element
    */
   appendTo(target) {
@@ -119,7 +130,7 @@ class ClickPathSVG {
   }
 
   /**
-   * Get function for the svg element
+   * Function to get the svg element
    * @return {SVGElement} - The svg clickPath element
    */
   getSVG() {
@@ -127,7 +138,7 @@ class ClickPathSVG {
   }
 
   /**
-   * Set method for setting a attribute to the svg element
+   * Function to set attributes to the svg element
    * @param {Object} attributes - The attributes to set
    */
   setAttributes(attributes) {

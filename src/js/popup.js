@@ -1,4 +1,4 @@
-/* globals loadStorage, saveStorage, loadSettings, updateSettings */
+/* globals loadStorage, loadSettings, updateSettings */
 
 /**
  * DOM elements user can interact with

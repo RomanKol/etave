@@ -1,4 +1,4 @@
-/* global millisecondsToIso, loadSession, loadStorage, createHeatmap, createPath */
+/* global millisecondsToIso, loadSession, loadStorage, createHeatmap, ClickPathSVG */
 
 let session;
 let sessionEvents;
@@ -24,6 +24,10 @@ let playing = false;
 let optionsEls;
 const options = [];
 
+let clickPath;
+
+let tick = 0;
+let progression;
 
 /**
  * Function to check if a array contains a element
@@ -56,32 +60,12 @@ function updateHeatmap(events) {
 }
 
 /**
- * Function to update the path
- * @param {Event[]} events - The events to draw
- */
-function updatePath(events) {
-   // Check if there is an previous path in the dom, remove it
-  const oldPath = iframeDocument.querySelector('#etave-path');
-  if (oldPath) {
-    oldPath.parentElement.removeChild(oldPath);
-  }
-
-  // Add a now path, if checked and there are events
-  if (inArray(options, 'path') && events.length > 0) {
-    const newPath = createPath(site.width, site.height, events);
-    newPath.id = 'etave-path';
-    newPath.style.cssText = `display: block; position: absolute; top: 0; left: 0; z-index: 1002; width: ${site.width}px; height: ${site.height}`;
-    iframeDocument.body.appendChild(newPath);
-  }
-}
-
-/**
  * Function to check if event has can be drawn
  * @param {Object} event - The event to check
  * @param {number} progression - The current timestamp ot the replay
  * @return {boolean} - If the event can be drawn
  */
-function checkEvent(event, progression) {
+function checkEvent(event) {
   return event.timeStamp <= progression && inArray(options, event.type);
 }
 
@@ -91,14 +75,55 @@ function checkEvent(event, progression) {
  */
 function updateScroll(events) {
   // Search for the last index
-  const event = events
-    .reverse()
-    .find(_event => _event.type === 'scroll');
+  const scrolls = events
+    .filter(event => event.type === 'scroll');
 
   // Scroll
-  if (event) {
-    iframe.contentWindow.scrollTo(event.scrollX, event.scrollY);
+  if (scrolls.length > 0) {
+    const x = scrolls[scrolls.length - 1].scrollX;
+    const y = scrolls[scrolls.length - 1].scrollY;
+    iframe.contentWindow.scrollTo(x, y);
   }
+}
+
+/**
+ * Function to update changes
+ * @param {Object[]} events - Array of event objects
+ */
+function updateChange(events) {
+  events
+    .filter(event => event.type === 'change')
+    .forEach((change) => {
+      // Add data depending on element type
+      if (change.targetType.includes('select')) {
+        // If target is select element, values are selected indices
+        const selectOptions = iframeDocument.querySelectorAll(`${change.domPath.join('>')} option`);
+        change.selected.forEach((index) => {
+          selectOptions[index].selected = true;
+        });
+      } else if (change.type === 'checkbox' || change.type === 'radio') {
+        // If target is a input select
+        iframeDocument.querySelector(change.domPath.join('>')).change = change.checked;
+      } else {
+        // Value for text/number/.. inputs fields, radios and text areas
+        iframeDocument.querySelector(change.domPath.join('>')).value = change.value;
+      }
+    });
+}
+
+/**
+ * Function to update clicks
+ * @param {Object[]} events - Array of event objects
+ */
+function updateClick(events) {
+  events
+    .filter(event => event.type === 'click')
+    .forEach((click) => {
+      const target = iframeDocument.querySelector(click.domPath.join('>'));
+      if (target !== null) {
+        target.click();
+      }
+    });
 }
 
 /**
@@ -135,17 +160,26 @@ function updateKey(events) {
  * @param {boolean} [key=true] - Option, whether the key should be updated or not
  */
   // Parse the range input value to int
-function updateReplay(heatmap = true, path = true, scroll = true, key = true) {
-  const progression = parseInt(progressInp.value, 10);
+function updateReplay() {
+  tick = parseInt(progressInp.value, 10) - progression;
+  progression = parseInt(progressInp.value, 10);
 
   // Filter the events by time and then by options
-  const filteredEvents = sessionEvents.filter(event => checkEvent(event, progression));
+  const filteredEvents = sessionEvents.filter(event => checkEvent(event));
+  const lastEvents = filteredEvents.filter(event => event.timeStamp >= progression - tick);
 
   // Update the heatmap and path
-  if (heatmap) updateHeatmap(filteredEvents);
-  if (path) updatePath(filteredEvents);
-  if (scroll) updateScroll(filteredEvents);
-  if (key) updateKey(filteredEvents);
+  if (!playing) {
+    updateHeatmap(filteredEvents);
+    clickPath.setData(filteredEvents);
+  } else {
+    clickPath.addData(lastEvents);
+  }
+
+  updateScroll(lastEvents);
+  updateKey(lastEvents);
+  updateChange(lastEvents);
+  updateClick(lastEvents);
 }
 
 /**
@@ -371,6 +405,7 @@ function initIframe() {
   browserContent.style.cssText = `height: ${session.viewport.height}px; width: ${session.viewport.width}px;`;
   iframe.onload = () => {
     iframeDocument = iframe.contentDocument;
+    clickPath.appendTo(iframeDocument.body);
   };
   iframe.src = site.url;
 }
@@ -387,7 +422,7 @@ function initReplay({ siteUuid, sessionUuid }) {
       document.querySelectorAll('body > *').forEach((element) => {
         element.style.setProperty('display', 'none');
       });
-      document.head.querySelectorAll('style, [type="text/css"]').forEach(element => {
+      document.head.querySelectorAll('style, [type="text/css"]').forEach((element) => {
         element.parentElement.removeChild(element);
       });
       document.documentElement.classList.add('etave-reset');
@@ -399,6 +434,8 @@ function initReplay({ siteUuid, sessionUuid }) {
       site = session.sites.find(_site => _site.uuid === siteUuid);
     })
     .then(() => {
+      clickPath = new ClickPathSVG(site.width, site.height);
+      clickPath.setAttributes({ style: `display: block; position: absolute; top: 0; left: 0; z-index: 1002; width: ${site.width}px; height: ${site.height}` });
       initIframe();
       document.body.appendChild(ui);
       initUi();

@@ -1,5 +1,5 @@
 /* global loadStorage, loadSession, downloadData, downloadSession, removeSession, createHeatmap,
-  createPath, millisecondsToIso  */
+  ClickPathSVG, millisecondsToIso  */
 
 /**
  * DOM elements
@@ -65,7 +65,7 @@ function injectScript(tabId, file, code, runAt = 'document_start') {
  */
 const replayFiles = [
   'utils.js',
-  'svg.js',
+  'ClickPathSVG.js',
   'heatmap.js',
   'replay.js',
 ];
@@ -110,11 +110,9 @@ function downloadPath() {
   const width = parseInt(this.dataset.width, 10);
 
   loadStorage(site)
-    .then(events => createPath(width, height, events))
-    .then((path) => {
-      const blob = new Blob([path.outerHTML], { type: 'image/svg+xml' });
-      downloadData(URL.createObjectURL(blob), `etave-path-${site}.svg`);
-    });
+    .then(events => new ClickPathSVG(width, height, events))
+    .then(path => new Blob([path.getSVG().outerHTML], { type: 'image/svg+xml' }))
+    .then(blob => downloadData(URL.createObjectURL(blob), `etave-path-${site}.svg`));
 }
 
 /**

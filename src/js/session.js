@@ -1,4 +1,4 @@
-/* global loadStorage, loadSession, downloadData, downloadSession, removeSession, createHeatmap,
+/* global loadStorage, loadSession, downloadData, downloadSession, removeSession, HeatMapCanvas,
   ClickPathSVG, millisecondsToIso  */
 
 /**
@@ -66,7 +66,7 @@ function injectScript(tabId, file, code, runAt = 'document_start') {
 const replayFiles = [
   'utils.js',
   'ClickPathSVG.js',
-  'heatmap.js',
+  'HeatMapCanvas.js',
   'replay.js',
 ];
 
@@ -95,9 +95,10 @@ function downloadHeatmap() {
   const width = parseInt(this.dataset.width, 10);
 
   loadStorage(site)
-    .then(events => createHeatmap(width, height, events))
-    .then((heatmap) => {
-      downloadData(heatmap.toDataURL(), `etave-heatmap-${site}.png`);
+    .then(events => new HeatMapCanvas(width, height, events))
+    .then(heatmap => heatmap.getCanvas())
+    .then((canvas) => {
+      downloadData(canvas.toDataURL(), `etave-heatmap-${site}.png`);
     });
 }
 

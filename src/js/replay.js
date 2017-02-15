@@ -1,4 +1,4 @@
-/* global millisecondsToIso, loadSession, loadStorage, createHeatmap, ClickPathSVG */
+/* global millisecondsToIso, loadSession, loadStorage, ClickPathSVG, HeatMapCanvas */
 
 let session;
 let sessionEvents;
@@ -25,9 +25,10 @@ let optionsEls;
 const options = [];
 
 let clickPath;
+let heatMap;
 
-let tick = 0;
-let progression;
+let timeStamp = 0;
+let duration;
 
 /**
  * Function to check if a array contains a element
@@ -35,29 +36,9 @@ let progression;
  * @param {any} needle - The element to check forEach
  * @return {boolean} If the array contains the element
  */
-function inArray(arr, needle) {
-  return arr.indexOf(needle) !== -1;
-}
-
-/**
- * Function to update the heatmap
- * @param {Event[]} events - The events to draw
- */
-function updateHeatmap(events) {
-  // Check if there is an previous heatmap in the dom, remove it
-  const oldHeatmap = iframeDocument.querySelector('#etave-heatmap');
-  if (oldHeatmap) {
-    oldHeatmap.parentElement.removeChild(oldHeatmap);
-  }
-
-  // Add a now heatmap, if checked and there are events
-  if (inArray(options, 'heatmap') && events.length > 0) {
-    const newHeatmap = createHeatmap(site.width, site.height, events);
-    newHeatmap.id = 'etave-heatmap';
-    newHeatmap.style.cssText = `display: block; position: absolute; top: 0; left: 0; z-index: 1001; width: ${site.width}px; height: ${site.height}`;
-    iframeDocument.body.appendChild(newHeatmap);
-  }
-}
+// function inArray(arr, needle) {
+//   return arr.indexOf(needle) !== -1;
+// }
 
 /**
  * Function to check if event has can be drawn
@@ -66,7 +47,7 @@ function updateHeatmap(events) {
  * @return {boolean} - If the event can be drawn
  */
 function checkEvent(event) {
-  return event.timeStamp <= progression && inArray(options, event.type);
+  return event.timeStamp <= timeStamp && options.includes(event.type);
 }
 
 /**
@@ -154,42 +135,40 @@ function updateKey(events) {
 
 /**
  * Function to update the replay
- * @param {boolean} [heatmap=true] - Option, whether the heatmap should be updated or not
- * @param {boolean} [path=true] - Option, whether the path should be updated or not
- * @param {boolean} [scroll=true] - Option, whether the scroll should be updated or not
- * @param {boolean} [key=true] - Option, whether the key should be updated or not
  */
   // Parse the range input value to int
 function updateReplay() {
-  tick = parseInt(progressInp.value, 10) - progression;
-  progression = parseInt(progressInp.value, 10);
 
   // Filter the events by time and then by options
   const filteredEvents = sessionEvents.filter(event => checkEvent(event));
-  const lastEvents = filteredEvents.filter(event => event.timeStamp >= progression - tick);
+  const lastEvents = filteredEvents.filter(event => event.timeStamp >= timeStamp - 16.67);
 
   // Update the heatmap and path
   if (!playing) {
-    updateHeatmap(filteredEvents);
+    heatMap.setData(filteredEvents);
     clickPath.setData(filteredEvents);
+
+    updateChange(filteredEvents);
+    updateScroll(filteredEvents);
   } else {
+    heatMap.addData(lastEvents);
     clickPath.addData(lastEvents);
+
+    updateScroll(lastEvents);
+    updateKey(lastEvents);
+    updateChange(lastEvents);
+    updateClick(lastEvents);
   }
 
-  updateScroll(lastEvents);
-  updateKey(lastEvents);
-  updateChange(lastEvents);
-  updateClick(lastEvents);
 }
 
 /**
  * Function to update the timeLeft input value
  */
 function updateDuration() {
-  const time = parseInt(progressInp.value, 10);
-  const timeLeft = parseInt(progressInp.max, 10);
-  timeInp.value = millisecondsToIso(time);
-  timeLeftInp.value = millisecondsToIso(timeLeft - time);
+  timeStamp = parseInt(progressInp.value, 10);
+  timeInp.value = millisecondsToIso(timeStamp);
+  timeLeftInp.value = millisecondsToIso(duration - timeStamp);
 }
 
 /**
@@ -219,8 +198,6 @@ function addProgressBackground() {
   const context = canvas.getContext('2d');
   context.fillStyle = ('rgba(2, 117, 216, 0.3)');
 
-  const duration = parseInt(progressInp.max, 10);
-
   sessionEvents.forEach((event) => {
     const position = (event.timeStamp / duration) * width;
     context.fillRect((position - 1), 0, 3, height);
@@ -242,21 +219,19 @@ function pause() {
  * Function to start replay
  */
 function play() {
-  const ts = parseInt(progressInp.value, 10);
-  const maxTs = parseInt(progressInp.max, 10);
-
-  if (ts < maxTs) {
+  if (timeStamp < duration) {
     playIndex = requestAnimationFrame(() => {
-      progressInp.value = ts + (16.67 * speed);
+      timeStamp += (17 * speed);
+      progressInp.value = timeStamp;
       updateDuration();
-      updateReplay(false);
+      updateReplay();
       play();
     });
   } else {
     pause();
     playBtn.textContent = '►';
     playing = false;
-    updateReplay(true, false);
+    updateReplay();
   }
 }
 
@@ -349,6 +324,7 @@ function loadUi() {
       progressInp = ui.querySelector('.timeline input[type="range"]');
       progressInp.addEventListener('change', updateReplay);
       progressInp.addEventListener('mousemove', updateDuration);
+      progressInp.addEventListener('click', updateDuration);
 
       playBtn = ui.querySelector('#play');
       playBtn.addEventListener('click', start);
@@ -368,7 +344,7 @@ function loadUi() {
  */
 function initUi() {
   // Set player values
-  const duration = (site.end - site.start);
+  duration = (site.end - site.start);
   timeInp.value = millisecondsToIso(0);
   timeLeftInp.value = millisecondsToIso(duration);
   progressInp.max = duration;
@@ -406,6 +382,7 @@ function initIframe() {
   iframe.onload = () => {
     iframeDocument = iframe.contentDocument;
     clickPath.appendTo(iframeDocument.body);
+    heatMap.appendTo(iframeDocument.body);
   };
   iframe.src = site.url;
 }
@@ -436,6 +413,10 @@ function initReplay({ siteUuid, sessionUuid }) {
     .then(() => {
       clickPath = new ClickPathSVG(site.width, site.height);
       clickPath.setAttributes({ style: `display: block; position: absolute; top: 0; left: 0; z-index: 1002; width: ${site.width}px; height: ${site.height}` });
+      heatMap = new HeatMapCanvas(site.width, site.height);
+      heatMap.setAttributes({ style: `display: block; position: absolute; top: 0; left: 0; z-index: 1001; width: ${site.width}px; height: ${site.height}` });
+    })
+    .then(() => {
       initIframe();
       document.body.appendChild(ui);
       initUi();

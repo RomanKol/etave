@@ -67,6 +67,7 @@ const replayFiles = [
   'utils.js',
   'ClickPathSVG.js',
   'HeatMapCanvas.js',
+  'ScrollMapCanvas.js',
   'replay.js',
 ];
 

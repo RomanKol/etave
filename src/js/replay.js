@@ -1,4 +1,6 @@
-/* global millisecondsToIso, loadSession, loadStorage, ClickPathSVG, HeatMapCanvas */
+/* global millisecondsToIso, loadSession, loadStorage,
+ * ClickPathSVG, HeatMapCanvas, ScrollMapCanvas
+ */
 
 let session;
 let sessionEvents;
@@ -26,6 +28,7 @@ const options = [];
 
 let clickPath;
 let heatMap;
+let scrollMap;
 
 let timeStamp = 0;
 let duration;
@@ -344,7 +347,6 @@ function loadUi() {
  */
 function initUi() {
   // Set player values
-  duration = (site.end - site.start);
   timeInp.value = millisecondsToIso(0);
   timeLeftInp.value = millisecondsToIso(duration);
   progressInp.max = duration;
@@ -383,6 +385,7 @@ function initIframe() {
     iframeDocument = iframe.contentDocument;
     clickPath.appendTo(iframeDocument.body);
     heatMap.appendTo(iframeDocument.body);
+    scrollMap.appendTo(iframeDocument.body);
   };
   iframe.src = site.url;
 }
@@ -409,13 +412,24 @@ function initReplay({ siteUuid, sessionUuid }) {
       sessionEvents = _events;
       ui = _ui;
       site = session.sites.find(_site => _site.uuid === siteUuid);
+      duration = (site.end - site.start);
     })
     .then(() => {
-      clickPath = new ClickPathSVG(site.width, site.height);
-      clickPath.setAttributes({ style: `display: block; position: absolute; top: 0; left: 0; z-index: 1002; width: ${site.width}px; height: ${site.height}` });
+      scrollMap = new ScrollMapCanvas(
+        site.width,
+        site.height,
+        session.viewport.width,
+        session.viewport.height,
+        duration,
+        sessionEvents
+      );
+      scrollMap.setAttributes({ style: `display: block; position: absolute; top: 0; left: 0; z-index: 1001; width: ${site.width}px; height: ${site.height}px` });
       heatMap = new HeatMapCanvas(site.width, site.height);
-      heatMap.setAttributes({ style: `display: block; position: absolute; top: 0; left: 0; z-index: 1001; width: ${site.width}px; height: ${site.height}` });
-    })
+      heatMap.setAttributes({ style: `display: block; position: absolute; top: 0; left: 0; z-index: 1002; width: ${site.width}px; height: ${site.height}px` });
+      clickPath = new ClickPathSVG(site.width, site.height);
+      clickPath.setAttributes({ style: `display: block; position: absolute; top: 0; left: 0; z-index: 1003; width: ${site.width}px; height: ${site.height}px` });
+
+  })
     .then(() => {
       initIframe();
       document.body.appendChild(ui);

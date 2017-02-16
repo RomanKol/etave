@@ -4,6 +4,13 @@
  * Class for creating heat map canvas
  */
 class HeatMapCanvas {
+
+  /**
+   * Class constructor
+   * @param {number} width - The width of the svg
+   * @param {number} height - The height of the svg
+   * @param {Object[]} [data=[]] - An array holding the events objects
+   */
   constructor(width, height, data = [], radius = 30) {
     this.data = HeatMapCanvas.filterData(data);
 
@@ -87,6 +94,7 @@ class HeatMapCanvas {
    * Function to clear the canvas context
    */
   clear() {
+    this.data = [];
     this.context.clearRect(0, 0, this.width, this.height);
   }
 

@@ -145,6 +145,7 @@ function insertSessions() {
     .then((sessions) => {
       // If there are some sessions left
       if (sessions.length > from) {
+        sessions.sort((a, b) => (a.start < b.start ? 1 : -1));
         const sessionsLeft = sessions.length - from;
         let to = from;
 

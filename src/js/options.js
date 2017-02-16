@@ -3,7 +3,7 @@
 /**
  * Dom elements
  */
-const sessionsList = document.querySelector('#sessions-list');
+const sessionsList = document.querySelector('#sessions-list tbody');
 const sessionsBtn = document.querySelector('#sessions-loader');
 const navList = document.querySelector('nav > ul');
 const saveEventsBtn = document.querySelector('#settings-save');
@@ -138,31 +138,33 @@ function updateNav() {
  * Function to insert additional sessions in table
  * @param {Session[]} sessions - Array of session objects
  */
-function insertSessions(sessions) {
-  const tableBody = sessionsList.querySelector('tbody');
-  const from = tableBody.children.length;
+function insertSessions() {
+  const from = sessionsList.children.length;
 
-  // If there are some sessions left
-  if (sessions.length > from) {
-    const sessionsLeft = sessions.length - from;
-    let to = from;
+  loadStorage('sessions')
+    .then((sessions) => {
+      // If there are some sessions left
+      if (sessions.length > from) {
+        const sessionsLeft = sessions.length - from;
+        let to = from;
 
-    // Check how many sessions are remaining, if more than five, load five ...
-    if (sessionsLeft > 3) {
-      to += 3;
+        // Check how many sessions are remaining, if more than five, load five ...
+        if (sessionsLeft > 3) {
+          to += 3;
 
-    // else load the remaining sessions
-    } else {
-      to += sessionsLeft;
-      this.disabled = true;
-    }
+        // else load the remaining sessions
+        } else {
+          to += sessionsLeft;
+          this.disabled = true;
+        }
 
-    // Add the sessions to te list
-    sessions.slice(from, to)
-      .forEach((session) => {
-        tableBody.appendChild(createSessionElement(session));
-      });
-  }
+        // Add the sessions to te list
+        sessions.slice(from, to)
+          .forEach((session) => {
+            sessionsList.appendChild(createSessionElement(session));
+          });
+      }
+    });
 }
 
 /**
@@ -170,9 +172,8 @@ function insertSessions(sessions) {
  */
 function init() {
   loadSettings()
-    .then(settings => initSettings(settings));
-  loadStorage('sessions')
-    .then(sessions => insertSessions(sessions.reverse()));
+    .then(settings => initSettings(settings))
+  insertSessions();
   updateNav();
 }
 

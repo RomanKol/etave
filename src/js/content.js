@@ -22,9 +22,9 @@
  * @param {number} timeStamp - Timestamp
  */
 let previousSavedMousemove = {
-  pageX: -25,
-  pageY: -25,
-  timeStamp: -50,
+  pageX: -Infinity,
+  pageY: -Infinity,
+  timeStamp: -Infinity,
 };
 
 /**
@@ -34,9 +34,9 @@ let previousSavedMousemove = {
  * @param {number} timeStamp - Timestamp
  */
 let previousSavedScroll = {
-  scrollX: -25,
-  scrollY: -25,
-  timeStamp: -50,
+  scrollX: -Infinity,
+  scrollY: -Infinity,
+  timeStamp: -Infinity,
 };
 
 let uuid;
@@ -433,6 +433,7 @@ function startRecording(data) {
       addDot();
       isRecording = true;
       ts = Date.now();
+      scroll({ type: 'scroll' });
     });
 }
 

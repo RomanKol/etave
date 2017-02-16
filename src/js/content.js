@@ -162,7 +162,6 @@ function createDomPath(target) {
     element = element.parentElement;
   }
 
-  console.log(elements)
   // Return the reversed array, starting from top/document
   return elements.reverse(); // .join('/');
 }

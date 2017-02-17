@@ -1,4 +1,4 @@
-/* global loadStorage, loadSession, downloadData, downloadSession, removeSession, HeatMapCanvas,
+/* global loadStorage, loadSession, downloadData, downloadSession, removeSession, HeatMapCanvas, ScrollMapCanvas,
   ClickPathSVG, millisecondsToIso  */
 
 /**
@@ -76,15 +76,16 @@ const replayFiles = [
  */
 function openReplay() {
   createTab(this.dataset.url)
-    .then(tab => Promise.all(replayFiles.map(file => injectScript(tab.id, file)))
-      .then(() => {
-        const replayObj = {
-          siteUuid: this.dataset.site,
-          sessionUuid: this.dataset.session,
-        };
-        return injectScript(tab.id, false, `initReplay(${JSON.stringify(replayObj)});`, 'document_end');
-      })
-    );
+    .then((tab) => {
+      Promise.all(replayFiles.map(file => injectScript(tab.id, file)))
+        .then(() => {
+          const replayObj = {
+            siteUuid: this.dataset.site,
+            sessionUuid: this.dataset.session,
+          };
+          return injectScript(tab.id, false, `initReplay(${JSON.stringify(replayObj)});`, 'document_end');
+        });
+    });
 }
 
 /**
@@ -100,6 +101,25 @@ function downloadHeatmap() {
     .then(heatmap => heatmap.getCanvas())
     .then((canvas) => {
       downloadData(canvas.toDataURL(), `etave-heatmap-${site}.png`);
+    });
+}
+
+/**
+ * Function to download scroll map
+ */
+function downloadScrollMap() {
+  const site = this.dataset.site;
+  const height = parseInt(this.dataset.height, 10);
+  const width = parseInt(this.dataset.width, 10);
+  const duration = parseInt(this.dataset.duration, 10);
+  const vw = session.viewport.width;
+  const vh = session.viewport.height;
+
+  loadStorage(site)
+    .then(events => new ScrollMapCanvas(width, height, vw, vh, duration, events))
+    .then(scrollmap => scrollmap.getCanvas())
+    .then((canvas) => {
+      downloadData(canvas.toDataURL(), `etave-scrollmap-${site}.png`);
     });
 }
 
@@ -202,7 +222,13 @@ function createSitesListItem(site) {
       <br>
       <button class='btn btn-icon btn-primary path mb-2' title='Path' data-site='${site.uuid}' data-width='${site.width}' data-height='${site.height}'>
         <img src='path.svg' alt='Path'>
-      </a>
+      </button>
+      <br>
+      <label>Scrollmap</label>
+      <br>
+      <button class='btn btn-icon btn-primary scrollmap mb-2' title='Scrollmap' data-site='${site.uuid}' data-width='${site.width}' data-height='${site.height} data-duration='${site.start - site.end}'>
+        <img src='scrollmap.svg' alt='Scrollmap'>
+      </button>
     </td>
   `;
 
@@ -211,6 +237,7 @@ function createSitesListItem(site) {
   item.querySelector('button.replay').addEventListener('click', openReplay);
   item.querySelector('button.heatmap').addEventListener('click', downloadHeatmap);
   item.querySelector('button.path').addEventListener('click', downloadPath);
+  item.querySelector('button.scrollmap').addEventListener('click', downloadScrollMap);
 
   const preview = item.querySelector('img');
 

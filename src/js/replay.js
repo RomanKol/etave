@@ -35,19 +35,8 @@ let prevTimeStamp = 0;
 let duration;
 
 /**
- * Function to check if a array contains a element
- * @param {Array} arr - The array to check
- * @param {any} needle - The element to check forEach
- * @return {boolean} If the array contains the element
- */
-// function inArray(arr, needle) {
-//   return arr.indexOf(needle) !== -1;
-// }
-
-/**
  * Function to check if event has can be drawn
  * @param {Object} event - The event to check
- * @param {number} progression - The current timestamp ot the replay
  * @return {boolean} - If the event can be drawn
  */
 function checkEvent(event) {
@@ -140,7 +129,6 @@ function updateKey(events) {
 /**
  * Function to update the replay
  */
-  // Parse the range input value to int
 function updateReplay() {
   // Filter the events by time and then by options
   const filteredEvents = sessionEvents.filter(event => checkEvent(event));
@@ -178,7 +166,6 @@ function updateDuration() {
 
 /**
  * Function to update the options array
- * @param {boolean} [replay=true] - Option, whether the replay should be updated
  */
 function updateOptions() {
   // Reset the options and set them

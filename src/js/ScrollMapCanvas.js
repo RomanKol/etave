@@ -95,9 +95,9 @@ class ScrollMapCanvas {
       const pixels = this.context.getImageData(0, 0, this.width, this.height);
 
       for (let i = 0; i < pixels.data.length; i += 4) {
-        pixels.data[i + 0] = 0; // R
-        pixels.data[i + 1] = 0; // G
-        pixels.data[i + 2] = 0; // B
+        pixels.data[i + 0] = 142; // R
+        pixels.data[i + 1] = 68; // G
+        pixels.data[i + 2] = 173; // B
         pixels.data[i + 3] = 255 - pixels.data[i + 3];  // A
       }
 
@@ -110,8 +110,8 @@ class ScrollMapCanvas {
    * @param {Object[]} data - Array with mousemove, mousedown and mouseup event data
    */
   setData(data) {
-    this.data = ScrollMapCanvas.filterData(data);
     this.clear();
+    this.data = ScrollMapCanvas.filterData(data);
     this.update(this.data);
   }
 

@@ -153,6 +153,7 @@ class HeatMapCanvas {
         }
       }
 
+
       this.context.putImageData(drawAreaPixels, bBox.left, bBox.top);
     }
   }
@@ -162,8 +163,8 @@ class HeatMapCanvas {
    * @param {Object[]} data - Array with mousemove, mousedown and mouseup event data
    */
   setData(data) {
-    this.data = HeatMapCanvas.filterData(data);
     this.clear();
+    this.data = HeatMapCanvas.filterData(data);
     this.update(this.data);
   }
 

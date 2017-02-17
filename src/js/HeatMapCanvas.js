@@ -153,7 +153,6 @@ class HeatMapCanvas {
         }
       }
 
-
       this.context.putImageData(drawAreaPixels, bBox.left, bBox.top);
     }
   }

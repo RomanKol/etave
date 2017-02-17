@@ -32,7 +32,7 @@ $height: 10rem;
     max-height: calc(100vh - 10rem);
 
     .browser {
-      transform-origin: top center;
+      transform-origin: top left;
       background: white;
       box-shadow: 0px 5px 20px hsla(0, 0%, 0%, 0.75);
       border-radius: 6px;

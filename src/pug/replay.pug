@@ -25,19 +25,26 @@ section#etave-player
 
   section.controls
     section
-      input#heatmap.hidden.option(type='checkbox' name='heatmap' checked)
+      input#heatmap.hidden(type='checkbox' name='heatmap' checked)
       label.btn.btn-icon(for='heatmap')
         include ../../extension/heatmap.svg
 
-      input#path.hidden.option(type='checkbox' name='path' checked)
+      input#path.hidden(type='checkbox' name='path' checked)
       label.btn.btn-icon(for='path')
         include ../../extension/path.svg
+
+      input#scrollmap.hidden(type='checkbox' name='scrollmap' checked)
+      label.btn.btn-icon(for='scrollmap')
+        include ../../extension/scrollmap.svg
 
     section
       button#backward.btn.btn-icon(title='+2 seconds')
         include ../../extension/backward.svg
 
-      button#play.btn.btn-icon ►
+      button#replay.btn.btn-icon(title='restart')
+        include ../../extension/replay.svg
+
+      button#play.btn.btn-icon(title='play/pause') ►
 
       button#forward.btn.btn-icon(title='-2 seconds')
         include ../../extension/forward.svg

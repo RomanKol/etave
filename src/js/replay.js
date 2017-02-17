@@ -144,9 +144,9 @@ function updateReplay() {
 
   // Filter the events by time and then by options
   const filteredEvents = sessionEvents.filter(event => checkEvent(event));
-  const lastEvents = filteredEvents.filter(event => event.timeStamp >= timeStamp - 16.67);
+  const lastEvents = filteredEvents.filter(event => event.timeStamp >= timeStamp - 17);
 
-  // Update the heatmap and path
+  // Update the heat map and click path
   if (!playing) {
     heatMap.setData(filteredEvents);
     clickPath.setData(filteredEvents);
@@ -162,7 +162,6 @@ function updateReplay() {
     updateChange(lastEvents);
     updateClick(lastEvents);
   }
-
 }
 
 /**
@@ -234,7 +233,7 @@ function play() {
     pause();
     playBtn.textContent = '►';
     playing = false;
-    updateReplay();
+    // updateReplay();
   }
 }
 
@@ -297,6 +296,48 @@ function toggleSpeed() {
 }
 
 /**
+ * Function to toggle the heat map
+ */
+function toggleHeatMap() {
+  heatMap.canvas.style.setProperty('display', this.checked ? 'block' : 'none');
+}
+
+/**
+ * Function to toggle the click path
+ */
+function toggleClickPath() {
+  clickPath.svg.style.setProperty('display', this.checked ? 'block' : 'none');
+}
+
+/**
+ * Function to toggle the scroll map
+ */
+function toggleScrollMap() {
+  scrollMap.canvas.style.setProperty('display', this.checked ? 'block' : 'none');
+}
+
+/**
+ * Function to reinitialize iframe and reset player
+ */
+function replay() {
+  // Somehow the scroll map has to be reinitialized :/
+  scrollMap = new ScrollMapCanvas(site.width, site.height, session.viewport.width, session.viewport.height, duration, sessionEvents);
+  scrollMap.setAttributes({ style: `display: block; position: absolute; top: 0; left: 0; z-index: 1001; width: ${site.width}px; height: ${site.height}px` });
+  scrollMap.canvas.style.setProperty('display', ui.querySelector('#scrollmap').checked ? 'block' : 'none');
+
+  // Reset the site url to reload the site
+  iframe.src = site.url;
+
+  // Clear click path and heat map, no reinitialize needed
+  clickPath.clear();
+  heatMap.clear();
+
+  // Reset player
+  progressInp.value = 0;
+  updateDuration();
+}
+
+/**
  * Function to load the etave replay ui
  * @return {Promise<Element>} - Returns a promise, if fulfilled returns the ui element
  */
@@ -321,6 +362,10 @@ function loadUi() {
         optionEl.addEventListener('change', updateOptions);
       });
 
+      ui.querySelector('#heatmap').addEventListener('change', toggleHeatMap);
+      ui.querySelector('#scrollmap').addEventListener('change', toggleScrollMap);
+      ui.querySelector('#path').addEventListener('change', toggleClickPath);
+
       timeInp = ui.querySelectorAll('.timeline input[type="text"]')[0];
       timeLeftInp = ui.querySelectorAll('.timeline input[type="text"]')[1];
 
@@ -331,6 +376,8 @@ function loadUi() {
 
       playBtn = ui.querySelector('#play');
       playBtn.addEventListener('click', start);
+
+      ui.querySelector('#replay').addEventListener('click', replay);
 
       ui.querySelector('#backward').addEventListener('click', backward);
       ui.querySelector('#forward').addEventListener('click', forward);
@@ -371,6 +418,7 @@ function scaleBrowser() {
 
   const tabDim = tab.getBoundingClientRect();
   tab.style.setProperty('top', `${((browserDim.height - tabDim.height) / 2).toFixed(2)}px`);
+  tab.style.setProperty('left', `${((browserDim.width - tabDim.width) / 2).toFixed(2)}px`);
 }
 
 /**
@@ -415,21 +463,13 @@ function initReplay({ siteUuid, sessionUuid }) {
       duration = (site.end - site.start);
     })
     .then(() => {
-      scrollMap = new ScrollMapCanvas(
-        site.width,
-        site.height,
-        session.viewport.width,
-        session.viewport.height,
-        duration,
-        sessionEvents
-      );
+      scrollMap = new ScrollMapCanvas(site.width, site.height, session.viewport.width, session.viewport.height, duration, sessionEvents);
       scrollMap.setAttributes({ style: `display: block; position: absolute; top: 0; left: 0; z-index: 1001; width: ${site.width}px; height: ${site.height}px` });
       heatMap = new HeatMapCanvas(site.width, site.height);
       heatMap.setAttributes({ style: `display: block; position: absolute; top: 0; left: 0; z-index: 1002; width: ${site.width}px; height: ${site.height}px` });
       clickPath = new ClickPathSVG(site.width, site.height);
       clickPath.setAttributes({ style: `display: block; position: absolute; top: 0; left: 0; z-index: 1003; width: ${site.width}px; height: ${site.height}px` });
-
-  })
+    })
     .then(() => {
       initIframe();
       document.body.appendChild(ui);

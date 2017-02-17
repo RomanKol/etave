@@ -31,6 +31,7 @@ let heatMap;
 let scrollMap;
 
 let timeStamp = 0;
+let prevTimeStamp = 0;
 let duration;
 
 /**
@@ -141,10 +142,9 @@ function updateKey(events) {
  */
   // Parse the range input value to int
 function updateReplay() {
-
   // Filter the events by time and then by options
   const filteredEvents = sessionEvents.filter(event => checkEvent(event));
-  const lastEvents = filteredEvents.filter(event => event.timeStamp >= timeStamp - 17);
+  const lastEvents = filteredEvents.filter(event => event.timeStamp >= prevTimeStamp);
 
   // Update the heat map and click path
   if (!playing) {
@@ -158,10 +158,13 @@ function updateReplay() {
     clickPath.addData(lastEvents);
 
     updateScroll(lastEvents);
-    updateKey(lastEvents);
     updateChange(lastEvents);
-    updateClick(lastEvents);
   }
+
+  updateKey(lastEvents);
+  updateClick(lastEvents);
+
+  prevTimeStamp = timeStamp;
 }
 
 /**
@@ -177,14 +180,14 @@ function updateDuration() {
  * Function to update the options array
  * @param {boolean} [replay=true] - Option, whether the replay should be updated
  */
-function updateOptions(replay = true) {
+function updateOptions() {
   // Reset the options and set them
   options.length = 0;
   optionsEls.forEach((optionEl) => {
     if (optionEl.checked) options.push(optionEl.name);
   });
 
-  if (replay) updateReplay();
+  updateReplay();
 }
 
 /**
@@ -233,7 +236,6 @@ function play() {
     pause();
     playBtn.textContent = '►';
     playing = false;
-    // updateReplay();
   }
 }
 
@@ -356,11 +358,8 @@ function loadUi() {
       iframe = ui.querySelector('iframe');
       urlbar = ui.querySelector('.urlbar input');
 
-      // Get all the ui elements
       optionsEls = ui.querySelectorAll('.option');
-      optionsEls.forEach((optionEl) => {
-        optionEl.addEventListener('change', updateOptions);
-      });
+      ui.querySelector('.options').addEventListener('change', updateOptions);
 
       ui.querySelector('#heatmap').addEventListener('change', toggleHeatMap);
       ui.querySelector('#scrollmap').addEventListener('change', toggleScrollMap);

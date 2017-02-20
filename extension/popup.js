@@ -1,3 +1,5 @@
+/* globals loadStorage, loadSettings, updateSettings */
+
 /**
  * DOM elements user can interact with
  */
@@ -10,44 +12,14 @@ const nameInp = document.querySelector('#name');
 const descrInp = document.querySelector('#descr');
 
 /**
- * Function to load data from the chrome.storage api
- * @param {string} key - The key of the data
- * @return {Promise.<boolean, Error>} - The saved data, else an error
- */
-function loadStorage(key) {
-  return new Promise((resolve, reject) => {
-    chrome.storage.local.get(key, (items) => {
-      if (chrome.runtime.lastError) reject(new Error('Runtime error'));
-      if (Object.keys(items).length === 0) reject(false);
-      resolve(items[key]);
-    });
-  });
-}
-
-/**
- * Function to save data with the chrome.storage api
- * @param {string} key - Key for the data
- * @param {any} data - Data to be saved
- * @returns {Promise.<boolean, Error>} - True, else an error
- */
-function saveStorage(key, data) {
-  return new Promise((resolve, reject) => {
-    chrome.storage.local.set({ [key]: data }, () => {
-      if (chrome.runtime.lastError) reject(new Error('Runtime error'));
-      resolve(true);
-    });
-  });
-}
-
-/**
  * Function to get the current settings
  * @return {string[]} - Array of active settings
 */
 function getSettings() {
   const settings = [];
   document.querySelectorAll('#settings input[type="checkbox"]:checked')
-    .forEach((el) => {
-      settings.push(el.name || el.id);
+    .forEach((element) => {
+      settings.push(element.name);
     });
   return settings;
 }
@@ -55,7 +27,7 @@ function getSettings() {
 /**
  * Function to send a message
  * @param {any} msg - Message to send
- * @return {Promise<Tab, Error>} - Returns a tab, else an error
+ * @return {Promise<Object, Error>} - Returns a tab object, else an error
  */
 function getActiveTab() {
   return new Promise((resolve, reject) => {
@@ -69,7 +41,7 @@ function getActiveTab() {
 /**
  * Function to send a message to the active tab
  * @param {any} msg - The message to send
- * @return {Promise<response, Error>} - Returns the response, else an error
+ * @return {Promise<Object, Error>} - Returns the response object, else an error
  */
 function sendRuntimeMessage(msg) {
   return new Promise((resolve, reject) => {
@@ -82,7 +54,7 @@ function sendRuntimeMessage(msg) {
 
 /**
  * Function to get inserted user data for session
- * @return {obj} - Returns an object containing name and description as strings
+ * @return {Object} - Returns an object containing name and description as strings
  */
 function getSessionSettings() {
   const name = nameInp.value || nameInp.placeholder;
@@ -95,8 +67,9 @@ function getSessionSettings() {
  */
 function saveSettings() {
   const settings = getSettings();
-  saveStorage('settings', settings);
+  updateSettings({ events: settings });
 }
+
 
 /**
  * Function to extract domain from url string
@@ -162,10 +135,10 @@ function updateNav() {
  */
 function initPopup() {
   // Load settings from storage, else use default settings
-  loadStorage('settings')
+  loadSettings('events')
     .then((settings) => {
       settings.forEach((setting) => {
-        document.getElementById(setting).checked = true;
+        document.querySelector(`[name=${setting}]`).checked = true;
       });
     });
 
@@ -194,12 +167,11 @@ function initPopup() {
     });
 
   location.hash = '#session';
-  updateNav();
 }
 
 /**
  * Function to open the options page in a new tab
- * @param {object} e - Event object
+ * @param {Object} e - Event object
  */
 function openDashboard(e) {
   e.preventDefault();

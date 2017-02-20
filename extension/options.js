@@ -1,22 +1,26 @@
-/* global loadStorage, downloadSession, millisecondsToIso*/
+/* global loadStorage, loadSettings, updateSettings, downloadSession, millisecondsToIso*/
 
 /**
  * Dom elements
  */
-const sessionsList = document.querySelector('#sessions-list');
+const sessionsList = document.querySelector('#sessions-list tbody');
 const sessionsBtn = document.querySelector('#sessions-loader');
 const navList = document.querySelector('nav > ul');
+const saveEventsBtn = document.querySelector('#settings-save');
+const settingsSuccessAlert = document.querySelector('#settings .alert-success');
+const settingsErrorAlert = document.querySelector('#settings .alert-danger');
 
 /**
- * Global application variables
+ * Function to initialize session download
  */
-let sessions;
-let settings;
+function download() {
+  downloadSession(this.dataset.uuid);
+}
 
 /**
  * Function to create a session elements
- * @param {object} session - The session
- * @return {element} - The session element
+ * @param {Object} session - The session
+ * @return {Element} - The session element
  */
 function createSessionElement(session) {
   const tableRow = document.createElement('tr');
@@ -39,7 +43,7 @@ function createSessionElement(session) {
     <td>
       <div class='form-group'>
         <label>Date</label>
-        <input class='form-control' type='text' value='${start.toLocaleDateString()}' readonly>
+        <input class='form-control' type='text' value='${start.toLocaleString()}' readonly>
       </div>
       <div class='form-group'>
         <label>Duration</label>
@@ -56,7 +60,7 @@ function createSessionElement(session) {
     <td>
       <label>Inspect</label>
       <br>
-      <a href='session.html#${session.uuid}' class='btn btn-primary btn-icon' title='Details'>
+      <a href='session.html?session=${session.uuid}' class='btn btn-primary btn-icon' title='Details'>
         <img src='details.svg' alt='details'>
       </a>
     </td>
@@ -64,16 +68,54 @@ function createSessionElement(session) {
 
   tableRow.innerHTML = template;
 
+  tableRow.querySelector('button').addEventListener('click', download);
+
   return tableRow;
 }
 
 /**
  * Function to initialize settings ui
+ * @param {Object} settings - The settings object
  */
-function initSettings() {
-  settings.forEach((setting) => {
-    document.getElementById(setting).checked = true;
+function initSettings(settings) {
+  settings.events.forEach((setting) => {
+    document.querySelector(`[name=${setting}]`).checked = true;
   });
+
+  Object.keys(settings.throttle).forEach((setting) => {
+    document.querySelector(`[name=${setting}]`).value = settings.throttle[setting];
+  });
+}
+
+/**
+ * Function to toggle alerts
+ * @param {Element} alert - The alert to toggle
+*/
+function toggleAlert(alert) {
+  alert.classList.remove('hidden');
+  setTimeout(() => {
+    alert.classList.add('hidden');
+  }, 5000);
+}
+
+/**
+ * Function to save settings
+ */
+function saveSettings() {
+  const events = Array.from(document.querySelectorAll('[data-setting=events]:checked'))
+    .map(el => el.name);
+
+  const throttle = Array.from(document.querySelectorAll('[data-setting=throttle]'))
+    .reduce((obj, el) => Object.assign(obj, { [el.name]: parseInt(el.value, 10) }), {});
+
+  updateSettings({ events, throttle })
+    .then((res) => {
+      if (res) {
+        toggleAlert(settingsSuccessAlert);
+      } else {
+        toggleAlert(settingsErrorAlert);
+      }
+    });
 }
 
 /**
@@ -94,59 +136,44 @@ function updateNav() {
 
 /**
  * Function to insert additional sessions in table
+ * @param {Session[]} sessions - Array of session objects
  */
 function insertSessions() {
-  const tableBody = sessionsList.querySelector('tbody');
-  const from = tableBody.children.length;
+  const from = sessionsList.children.length;
 
-  // If there are some sessions left
-  if (sessions.length > from) {
-    const sessionsLeft = sessions.length - from;
-    let to = from;
+  loadStorage('sessions')
+    .then((sessions) => {
+      // If there are some sessions left
+      if (sessions.length > from) {
+        sessions.sort((a, b) => (a.start < b.start ? 1 : -1));
+        const sessionsLeft = sessions.length - from;
+        let to = from;
 
-    // Check how many sessions are remaining, if more than five, load five ...
-    if (sessionsLeft > 3) {
-      to += 3;
+        // Check how many sessions are remaining, if more than five, load five ...
+        if (sessionsLeft > 3) {
+          to += 3;
 
-    // else load the remaining sessions
-    } else {
-      to += sessionsLeft;
-      this.disabled = true;
-    }
+        // else load the remaining sessions
+        } else {
+          to += sessionsLeft;
+          this.disabled = true;
+        }
 
-    // Add the sessions to te list
-    sessions.slice(from, to)
-      .forEach((session) => {
-        tableBody.appendChild(createSessionElement(session));
-      });
-  }
-}
-
-/**
- * Function to initialize session download
- * @param {object} e - Button click event
- */
-function download(e) {
-  let element = e.target;
-
-  // If it is the image, select the parent button
-  if (element.nodeName === 'IMG') element = element.parentElement;
-
-  // If it is the button and it has a uuid
-  if (element.nodeName === 'BUTTON' && element.dataset.uuid) {
-    downloadSession(element.dataset.uuid);
-  }
+        // Add the sessions to te list
+        sessions.slice(from, to)
+          .forEach((session) => {
+            sessionsList.appendChild(createSessionElement(session));
+          });
+      }
+    });
 }
 
 /**
  * Function to initialize options page
  */
-async function init() {
-  settings = await loadStorage('settings');
-  sessions = await loadStorage('sessions')
-    .then(_sessions => _sessions.sort((a, b) => a.start < b.start));
-
-  initSettings();
+function init() {
+  loadSettings()
+    .then(settings => initSettings(settings));
   insertSessions();
   updateNav();
 }
@@ -157,5 +184,8 @@ async function init() {
 document.addEventListener('DOMContentLoaded', init);
 window.addEventListener('hashchange', updateNav);
 
-sessionsList.addEventListener('click', download);
+/**
+ * User event listeners
+ */
 sessionsBtn.addEventListener('click', insertSessions);
+saveEventsBtn.addEventListener('click', saveSettings);

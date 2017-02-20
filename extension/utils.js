@@ -2,7 +2,7 @@
 
 /**
  * Function to insert data in the chrome.storage api
- * @param {object} data - The data as an object
+ * @param {Object} data - The data as an object
  * @return {Promise<true, error>} - The saved data or false, if no data was found
  */
 function saveStorage(data) {
@@ -59,8 +59,37 @@ function loadSession(uuid) {
 }
 
 /**
+ * Function to load settings
+ * @param {string} setting - The setting to load
+ * @return {Promise<session, Error>} A Promise that returns settings if fulfilled
+ */
+function loadSettings(setting) {
+  return loadStorage('settings')
+    .then((_settings) => {
+      if (typeof setting === 'undefined') return _settings;
+      return _settings[setting];
+    });
+}
+
+/**
+ * Function to update the settings
+ * @param {Object} updates - The updates
+ * @return {Promise<true, error>} - Returns a promise with true if fulfilled, else an error
+ */
+function updateSettings(updates) {
+  return loadSettings()
+    .then((_settings) => {
+      const settings = Object.assign({}, _settings);
+      Object.keys(updates).forEach((key) => {
+        settings[key] = updates[key];
+      });
+      return saveStorage({ settings });
+    });
+}
+
+/**
  * Function to download a file with chrome.downloads.download
- * @param {any} data - The file data
+ * @param {string} url - The file string/objectURL
  * @param {string} filename - The filename
  */
 function downloadData(url, filename) {
@@ -108,6 +137,9 @@ async function removeSession(uuid) {
 
   // Remove all session sites
   await Promise.all(session.sites.map(_site => removeStorage(_site.uuid)));
+
+ // Remove all session sites screenshots
+  await Promise.all(session.sites.map(_site => removeStorage(`screenshot-${_site.uuid}`)));
 
   // Update the sessions
   await saveStorage({ sessions });

@@ -106,4 +106,4 @@ gulp.task('watch', () => {
 gulp.task('default', ['watch', 'pug', 'css', 'lint', 'image', 'manifest']);
 
 // Build Task
-gulp.task('build', ['pug-min', 'css-min', 'lint', 'manifest']);
+gulp.task('build', ['pug-min', 'css-min', 'lint', 'image', 'manifest']);

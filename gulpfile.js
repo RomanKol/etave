@@ -40,6 +40,15 @@ gulp.task('pug', () => gulp.src('./src/pug/*.pug')
   .on('error', reportError)
   .pipe(gulp.dest('./extension/')));
 
+gulp.task('pug-min', () => gulp.src('./src/pug/*.pug')
+  .pipe(pug({
+    locals: {
+      name: 'etave',
+    },
+  }))
+  .on('error', reportError)
+  .pipe(gulp.dest('./extension/')));
+
 
 // Sass css compilation task
 gulp.task('css', () => gulp.src(['./src/sass/styles.scss', './src/sass/content.scss'])
@@ -61,9 +70,12 @@ gulp.task('css-min', () => gulp.src(['./src/sass/styles.scss', './src/sass/conte
   .pipe(uncss({
     html: ['./extension/**.html'],
     ignore: [
-      '#etave-recorder-dot',
-      '.btn-danger',
-      '.btn-success',
+      /\.modal/,
+      /\.btn/,
+      /\.table/,
+      /\#etave-recorder-dot/,
+      /\.etave-reset/,
+      /\#etave-replay/,
     ],
   }))
   .pipe(cssnano())
@@ -95,4 +107,4 @@ gulp.task('watch', () => {
 gulp.task('default', ['watch', 'pug', 'css', 'lint', 'image', 'manifest']);
 
 // Build Task
-gulp.task('build', ['pug', 'css-min', 'lint', 'manifest']);
+gulp.task('build', ['pug-min', 'css-min', 'lint', 'image', 'manifest']);

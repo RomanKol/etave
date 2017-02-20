@@ -82,10 +82,8 @@ html
                     th.w-25 Times
                     th.w-20 Size
                     th Replay
+                    th Export
                 tbody
-
-          section#site.row
-            .overlay
 
     #delete-modal.modal(tabindex='-1', role='dialog')
       .modal-dialog
@@ -110,6 +108,7 @@ html
             button.btn.btn-primary Quit
 
   script(src='utils.js')
-  script(src='svg.js')
-  script(src='heatmap.js')
+  script(src='ClickPathSVG.js')
+  script(src='HeatMapCanvas.js')
+  script(src='ScrollMapCanvas.js')
   script(src='session.js')

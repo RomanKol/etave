@@ -1,8 +1,16 @@
-/* global millisecondsToIso, loadSession, loadStorage, createHeatmap, createPath */
+/* global millisecondsToIso, loadSession, loadStorage,
+ * ClickPathSVG, HeatMapCanvas, ScrollMapCanvas
+ */
+
 let session;
 let sessionEvents;
 let site;
 let ui;
+let browser;
+let browserContent;
+let iframe;
+let iframeDocument;
+let urlbar;
 
 // Play ui elements
 let timeInp;
@@ -15,65 +23,24 @@ let playIndex;
 let speed = 1;
 let playing = false;
 
-let optionsEl;
+let optionsEls;
 const options = [];
 
-/**
- * Function to check if a array contains a element
- * @param {Array} arr - The array to check
- * @param {any} needle - The element to check forEach
- * @return {Boolean} If the array contains the element
- */
-function inArray(arr, needle) {
-  return arr.indexOf(needle) !== -1;
-}
+let clickPath;
+let heatMap;
+let scrollMap;
 
-/**
- * Function to update the heatmap
- * @param {event[]} events - The events to draw
- */
-function updateHeatmap(events) {
-  // Check if there is an previous heatmap in the dom, remove it
-  const oldHeatmap = document.querySelector('#etave-heatmap');
-  if (oldHeatmap) {
-    oldHeatmap.parentElement.removeChild(oldHeatmap);
-  }
-
-  // Add a now heatmap, if checked and there are events
-  if (inArray(options, 'heatmap') && events.length > 0) {
-    const newHeatmap = createHeatmap(site.width, site.height, events);
-    newHeatmap.id = 'etave-heatmap';
-    document.body.appendChild(newHeatmap);
-  }
-}
-
-/**
- * Function to update the path
- * @param {event[]} events - The events to draw
- */
-function updatePath(events) {
-   // Check if there is an previous path in the dom, remove it
-  const oldPath = document.querySelector('#etave-path');
-  if (oldPath) {
-    oldPath.parentElement.removeChild(oldPath);
-  }
-
-  // Add a now path, if checked and there are events
-  if (inArray(options, 'path') && events.length > 0) {
-    const newPath = createPath(site.width, site.height, events);
-    newPath.id = 'etave-path';
-    document.body.appendChild(newPath);
-  }
-}
+let timeStamp = 0;
+let prevTimeStamp = 0;
+let duration;
 
 /**
  * Function to check if event has can be drawn
  * @param {Object} event - The event to check
- * @param {Number} progression - The current timestamp ot the replay
- * @return {Boolean} - If the event can be drawn
+ * @return {boolean} - If the event can be drawn
  */
-function checkEvent(event, progression) {
-  return event.timeStamp <= progression && inArray(options, event.type);
+function checkEvent(event) {
+  return event.timeStamp <= timeStamp && options.includes(event.type);
 }
 
 /**
@@ -82,33 +49,79 @@ function checkEvent(event, progression) {
  */
 function updateScroll(events) {
   // Search for the last index
-  const event = events
-    .reverse()
-    .find(_event => _event.type === 'scroll');
+  const scrolls = events
+    .filter(event => event.type === 'scroll');
 
   // Scroll
-  if (event) {
-    scrollTo(event.scrollX, event.scrollY);
+  if (scrolls.length > 0) {
+    const x = scrolls[scrolls.length - 1].scrollX;
+    const y = scrolls[scrolls.length - 1].scrollY;
+    iframe.contentWindow.scrollTo(x, y);
   }
 }
 
+/**
+ * Function to update changes
+ * @param {Object[]} events - Array of event objects
+ */
+function updateChange(events) {
+  events
+    .filter(event => event.type === 'change')
+    .forEach((change) => {
+      // Add data depending on element type
+      if (change.targetType.includes('select')) {
+        // If target is select element, values are selected indices
+        const selectOptions = iframeDocument.querySelectorAll(`${change.domPath.join('>')} option`);
+        change.selected.forEach((index) => {
+          selectOptions[index].selected = true;
+        });
+      } else if (change.type === 'checkbox' || change.type === 'radio') {
+        // If target is a input select
+        iframeDocument.querySelector(change.domPath.join('>')).change = change.checked;
+      } else {
+        // Value for text/number/.. inputs fields, radios and text areas
+        iframeDocument.querySelector(change.domPath.join('>')).value = change.value;
+      }
+    });
+}
+
+/**
+ * Function to update clicks
+ * @param {Object[]} events - Array of event objects
+ */
+function updateClick(events) {
+  events
+    .filter(event => event.type === 'click')
+    .forEach((click) => {
+      const target = iframeDocument.querySelector(click.domPath.join('>'));
+      if (target !== null) {
+        target.click();
+      }
+    });
+}
+
+/**
+ * Function to simulate key input on replay
+ * @param {Object[]} events - Array of event objects
+ */
 function updateKey(events) {
   // Create an object with selector and inputs
   const keys = events
     .filter(event => event.type === 'keydown')
     .reduce((_keys, _event) => {
       const key = _event.domPath.join('>');
-      if (key in _keys) {
-        _keys[key] += _event.key;
+      const obj = Object.assign({}, _keys);
+      if (key in obj) {
+        obj[key] += _event.key;
       } else {
-        _keys[key] = _event.key;
+        obj[key] = _event.key;
       }
-      return _keys;
+      return obj;
     }, {});
 
   // Iterate over keys and insert data
   Object.keys(keys).forEach((key) => {
-    const element = document.querySelector(key);
+    const element = iframeDocument.querySelector(key);
     if (element) element.value = keys[key];
   });
 }
@@ -116,28 +129,39 @@ function updateKey(events) {
 /**
  * Function to update the replay
  */
-  // Parse the range input value to int
-function updateReplay(heatmap = true, path = true, scroll = true, key = true) {
-  const progression = parseInt(progressInp.value, 10);
-
+function updateReplay() {
   // Filter the events by time and then by options
-  const filteredEvents = sessionEvents.filter(event => checkEvent(event, progression));
+  const filteredEvents = sessionEvents.filter(event => checkEvent(event));
+  const lastEvents = filteredEvents.filter(event => event.timeStamp >= prevTimeStamp);
 
-  // Update the heatmap and path
-  if (heatmap) updateHeatmap(filteredEvents);
-  if (path) updatePath(filteredEvents);
-  if (scroll) updateScroll(filteredEvents);
-  if (key) updateKey(filteredEvents);
+  // Update the heat map and click path
+  if (!playing) {
+    heatMap.setData(filteredEvents);
+    clickPath.setData(filteredEvents);
+
+    updateChange(filteredEvents);
+    updateScroll(filteredEvents);
+  } else {
+    heatMap.addData(lastEvents);
+    clickPath.addData(lastEvents);
+
+    updateScroll(lastEvents);
+    updateChange(lastEvents);
+  }
+
+  updateKey(lastEvents);
+  updateClick(lastEvents);
+
+  prevTimeStamp = timeStamp;
 }
 
 /**
  * Function to update the timeLeft input value
  */
 function updateDuration() {
-  const time = parseInt(progressInp.value, 10);
-  const timeLeft = parseInt(progressInp.max, 10);
-  timeInp.value = millisecondsToIso(time);
-  timeLeftInp.value = millisecondsToIso(timeLeft - time);
+  timeStamp = parseInt(progressInp.value, 10);
+  timeInp.value = millisecondsToIso(timeStamp);
+  timeLeftInp.value = millisecondsToIso(duration - timeStamp);
 }
 
 /**
@@ -146,18 +170,11 @@ function updateDuration() {
 function updateOptions() {
   // Reset the options and set them
   options.length = 0;
-  optionsEl.querySelectorAll(':checked').forEach((element) => {
-    options.push(element.name);
+  optionsEls.forEach((optionEl) => {
+    if (optionEl.checked) options.push(optionEl.name);
   });
 
   updateReplay();
-}
-
-/**
- * Function to toggle the etave replay ui
- */
-function toggleUi() {
-  ui.classList.toggle('open');
 }
 
 /**
@@ -172,8 +189,6 @@ function addProgressBackground() {
 
   const context = canvas.getContext('2d');
   context.fillStyle = ('rgba(2, 117, 216, 0.3)');
-
-  const duration = parseInt(progressInp.max, 10);
 
   sessionEvents.forEach((event) => {
     const position = (event.timeStamp / duration) * width;
@@ -196,21 +211,18 @@ function pause() {
  * Function to start replay
  */
 function play() {
-  const ts = parseInt(progressInp.value, 10);
-  const maxTs = parseInt(progressInp.max, 10);
-
-  if (ts < maxTs) {
+  if (timeStamp < duration) {
     playIndex = requestAnimationFrame(() => {
-      progressInp.value = ts + (16.67 * speed);
+      timeStamp += (17 * speed);
+      progressInp.value = timeStamp;
       updateDuration();
-      updateReplay(false);
+      updateReplay();
       play();
     });
   } else {
     pause();
     playBtn.textContent = '►';
     playing = false;
-    updateReplay(true, false);
   }
 }
 
@@ -273,12 +285,54 @@ function toggleSpeed() {
 }
 
 /**
+ * Function to toggle the heat map
+ */
+function toggleHeatMap() {
+  heatMap.canvas.style.setProperty('display', this.checked ? 'block' : 'none');
+}
+
+/**
+ * Function to toggle the click path
+ */
+function toggleClickPath() {
+  clickPath.svg.style.setProperty('display', this.checked ? 'block' : 'none');
+}
+
+/**
+ * Function to toggle the scroll map
+ */
+function toggleScrollMap() {
+  scrollMap.canvas.style.setProperty('display', this.checked ? 'block' : 'none');
+}
+
+/**
+ * Function to reinitialize iframe and reset player
+ */
+function replay() {
+  // Somehow the scroll map has to be reinitialized :/
+  scrollMap = new ScrollMapCanvas(site.width, site.height, session.viewport.width, session.viewport.height, duration, sessionEvents);
+  scrollMap.setAttributes({ style: `display: block; position: absolute; top: 0; left: 0; z-index: 1001; width: ${site.width}px; height: ${site.height}px` });
+  scrollMap.canvas.style.setProperty('display', ui.querySelector('#scrollmap').checked ? 'block' : 'none');
+
+  // Reset the site url to reload the site
+  iframe.src = site.url;
+
+  // Clear click path and heat map, no reinitialize needed
+  clickPath.clear();
+  heatMap.clear();
+
+  // Reset player
+  progressInp.value = 0;
+  updateDuration();
+}
+
+/**
  * Function to load the etave replay ui
- * @return {Promise<element>} - Returns a promise, if fulfilled returns the ui element
+ * @return {Promise<Element>} - Returns a promise, if fulfilled returns the ui element
  */
 function loadUi() {
   const uiPath = chrome.extension.getURL('replay.html');
-  ui = document.createElement('aside');
+  ui = document.createElement('div');
   ui.id = 'etave-replay';
 
   return fetch(uiPath)
@@ -286,9 +340,17 @@ function loadUi() {
     .then((html) => {
       ui.innerHTML = html;
 
-      // Get all the ui elements
-      optionsEl = ui.querySelector('#options');
-      optionsEl.addEventListener('change', updateOptions);
+      browser = ui.querySelector('#etave-browser');
+      browserContent = ui.querySelector('#etave-browser .browser-content');
+      iframe = ui.querySelector('iframe');
+      urlbar = ui.querySelector('.urlbar input');
+
+      optionsEls = ui.querySelectorAll('.option');
+      ui.querySelector('.options').addEventListener('change', updateOptions);
+
+      ui.querySelector('#heatmap').addEventListener('change', toggleHeatMap);
+      ui.querySelector('#scrollmap').addEventListener('change', toggleScrollMap);
+      ui.querySelector('#path').addEventListener('change', toggleClickPath);
 
       timeInp = ui.querySelectorAll('.timeline input[type="text"]')[0];
       timeLeftInp = ui.querySelectorAll('.timeline input[type="text"]')[1];
@@ -296,9 +358,12 @@ function loadUi() {
       progressInp = ui.querySelector('.timeline input[type="range"]');
       progressInp.addEventListener('change', updateReplay);
       progressInp.addEventListener('mousemove', updateDuration);
+      progressInp.addEventListener('click', updateDuration);
 
       playBtn = ui.querySelector('#play');
       playBtn.addEventListener('click', start);
+
+      ui.querySelector('#replay').addEventListener('click', replay);
 
       ui.querySelector('#backward').addEventListener('click', backward);
       ui.querySelector('#forward').addEventListener('click', forward);
@@ -314,12 +379,49 @@ function loadUi() {
  * Function to initialize the etave replay ui
  */
 function initUi() {
-  const duration = (site.end - site.start);
+  // Set player values
   timeInp.value = millisecondsToIso(0);
   timeLeftInp.value = millisecondsToIso(duration);
   progressInp.max = duration;
-  updateOptions();
+
+  urlbar.value = site.url;
+
+  updateOptions(false);
   addProgressBackground();
+}
+
+/**
+ * Function to scale browser
+ */
+function scaleBrowser() {
+  // Scale session viewport for current window
+  const tab = browser.querySelector('.browser');
+  const browserDim = browser.getBoundingClientRect();
+  const width = (browserDim.width - 80) / session.viewport.width;
+  const height = (browserDim.height - 80) / session.viewport.height;
+  const scale = Math.min(width, height).toFixed(2);
+  tab.style.setProperty('transform', `scale(${scale})`);
+
+  const tabDim = tab.getBoundingClientRect();
+  tab.style.setProperty('top', `${((browserDim.height - tabDim.height) / 2).toFixed(2)}px`);
+  tab.style.setProperty('left', `${((browserDim.width - tabDim.width) / 2).toFixed(2)}px`);
+}
+
+/**
+ * Function to initialize iframe
+ */
+function initIframe() {
+  // Set iframe to session viewport size
+  iframe.width = session.viewport.width;
+  iframe.height = session.viewport.height;
+  browserContent.style.cssText = `height: ${session.viewport.height}px; width: ${session.viewport.width}px;`;
+  iframe.onload = () => {
+    iframeDocument = iframe.contentDocument;
+    clickPath.appendTo(iframeDocument.body);
+    heatMap.appendTo(iframeDocument.body);
+    scrollMap.appendTo(iframeDocument.body);
+  };
+  iframe.src = site.url;
 }
 
 /**
@@ -328,21 +430,42 @@ function initUi() {
  * @param {string} uuid - Session uuid string
  */
 function initReplay({ siteUuid, sessionUuid }) {
-  loadUi()
-    .then((el) => {
-      ui = el;
-      ui.querySelector('#replay').addEventListener('click', toggleUi);
-      document.body.appendChild(ui);
-    })
-    .then(() => Promise.all([loadSession(sessionUuid), loadStorage(siteUuid)]))
-    .then(([_session, _events]) => {
+  Promise.all([loadSession(sessionUuid), loadStorage(siteUuid), loadUi()])
+    .then(([_session, _events, _ui]) => {
+      /** Reset site*/
+      document.querySelectorAll('body > *').forEach((element) => {
+        element.style.setProperty('display', 'none');
+      });
+      document.head.querySelectorAll('style, [type="text/css"]').forEach((element) => {
+        element.parentElement.removeChild(element);
+      });
+      document.documentElement.classList.add('etave-reset');
+
+      // set global variables
       session = _session;
       sessionEvents = _events;
-
+      ui = _ui;
       site = session.sites.find(_site => _site.uuid === siteUuid);
+      duration = (site.end - site.start);
     })
     .then(() => {
+      scrollMap = new ScrollMapCanvas(site.width, site.height, session.viewport.width, session.viewport.height, duration, sessionEvents);
+      scrollMap.setAttributes({ style: `display: block; position: absolute; top: 0; left: 0; z-index: 1001; width: ${site.width}px; height: ${site.height}px` });
+      heatMap = new HeatMapCanvas(site.width, site.height);
+      heatMap.setAttributes({ style: `display: block; position: absolute; top: 0; left: 0; z-index: 1002; width: ${site.width}px; height: ${site.height}px` });
+      clickPath = new ClickPathSVG(site.width, site.height);
+      clickPath.setAttributes({ style: `display: block; position: absolute; top: 0; left: 0; z-index: 1003; width: ${site.width}px; height: ${site.height}px` });
+    })
+    .then(() => {
+      initIframe();
+      document.body.appendChild(ui);
       initUi();
+      scaleBrowser();
     })
     .catch((err) => { console.error(err); });
 }
+
+/**
+ * Page event listener
+ */
+window.addEventListener('resize', scaleBrowser);

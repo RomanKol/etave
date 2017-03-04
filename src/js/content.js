@@ -488,7 +488,17 @@ function messageListener(msg, sender, sendResponse) {
         console.error(err);
       });
 
-    const { height, width } = document.documentElement.getBoundingClientRect();
+    const width = Math.max(
+      document.documentElement.getBoundingClientRect().width,
+      document.body.getBoundingClientRect().width,
+      document.body.scrollWidth,
+    );
+
+    const height = Math.max(
+      document.documentElement.getBoundingClientRect().height,
+      document.body.getBoundingClientRect().height,
+      document.body.scrollHeight,
+    );
 
     const response = {
       height: Math.round(height),

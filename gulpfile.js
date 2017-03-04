@@ -73,6 +73,7 @@ gulp.task('css-min', () => gulp.src(['./src/sass/styles.scss', './src/sass/conte
       /\.modal/,
       /\.btn/,
       /\.table/,
+      /\.list-group/,
       /\#etave-recorder-dot/,
       /\.etave-reset/,
       /\#etave-replay/,

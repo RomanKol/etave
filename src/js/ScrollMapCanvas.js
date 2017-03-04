@@ -48,6 +48,7 @@ class ScrollMapCanvas {
    */
   clear() {
     this.data = [];
+    this.norm = -Infinity;
     this.context.clearRect(0, 0, this.width, this.height);
   }
 
@@ -70,29 +71,36 @@ class ScrollMapCanvas {
   update(data) {
     const scrolls = [];
     if (data.length > 0) {
-      let norm = -Infinity;
 
-      // Iterate over scrolls to add duration and find norm value
+      // Iterate over events to add duration and find norm value
       for (let i = 0; i < data.length - 1; i += 1) {
         const index = scrolls.findIndex(_scroll => ScrollMapCanvas.compare(_scroll, data[i]));
         if (index !== -1) {
           scrolls[index].duration += (data[i + 1].timeStamp || this.duration) - data[i].timeStamp;
-          if (scrolls[index].duration > norm) norm = scrolls[index].duration;
+          if (scrolls[index].duration > this.norm) this.norm = scrolls[index].duration;
         } else {
           const duration = (data[i + 1].timeStamp || this.duration) - data[i].timeStamp;
           scrolls.push(Object.assign({ duration }, data[i]));
-          if (duration > norm) norm = duration;
+          if (duration > this.norm) this.norm = duration;
         }
       }
-      // Iterate over scrolls to add duration and find norm value
+
+      // Create temp canvas
+      const factor = 8;
+      const tempCanvas = document.createElement('canvas');
+      tempCanvas.width = this.width / factor;
+      tempCanvas.height = this.height / factor;
+      const tempContext = tempCanvas.getContext('2d');
+
+      // Iterate over scrolls to add alpha to canvas
       for (let i = 0; i < scrolls.length; i += 1) {
-        const alpha = (scrolls[i].duration / norm).toFixed(2);
+        const alpha = (scrolls[i].duration / this.norm).toFixed(2);
         if (alpha !== '0.00') {
-          this.context.fillStyle = `rgba(0,0,0,${alpha})`;
-          this.context.fillRect(scrolls[i].scrollX, scrolls[i].scrollY, this.vw, this.vh);
+          tempContext.fillStyle = `rgba(0,0,0,${alpha})`;
+          tempContext.fillRect(scrolls[i].scrollX / factor, scrolls[i].scrollY / factor, this.vw / factor, this.vh / factor);
         }
       }
-      const pixels = this.context.getImageData(0, 0, this.width, this.height);
+      const pixels = tempContext.getImageData(0, 0, this.width / factor, this.height / factor);
 
       for (let i = 0; i < pixels.data.length; i += 4) {
         pixels.data[i + 0] = 142; // R
@@ -101,7 +109,9 @@ class ScrollMapCanvas {
         pixels.data[i + 3] = 255 - pixels.data[i + 3];  // A
       }
 
-      this.context.putImageData(pixels, 0, 0);
+      tempContext.putImageData(pixels, 0, 0);
+
+      this.context.drawImage(tempCanvas, 0, 0, this.width, this.height);
     }
   }
 

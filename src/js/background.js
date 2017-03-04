@@ -19,6 +19,7 @@
  * @prop {number} start - Timestamp of session start
  * @prop {string} uuid - Uuid of the session
  * @prop {Object} viewport - Object with height and width of the tab
+ * @prop {number} tabId - The if of the tab
  */
 
 /**
@@ -138,7 +139,7 @@ function createSite(tab) {
  * Function to create a new session
  * @param {Object} sessionData - Object with session data
  * @param {Object} tab - Object with tab information
- * @return {Object} - Returns a session Object
+ * @return {Session} - Returns a session Object
  */
 function createSession(sessionData, tab) {
   const session = {

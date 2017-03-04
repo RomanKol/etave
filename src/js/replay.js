@@ -308,18 +308,19 @@ function toggleScrollMap() {
 /**
  * Function to reinitialize iframe and reset player
  */
-function replay() {
+function restart() {
   // Somehow the scroll map has to be reinitialized :/
   scrollMap = new ScrollMapCanvas(site.width, site.height, session.viewport.width, session.viewport.height, duration, sessionEvents);
-  scrollMap.setAttributes({ style: `display: block; position: absolute; top: 0; left: 0; z-index: 1001; width: ${site.width}px; height: ${site.height}px` });
-  scrollMap.canvas.style.setProperty('display', ui.querySelector('#scrollmap').checked ? 'block' : 'none');
+  scrollMap.setAttributes({ style: `display: ${ui.querySelector('#scrollmap').checked ? 'block' : 'none'}; position: absolute; top: 0; left: 0; z-index: 1001; width: ${site.width}px; height: ${site.height}px` });
+
+  heatMap = new HeatMapCanvas(site.width, site.height);
+  heatMap.setAttributes({ style: `display: ${ui.querySelector('#heatmap').checked ? 'block' : 'none'}; position: absolute; top: 0; left: 0; z-index: 1002; width: ${site.width}px; height: ${site.height}px` });
 
   // Reset the site url to reload the site
   iframe.src = site.url;
 
-  // Clear click path and heat map, no reinitialize needed
+  // Clear click path, no reinitialize needed
   clickPath.clear();
-  heatMap.clear();
 
   // Reset player
   progressInp.value = 0;
@@ -363,7 +364,7 @@ function loadUi() {
       playBtn = ui.querySelector('#play');
       playBtn.addEventListener('click', start);
 
-      ui.querySelector('#replay').addEventListener('click', replay);
+      ui.querySelector('#replay').addEventListener('click', restart);
 
       ui.querySelector('#backward').addEventListener('click', backward);
       ui.querySelector('#forward').addEventListener('click', forward);

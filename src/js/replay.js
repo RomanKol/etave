@@ -93,7 +93,10 @@ function updateClick(events) {
   events
     .filter(event => event.type === 'click')
     .forEach((click) => {
-      const target = iframeDocument.querySelector(click.domPath.join('>'));
+      // Build element selector and unescape starting numeric ids
+      const selector = click.domPath
+        .map((_selector => _selector.replace(/(^#[0-9])/, (match, p1, offset, string) => `#\\\\${p1.charCodeAt(0)} ${string.substring(offset+2)}`))).join('>');
+      const target = iframeDocument.querySelector(selector);
       if (target !== null) {
         target.click();
       }

@@ -436,7 +436,7 @@ function initReplay({ siteUuid, sessionUuid }) {
       document.querySelectorAll('body > *').forEach((element) => {
         element.style.setProperty('display', 'none');
       });
-      document.head.querySelectorAll('style, [type="text/css"]').forEach((element) => {
+      document.head.querySelectorAll('style, [type="text/css"], [rel="stylesheet"]').forEach((element) => {
         element.parentElement.removeChild(element);
       });
       document.documentElement.classList.add('etave-reset');

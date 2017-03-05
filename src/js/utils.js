@@ -146,6 +146,20 @@ async function removeSession(uuid) {
 }
 
 /**
+ * Function to send a message
+ * @param {any} msg - Message to send
+ * @return {Promise<Object, Error>} - Returns a tab object, else an error
+ */
+function getActiveTab() {
+  return new Promise((resolve, reject) => {
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      if (tabs.length === 0) reject(new Error('No tab'));
+      resolve(tabs[0]);
+    });
+  });
+}
+
+/**
  * Function to add a leading null
  * @param {number} num - A number
  * @return {string} - The number as a string with leading null

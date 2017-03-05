@@ -1,4 +1,5 @@
-/* global loadStorage, saveStorage */
+/* global loadStorage, saveStorage, getActiveTab */
+/* eslint no-unused-vars: ["error", { "varsIgnorePattern": "[start|stop]Recording" }] */
 
 /**
  * @typedef {Object} Site
@@ -21,19 +22,6 @@
  * @prop {Object} viewport - Object with height and width of the tab
  * @prop {number} tabId - The if of the tab
  */
-
-/**
- * Function to get the current tab
- * @return {Promise<Object, Error>} - Returns a tab object or an error
- */
-function getCurrentTab() {
-  return new Promise((resolve, reject) => {
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      if (tabs.length === 0) reject(new Error('No tab'));
-      resolve(tabs[0]);
-    });
-  });
-}
 
 /**
  * Function to capture/create a thumbnail of the tab
@@ -211,7 +199,7 @@ function tabListener(tabId, info, tab) {
  */
 function startRecording(data) {
   // Get active tab
-  return getCurrentTab()
+  return getActiveTab()
     .then((tab) => {
       // Create new session and site object
       const session = createSession(data.session, tab);
@@ -250,7 +238,7 @@ function startRecording(data) {
  */
 function stopRecording(data) {
   // Get the active tab and load the sessions
-  return Promise.all([getCurrentTab(), loadStorage('recordingSessions')])
+  return Promise.all([getActiveTab(), loadStorage('recordingSessions')])
     .then(([tab, _sessions]) => {
       // Remove the tab listener
       if (chrome.tabs.onUpdated.hasListener(tabListener)) {
@@ -269,33 +257,6 @@ function stopRecording(data) {
         sendTabMessage(tab, data),
       ]);
     });
-}
-
-/**
- * Object that holds the tasks which can be called by messages
- * @typedef {Object} tasks
- * @prop {Function} startRecording - The startRecording function
- * @prop {Function} stopRecording - The stopRecording function
- */
-const tasks = {
-  startRecording,
-  stopRecording,
-};
-
-/**
- * Function to handle messages
- * @param {any} msg - The message that was send
- * @param {Object} sender - The sender of the message
- * @param {function} sendResponse - Function to send a response
- */
-function messageListener(msg, sender, sendResponse) {
-  if ('task' in msg) {
-    tasks[msg.task](msg)
-      .catch((err) => {
-        console.error(err);
-      });
-    sendResponse({ response: true });
-  }
 }
 
 /**
@@ -334,5 +295,4 @@ function init() {
 /**
  * Chrome runtime listeners
  */
-chrome.runtime.onMessage.addListener(messageListener);
 chrome.runtime.onInstalled.addListener(init);

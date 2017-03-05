@@ -1,4 +1,4 @@
-/* globals loadStorage, loadSettings, updateSettings */
+/* globals loadStorage, loadSettings, getActiveTab, updateSettings */
 
 /**
  * DOM elements user can interact with
@@ -11,6 +11,8 @@ const navTabs = document.querySelector('.nav-tabs');
 const nameInp = document.querySelector('#name');
 const descrInp = document.querySelector('#descr');
 
+const background = chrome.extension.getBackgroundPage();
+
 /**
  * Function to get the current settings
  * @return {string[]} - Array of active settings
@@ -22,34 +24,6 @@ function getSettings() {
       settings.push(element.name);
     });
   return settings;
-}
-
-/**
- * Function to send a message
- * @param {any} msg - Message to send
- * @return {Promise<Object, Error>} - Returns a tab object, else an error
- */
-function getActiveTab() {
-  return new Promise((resolve, reject) => {
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      if (tabs.length === 0) reject(new Error('No tab'));
-      resolve(tabs[0]);
-    });
-  });
-}
-
-/**
- * Function to send a message to the active tab
- * @param {any} msg - The message to send
- * @return {Promise<Object, Error>} - Returns the response object, else an error
- */
-function sendRuntimeMessage(msg) {
-  return new Promise((resolve, reject) => {
-    chrome.runtime.sendMessage(msg, (response) => {
-      if (response === undefined) reject(new Error('Message undefined'));
-      resolve(response);
-    });
-  });
 }
 
 /**
@@ -87,7 +61,7 @@ function getDomain(url) {
  * Function to start recording
  */
 function recording() {
-  const msg = {};
+
   if (recorderBtn.classList.contains('btn-success')) {
     // Update the button
     recorderBtn.classList.remove('btn-success');
@@ -95,8 +69,16 @@ function recording() {
     recorderBtn.textContent = 'stop and save';
 
     // Set the message
-    msg.task = 'startRecording';
-    msg.session = getSessionSettings();
+    const msg = {
+      task: 'startRecording',
+      session: getSessionSettings(),
+    }
+
+    background.startRecording(msg)
+      .then(() => {
+        window.close();
+      });
+
   } else {
     // Update the button
     recorderBtn.classList.contains('btn-success');
@@ -104,14 +86,15 @@ function recording() {
     recorderBtn.textContent = 'start';
 
     // Set the message
-    msg.task = 'stopRecording';
-  }
+    const msg = {
+      task: 'stopRecording',
+    }
 
-  // Send the message
-  sendRuntimeMessage(msg)
-    .then(() => {
-      window.close();
-    });
+    background.stopRecording(msg)
+      .then(() => {
+        window.close();
+      });
+  }
 }
 
 /**

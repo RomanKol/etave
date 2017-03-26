@@ -63,11 +63,6 @@ function getDomain(url) {
 function recording() {
 
   if (recorderBtn.classList.contains('btn-success')) {
-    // Update the button
-    recorderBtn.classList.remove('btn-success');
-    recorderBtn.classList.add('btn-danger');
-    recorderBtn.textContent = 'stop and save';
-
     // Set the message
     const msg = {
       task: 'startRecording',
@@ -80,11 +75,6 @@ function recording() {
       });
 
   } else {
-    // Update the button
-    recorderBtn.classList.contains('btn-success');
-    recorderBtn.classList.contains('btn-success');
-    recorderBtn.textContent = 'start';
-
     // Set the message
     const msg = {
       task: 'stopRecording',

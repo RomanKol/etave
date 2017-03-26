@@ -23,6 +23,8 @@ let playIndex;
 let speed = 1;
 let playing = false;
 
+let fadeValue;
+
 let optionsEls;
 const options = [];
 
@@ -314,10 +316,10 @@ function toggleScrollMap() {
 function restart() {
   // Somehow the scroll map has to be reinitialized :/
   scrollMap = new ScrollMapCanvas(site.width, site.height, session.viewport.width, session.viewport.height, duration, sessionEvents);
-  scrollMap.setAttributes({ style: `display: ${ui.querySelector('#scrollmap').checked ? 'block' : 'none'}; position: absolute; top: 0; left: 0; z-index: 1001; width: ${site.width}px; height: ${site.height}px` });
+  scrollMap.setAttributes({ style: `display: ${ui.querySelector('#scrollmap').checked ? 'block' : 'none'}; position: absolute; top: 0; left: 0; z-index: 1001; width: ${site.width}px; height: ${site.height}px; background-color: transparent;` });
 
   heatMap = new HeatMapCanvas(site.width, site.height);
-  heatMap.setAttributes({ style: `display: ${ui.querySelector('#heatmap').checked ? 'block' : 'none'}; position: absolute; top: 0; left: 0; z-index: 1002; width: ${site.width}px; height: ${site.height}px` });
+  heatMap.setAttributes({ style: `display: ${ui.querySelector('#heatmap').checked ? 'block' : 'none'}; position: absolute; top: 0; left: 0; z-index: 1002; width: ${site.width}px; height: ${site.height}px; background-color: transparent;` });
 
   // Reset the site url to reload the site
   iframe.src = site.url;
@@ -328,6 +330,27 @@ function restart() {
   // Reset player
   progressInp.value = 0;
   updateDuration();
+}
+
+/**
+ * Function to update fade in overlays
+ */
+function updateFade() {
+  let fade = false;
+  if (!fadeValue.disabled) {
+    fade = parseInt(fadeValue.value, 10) || 0;
+  }
+
+  clickPath.setFade(fade);
+  heatMap.setFade(fade);
+}
+
+/**
+ * Function to toggle fadeValue
+ */
+function toggleFade() {
+  fadeValue.disabled = !this.checked;
+  updateFade();
 }
 
 /**
@@ -358,6 +381,10 @@ function loadUi() {
 
       timeInp = ui.querySelectorAll('.timeline input[type="text"]')[0];
       timeLeftInp = ui.querySelectorAll('.timeline input[type="text"]')[1];
+
+      fadeValue = ui.querySelector('#fadeValue');
+      fadeValue.addEventListener('change', updateFade);
+      ui.querySelector('#fade').addEventListener('change', toggleFade);
 
       progressInp = ui.querySelector('.timeline input[type="range"]');
       progressInp.addEventListener('change', updateReplay);
@@ -454,11 +481,11 @@ function initReplay({ siteUuid, sessionUuid }) {
     })
     .then(() => {
       scrollMap = new ScrollMapCanvas(site.width, site.height, session.viewport.width, session.viewport.height, duration, sessionEvents);
-      scrollMap.setAttributes({ style: `display: block; position: absolute; top: 0; left: 0; z-index: 1001; width: ${site.width}px; height: ${site.height}px` });
+      scrollMap.setAttributes({ style: `display: block; position: absolute; top: 0; left: 0; z-index: 1001; width: ${site.width}px; height: ${site.height}px; background-color: transparent;` });
       heatMap = new HeatMapCanvas(site.width, site.height);
-      heatMap.setAttributes({ style: `display: block; position: absolute; top: 0; left: 0; z-index: 1002; width: ${site.width}px; height: ${site.height}px` });
+      heatMap.setAttributes({ style: `display: block; position: absolute; top: 0; left: 0; z-index: 1002; width: ${site.width}px; height: ${site.height}px; background-color: transparent;` });
       clickPath = new ClickPathSVG(site.width, site.height);
-      clickPath.setAttributes({ style: `display: block; position: absolute; top: 0; left: 0; z-index: 1003; width: ${site.width}px; height: ${site.height}px` });
+      clickPath.setAttributes({ style: `display: block; position: absolute; top: 0; left: 0; z-index: 1003; width: ${site.width}px; height: ${site.height}px; background-color: transparent;` });
     })
     .then(() => {
       initIframe();

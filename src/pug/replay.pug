@@ -10,7 +10,7 @@ section#etave-browser
       div.urlbar
         svg(xmlns='http://www.w3.org/2000/svg' viewbox='0 0 40 40')
           path(d='M16.3 15L10 21.3l6.3 6.2 2.5-2.5-3.8-3.7 3.8-3.8-2.5-2.5zm5 2.5l3.7 3.8-3.7 3.7 2.5 2.5 6.2-6.2-6.2-6.3-2.5 2.5zm6.2-15H5v35h30V10l-7.5-7.5zm5 32.5h-25V5H25l7.5 7.5V35z', fill='#808080')
-        input(value='/')
+        input(value='/' disabled)
     section.browser-content
       div
         iframe
@@ -53,6 +53,13 @@ section#etave-player
       button.player-speed.btn.btn-circle(disabled data-speed=1) 1x
       button.player-speed.btn.btn-circle(data-speed=2) 2x
       button.player-speed.btn.btn-circle(data-speed=4) 4x
+
+    section.fade
+      label(title="Fade events out")
+        input#fade(type='checkbox' name='fade')
+        | Fade
+
+      input#fadeValue(type='number' name='fadeValue' min=0 value=10 disabled)
 
   section.options
 

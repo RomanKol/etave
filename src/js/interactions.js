@@ -273,7 +273,7 @@ function init() {
 
         interactionList.innerHTML = html;
       })
-      .catch((e) => {toggleModal(errorModal); console.log(e)});
+      .catch(() => { toggleModal(errorModal); });
   } else {
     toggleModal(errorModal);
   }

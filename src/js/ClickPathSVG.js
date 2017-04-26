@@ -115,7 +115,7 @@ class ClickPathSVG {
    * @param {Object[]} data - Array with mousemove, mousedown and mouseup event data
    */
   setData(data) {
-    this.data = ClickPathSVG.filterData(data)
+    this.data = ClickPathSVG.filterData(data);
     this.clear();
     this.update(this.data);
   }

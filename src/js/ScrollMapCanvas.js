@@ -53,35 +53,21 @@ class ScrollMapCanvas {
   }
 
   /**
-   * Function to compare two scroll events
-   * @param {Object} scrollA - The first scroll event object
-   * @param {Object} scrollB - The second scroll event object
-   * @return {boolean} Whether they are close to each other
-   */
-  static compare(scrollA, scrollB) {
-    const differenceX = Math.abs(scrollA.scrollY - scrollB.scrollY);
-    const differenceY = Math.abs(scrollA.scrollX - scrollB.scrollX);
-    return differenceX < 25 && differenceY < 25;
-  }
-
-  /**
    * Function to update the canvas
    * @param {Object[]} name description
    */
   update(data) {
     const scrolls = [];
     if (data.length > 0) {
-
       // Iterate over events to add duration and find norm value
-      for (let i = 0; i < data.length - 1; i += 1) {
-        const index = scrolls.findIndex(_scroll => ScrollMapCanvas.compare(_scroll, data[i]));
-        if (index !== -1) {
-          scrolls[index].duration += (data[i + 1].timeStamp || this.duration) - data[i].timeStamp;
-          if (scrolls[index].duration > this.norm) this.norm = scrolls[index].duration;
-        } else {
+      if (data.length === 1) {
+        scrolls.push(Object.assign({ duration: this.duration }, data[0]));
+        this.norm = this.duration;
+      } else {
+        for (let i = 0; i < data.length - 1; i += 1) {
           const duration = (data[i + 1].timeStamp || this.duration) - data[i].timeStamp;
-          scrolls.push(Object.assign({ duration }, data[i]));
           if (duration > this.norm) this.norm = duration;
+          scrolls.push(Object.assign({ duration }, data[i]));
         }
       }
 
@@ -92,25 +78,27 @@ class ScrollMapCanvas {
       tempCanvas.height = this.height / factor;
       const tempContext = tempCanvas.getContext('2d');
 
+      const tmpVw = this.vw / factor;
+      const tmpVh = this.vh / factor;
+
       // Iterate over scrolls to add alpha to canvas
       for (let i = 0; i < scrolls.length; i += 1) {
         const alpha = (scrolls[i].duration / this.norm).toFixed(2);
         if (alpha !== '0.00') {
           tempContext.fillStyle = `rgba(0,0,0,${alpha})`;
-          tempContext.fillRect(scrolls[i].scrollX / factor, scrolls[i].scrollY / factor, this.vw / factor, this.vh / factor);
+          tempContext.fillRect(scrolls[i].scrollX / factor, scrolls[i].scrollY / factor, tmpVw, tmpVh);
         }
       }
-      const pixels = tempContext.getImageData(0, 0, this.width / factor, this.height / factor);
 
+      const pixels = tempContext.getImageData(0, 0, tempCanvas.width, tempCanvas.height);
       for (let i = 0; i < pixels.data.length; i += 4) {
-        pixels.data[i + 0] = 142; // R
-        pixels.data[i + 1] = 68; // G
-        pixels.data[i + 2] = 173; // B
+        // pixels.data[i + 0] = 142;  // R
+        // pixels.data[i + 1] = 68;   // G
+        // pixels.data[i + 2] = 173;  // B
         pixels.data[i + 3] = 255 - pixels.data[i + 3];  // A
       }
 
       tempContext.putImageData(pixels, 0, 0);
-
       this.context.drawImage(tempCanvas, 0, 0, this.width, this.height);
     }
   }

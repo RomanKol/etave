@@ -23,7 +23,7 @@ class HeatMapCanvas {
     this.context = this.canvas.getContext('2d');
 
     this.radius = radius;
-    this.circle = HeatMapCanvas.createCircle();
+    this.circle = HeatMapCanvas.createCircle(this.radius);
     this.gradient = HeatMapCanvas.createGradient();
     this.gradientPixels = this.gradient.getContext('2d').getImageData(0, 0, 256, 1).data;
 
@@ -135,7 +135,7 @@ class HeatMapCanvas {
       this.context.drawImage(
         this.circle,
         data[i].pageX - this.radius,
-        data[i].pageY - this.radius
+        data[i].pageY - this.radius,
       );
     }
 
@@ -152,7 +152,7 @@ class HeatMapCanvas {
       bBox.left,
       bBox.top,
       bBox.width,
-      bBox.height
+      bBox.height,
     );
 
     // Iterate over the alpha pixels
@@ -185,7 +185,7 @@ class HeatMapCanvas {
    * @param {Object[]} data - Array with mousemove, mousedown and mouseup event data
    */
   addData(data) {
-    const adds = HeatMapCanvas.filterData(data)
+    const adds = HeatMapCanvas.filterData(data);
     this.data = this.data.concat(...adds);
     this.update(adds);
   }

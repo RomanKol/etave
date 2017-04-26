@@ -156,7 +156,7 @@ function tabListener(tabId, info, tab) {
     // Find the session object of the tab
     sendTabMessage(tab, { status: true })
       .then((response) => {
-        if (response.isRecording) return Promise.reject(new Error('Tab is already recording'))
+        if (response.isRecording) return Promise.reject(new Error('Tab is already recording'));
         return loadStorage('recordingSessions');
       })
       .then((_sessions) => {

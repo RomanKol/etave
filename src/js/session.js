@@ -89,7 +89,7 @@ function openReplay() {
 }
 
 /**
- * Function to download heatmap
+ * Function to download heat map
  */
 function downloadHeatmap() {
   const site = this.dataset.site;
@@ -203,16 +203,16 @@ function createSitesListItem(site) {
         <img src='play.svg' alt='Replay'>
       </button>
       <br>
-      <label>Interactions</label>
+      <label>Input log</label>
       <br>
-      <a href='interactions.html?session=${session.uuid}&site=${site.uuid}' alt='Interactions'>
-        <button class='btn btn-icon btn-success interactions' title='Interactions'>
+      <a href='inputlog.html?session=${session.uuid}&site=${site.uuid}' alt='Inputlog'>
+        <button class='btn btn-icon btn-success inputlog' title='Inputlog'>
           <img src='play.svg' alt='Play'>
         </button>
       </a>
     </td>
     <td>
-      <label>Heatmap</label>
+      <label>Heat map</label>
       <br>
       <button class='btn btn-icon btn-primary heatmap mb-2' title='Heatmap' data-site='${site.uuid}' data-width='${site.width}' data-height='${site.height}'>
         <img src='heatmap.svg' alt='Heatmap'>
@@ -224,7 +224,7 @@ function createSitesListItem(site) {
         <img src='path.svg' alt='Path'>
       </button>
       <br>
-      <label>Scrollmap</label>
+      <label>Scroll map</label>
       <br>
       <button class='btn btn-icon btn-primary scrollmap mb-2' title='Scrollmap' data-site='${site.uuid}' data-width='${site.width}' data-height='${site.height} data-duration='${site.start - site.end}'>
         <img src='scrollmap.svg' alt='Scrollmap'>
@@ -241,9 +241,13 @@ function createSitesListItem(site) {
 
   const preview = item.querySelector('img');
 
+  // Try to load screenshot else console waring
   loadStorage(`screenshot-${site.uuid}`)
     .then((img) => {
       preview.src = img;
+    })
+    .catch((err) => {
+      console.warn('No screenshot available!', err);
     });
 
   return item;
@@ -333,7 +337,7 @@ function init() {
       })
       .catch(() => toggleModal(errorModal));
   } else {
-    toggleModal(errorModal)
+    toggleModal(errorModal);
   }
 }
 

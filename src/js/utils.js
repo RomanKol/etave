@@ -14,7 +14,6 @@ function saveStorage(data) {
   });
 }
 
-
 /**
  * Function to load data from the chrome.storage api
  * @param {string} key - The key of the data

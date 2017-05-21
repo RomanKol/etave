@@ -61,24 +61,22 @@ function getDomain(url) {
  * Function to start recording
  */
 function recording() {
-
   if (recorderBtn.classList.contains('btn-success')) {
     // Set the message
     const msg = {
       task: 'startRecording',
       session: getSessionSettings(),
-    }
+    };
 
     background.startRecording(msg)
       .then(() => {
         window.close();
       });
-
   } else {
     // Set the message
     const msg = {
       task: 'stopRecording',
-    }
+    };
 
     background.stopRecording(msg)
       .then(() => {

@@ -114,7 +114,7 @@ class HeatMapCanvas {
   }
 
   /**
-   * Function to update the heatmap
+   * Function to update the heat map
    * @param {Object[]} data - Event data
    */
   updateHeatMap(data) {

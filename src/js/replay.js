@@ -97,7 +97,7 @@ function updateClick(events) {
     .forEach((click) => {
       // Build element selector and unescape starting numeric ids
       const selector = click.domPath
-        .map((_selector => _selector.replace(/(^#[0-9])/, (match, p1, offset, string) => `#\\\\${p1.charCodeAt(0)} ${string.substring(offset+2)}`))).join('>');
+        .map((_selector => _selector.replace(/(^#[0-9])/, (match, p1, offset, string) => `#\\\\${p1.charCodeAt(0)} ${string.substring(offset + 2)}`))).join('>');
       const target = iframeDocument.querySelector(selector);
       if (target !== null) {
         target.click();
@@ -414,7 +414,6 @@ function initUi() {
   timeInp.value = millisecondsToIso(0);
   timeLeftInp.value = millisecondsToIso(duration);
   progressInp.max = duration;
-
   urlbar.value = site.url;
 
   updateOptions(false);

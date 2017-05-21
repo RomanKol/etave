@@ -12,14 +12,14 @@ html
       button#back.btn.btn-primary.btn-icon.mr-2
         img(src='chevron-left.svg', alt='Back')
 
-      span.navbar-brand etave session interactions
+      span.navbar-brand etave session inputlog
 
       button#download.btn.btn-primary.btn-icon.float-right
         img(src='download.svg', alt='Download')
 
     main
       .container
-        section#interactions.row
+        section#inputlog.row
           ul.list-group.col-12.mt-4.mb-4(style='font-family: monospace;')
 
     #error-modal.modal(tabindex='-1', role='dialog')
@@ -33,4 +33,4 @@ html
             button.btn.btn-primary Quit
 
   script(src='utils.js')
-  script(src='interactions.js')
+  script(src='inputlog.js')

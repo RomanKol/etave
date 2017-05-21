@@ -1,4 +1,4 @@
-/* global loadStorage, loadSettings, updateSettings, downloadSession, millisecondsToIso*/
+/* global loadStorage, saveStorage, loadSettings, updateSettings, downloadSession, downloadData, millisecondsToIso*/
 
 /**
  * Dom elements
@@ -9,6 +9,9 @@ const navList = document.querySelector('nav > ul');
 const saveEventsBtn = document.querySelector('#settings-save');
 const settingsSuccessAlert = document.querySelector('#settings .alert-success');
 const settingsErrorAlert = document.querySelector('#settings .alert-danger');
+const importBtn = document.querySelector('#import');
+const importInp = document.querySelector('#importFile');
+const exportBtn = document.querySelector('#export');
 
 /**
  * Function to initialize session download
@@ -169,6 +172,59 @@ function insertSessions() {
 }
 
 /**
+ * Function to export data
+ */
+function exportData() {
+  new Promise((resolve, reject) => {
+    chrome.storage.local.get(null, (storage) => {
+      if (chrome.runtime.lastError) reject(new Error('Runtime error'));
+      resolve(storage);
+    });
+  })
+  .then((storage) => {
+    if (storage.recordingSessions !== undefined) delete storage.recordingSessions;
+    if (storage.settings !== undefined) delete storage.settings;
+    Object.keys(storage).forEach((key) => {
+      if (key.startsWith('screenshot')) delete storage[key];
+    });
+    return storage;
+  })
+  .then((data) => {
+    const dataBlob = new Blob([JSON.stringify(data)]);
+    const dataUrl = URL.createObjectURL(dataBlob);
+
+    // Download the data
+    downloadData(dataUrl, `etave-export-${new Date().toLocaleDateString()}.json`);
+  });
+}
+
+/**
+ * Function to toggle import button
+ */
+function toggleImport() {
+  importBtn.disabled = !(this.files.length > 0);
+}
+
+/**
+ * Function to import data
+ */
+function importData() {
+  const fileReader = new FileReader();
+  fileReader.onload = function () {
+    const data = JSON.parse(this.result);
+    const sites = [].concat(...data.sessions.map(session => session.sites.map(site => site.uuid)));
+    loadStorage('sessions')
+      .then(sessions => sessions.concat(data.sessions).sort((a, b) => (a.start < b.start ? -1 : 1)))
+      .then(sessions => saveStorage({ sessions }))
+      .then(() => Promise.all(sites.map(site => saveStorage({ [site]: data[site] }))))
+      .then(() => {
+        window.location.reload();
+      });
+  };
+  fileReader.readAsText(importInp.files[0]);
+}
+
+/**
  * Function to initialize options page
  */
 function init() {
@@ -189,3 +245,6 @@ window.addEventListener('hashchange', updateNav);
  */
 sessionsBtn.addEventListener('click', insertSessions);
 saveEventsBtn.addEventListener('click', saveSettings);
+exportBtn.addEventListener('click', exportData);
+importBtn.addEventListener('click', importData);
+importInp.addEventListener('change', toggleImport);

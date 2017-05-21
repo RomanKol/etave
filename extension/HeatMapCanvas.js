@@ -23,9 +23,11 @@ class HeatMapCanvas {
     this.context = this.canvas.getContext('2d');
 
     this.radius = radius;
-    this.circle = HeatMapCanvas.createCircle();
+    this.circle = HeatMapCanvas.createCircle(this.radius);
     this.gradient = HeatMapCanvas.createGradient();
     this.gradientPixels = this.gradient.getContext('2d').getImageData(0, 0, 256, 1).data;
+
+    this.fade = false;
 
     // Initialize
     this.update(this.data);
@@ -94,7 +96,6 @@ class HeatMapCanvas {
    * Function to clear the canvas context
    */
   clear() {
-    this.data = [];
     this.context.clearRect(0, 0, this.width, this.height);
   }
 
@@ -103,58 +104,70 @@ class HeatMapCanvas {
    * @param {Object[]} name description
    */
   update(data) {
-    if (data.length > 0) {
-      // Bounding box object
-      const bBox = {
-        top: Infinity,
-        right: 0,
-        bottom: 0,
-        left: Infinity,
-      };
-
-      // Iterate over the new data to find the bounding box data and draw the new circles
-      for (let i = 0; i < data.length; i += 1) {
-        if (bBox.top > data[i].pageY) bBox.top = data[i].pageY;
-        if (bBox.right < data[i].pageX) bBox.right = data[i].pageX;
-        if (bBox.bottom < data[i].pageY) bBox.bottom = data[i].pageY;
-        if (bBox.left > data[i].pageX) bBox.left = data[i].pageX;
-        this.context.drawImage(
-          this.circle,
-          data[i].pageX - this.radius,
-          data[i].pageY - this.radius,
-        );
-      }
-
-      // Fix the bounding box with the radius and add with/height
-      bBox.top -= this.radius;
-      bBox.right += this.radius;
-      bBox.bottom += this.radius;
-      bBox.left -= this.radius;
-      bBox.width = bBox.right - bBox.left;
-      bBox.height = bBox.bottom - bBox.top;
-
-      // Get the pixels form the newly drawn circles
-      const drawAreaPixels = this.context.getImageData(
-        bBox.left,
-        bBox.top,
-        bBox.width,
-        bBox.height,
-      );
-
-      // Iterate over the alpha pixels
-      for (let i = 0; i < drawAreaPixels.data.length; i += 4) {
-        const p = drawAreaPixels.data[i + 3] * 4;
-
-        // Replace the grey scale with gradient colors
-        if (p) {
-          drawAreaPixels.data[i + 0] = this.gradientPixels[p + 0];
-          drawAreaPixels.data[i + 1] = this.gradientPixels[p + 1];
-          drawAreaPixels.data[i + 2] = this.gradientPixels[p + 2];
-        }
-      }
-
-      this.context.putImageData(drawAreaPixels, bBox.left, bBox.top);
+    if (data.length > 0 && this.fade) {
+      this.clear();
+      const timeStamp = this.data[this.data.length - 1].timeStamp;
+      this.updateHeatMap(this.data.filter(_data => _data.timeStamp > (timeStamp - (this.fade))));
+    } else if (data.length > 0) {
+      this.updateHeatMap(data);
     }
+  }
+
+  /**
+   * Function to update the heat map
+   * @param {Object[]} data - Event data
+   */
+  updateHeatMap(data) {
+    // Bounding box object
+    const bBox = {
+      top: Infinity,
+      right: 0,
+      bottom: 0,
+      left: Infinity,
+    };
+
+    // Iterate over the new data to find the bounding box data and draw the new circles
+    for (let i = 0; i < data.length; i += 1) {
+      if (bBox.top > data[i].pageY) bBox.top = data[i].pageY;
+      if (bBox.right < data[i].pageX) bBox.right = data[i].pageX;
+      if (bBox.bottom < data[i].pageY) bBox.bottom = data[i].pageY;
+      if (bBox.left > data[i].pageX) bBox.left = data[i].pageX;
+      this.context.drawImage(
+        this.circle,
+        data[i].pageX - this.radius,
+        data[i].pageY - this.radius,
+      );
+    }
+
+    // Fix the bounding box with the radius and add with/height
+    bBox.top -= this.radius;
+    bBox.right += this.radius;
+    bBox.bottom += this.radius;
+    bBox.left -= this.radius;
+    bBox.width = bBox.right - bBox.left;
+    bBox.height = bBox.bottom - bBox.top;
+
+    // Get the pixels form the newly drawn circles
+    const drawAreaPixels = this.context.getImageData(
+      bBox.left,
+      bBox.top,
+      bBox.width,
+      bBox.height,
+    );
+
+    // Iterate over the alpha pixels
+    for (let i = 0; i < drawAreaPixels.data.length; i += 4) {
+      const p = drawAreaPixels.data[i + 3] * 4;
+
+      // Replace the grey scale with gradient colors
+      if (p) {
+        drawAreaPixels.data[i + 0] = this.gradientPixels[p + 0];
+        drawAreaPixels.data[i + 1] = this.gradientPixels[p + 1];
+        drawAreaPixels.data[i + 2] = this.gradientPixels[p + 2];
+      }
+    }
+
+    this.context.putImageData(drawAreaPixels, bBox.left, bBox.top);
   }
 
   /**
@@ -202,5 +215,14 @@ class HeatMapCanvas {
     keys.forEach((key) => {
       this.canvas.setAttribute(key, attributes[key]);
     });
+  }
+
+  /**
+   * Function to fade events
+   * @param {boolean|number} fade - fade value
+   */
+  setFade(fade) {
+    this.fade = fade ? parseInt(fade, 10) * 1000 : fade;
+    this.update(this.data);
   }
 }

@@ -6,7 +6,7 @@ const errorModalQuitBtn = errorModal.querySelector('button');
 
 const downloadBtn = document.querySelector('#download');
 const backBtn = document.querySelector('#back');
-const interactionList = document.querySelector('#interactions ul');
+const interactionList = document.querySelector('#inputlog ul');
 
 const mouseButtons = [
   'left',
@@ -41,7 +41,7 @@ function download() {
   const blob = new Blob([interactions.join('\n\r')]);
 
   // Download the interactions
-  downloadData(URL.createObjectURL(blob), `etave-interactions-${this.dataset.site}.txt`);
+  downloadData(URL.createObjectURL(blob), `etave-inputlog-${this.dataset.site}.txt`);
 }
 
 /**
@@ -174,10 +174,10 @@ const createInteractionKnot = {
 };
 
 /**
- * Function to create session intro and outro
+ * Function to create session intro and ending
  * @param {Object} session - The session object
  * @param {string} siteUUid - The uuid of the site
- * @return {Object} Object containing the intro and outro string
+ * @return {Object} Object containing the intro and ending string
  */
 function createSessionInteraction(session, siteUuid) {
   const site = session.sites.find(_site => _site.uuid === siteUuid);
@@ -185,10 +185,10 @@ function createSessionInteraction(session, siteUuid) {
   const start = new Date(site.start);
   const end = new Date(site.end);
 
-  const intro = `recording on [${site.url}] with id [${siteUuid}] started at [${start.toLocaleString()}]; screensize was [${session.viewport.width},${session.viewport.height}]`;
-  const outro = `recording on [${site.url}] with id [${siteUuid}] ended at [${end.toLocaleString()}] with a total duration of [${millisecondsToIso(end - start)}]`;
+  const intro = `recording on [${site.url}] with id [${siteUuid}] started at [${start.toLocaleString()}]; screen size was [${session.viewport.width},${session.viewport.height}]`;
+  const ending = `recording on [${site.url}] with id [${siteUuid}] ended at [${end.toLocaleString()}] with a total duration of [${millisecondsToIso(end - start)}]`;
 
-  return { intro, outro };
+  return { intro, ending };
 }
 
 /**
@@ -263,12 +263,12 @@ function init() {
       .then(([_events, _session]) => {
         interactions = reduceInteractions(_events);
 
-        const { intro, outro } = createSessionInteraction(_session, siteUuid);
+        const { intro, ending } = createSessionInteraction(_session, siteUuid);
 
         const html = `
           <li class='list-group-item'>***<br> ${intro} <br>***</li>
           <li class='list-group-item'>${interactions.join('</li><li class="list-group-item">')}</li>
-          <li class='list-group-item'>***<br> ${outro} <br>***</li>
+          <li class='list-group-item'>***<br> ${ending} <br>***</li>
         `;
 
         interactionList.innerHTML = html;

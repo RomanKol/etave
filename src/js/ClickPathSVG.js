@@ -16,7 +16,7 @@ class ClickPathSVG {
 
     this.style = document.createElementNS('http://www.w3.org/2000/svg', 'style');
     this.style.setAttribute('type', 'text/css');
-    this.style.textContent = 'circle.etave-circle.mouseup { fill: #ffeb3b; opacity: 0.5; } circle.etave-circle.mousedown { fill: #2196f3; opacity: 0.5; } path.etave-path { fill: none; stroke: #ff5722; stroke-width: 2; }';
+    this.style.textContent = '.etave-circle { opacity: 0.5; } .etave-circle.click { fill: #17202a; } .etave-circle.mouseup { fill: #ffeb3b; } .etave-circle.mousedown { fill: #2196f3; } .etave-path { fill: none; stroke: #ff5722; stroke-width: 2; }';
 
     this.defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
     this.defs.appendChild(this.style);
@@ -38,6 +38,8 @@ class ClickPathSVG {
     this.svg.appendChild(this.path);
     this.svg.appendChild(this.clicks);
 
+    this.fade = false;
+
     // Initialize
     this.update(this.data);
   }
@@ -48,7 +50,7 @@ class ClickPathSVG {
    * @return {Object[]} - Filtered array with event data
    */
   static filterData(data) {
-    return data.filter(_data => ['mousemove', 'mousedown', 'mouseup', 'click'].includes(_data.type));
+    return data.filter(_data => ['click', 'mousedown', 'mousemove', 'mouseup'].includes(_data.type));
   }
 
   /**
@@ -66,8 +68,15 @@ class ClickPathSVG {
    * @param {Object[]} [data=[]] - Array with mousemove, mousedown and mouseup event data
    */
   update(data = []) {
-    this.updatePath(data.filter(_data => _data.type === 'mousemove'));
-    this.updateClicks(data.filter(_data => _data.type === 'mousedown' || _data.type === 'mouseup'));
+    if (this.fade && this.data.length > 0) {
+      this.clear();
+      const timeStamp = this.data[this.data.length - 1].timeStamp;
+      this.updatePath(this.data.filter(_data => (_data.type === 'mousemove' && _data.timeStamp > (timeStamp - (this.fade)))));
+      this.updateClicks(this.data.filter(_data => (['click', 'mousedown', 'mouseup'].includes(_data.type) && _data.timeStamp > (timeStamp - (this.fade)))));
+    } else {
+      this.updatePath(data.filter(_data => _data.type === 'mousemove'));
+      this.updateClicks(data.filter(_data => ['click', 'mousedown', 'mouseup'].includes(_data.type)));
+    }
   }
 
   /**
@@ -106,7 +115,7 @@ class ClickPathSVG {
    * @param {Object[]} data - Array with mousemove, mousedown and mouseup event data
    */
   setData(data) {
-    this.data = ClickPathSVG.filterData(data)
+    this.data = ClickPathSVG.filterData(data);
     this.clear();
     this.update(this.data);
   }
@@ -146,5 +155,14 @@ class ClickPathSVG {
     keys.forEach((key) => {
       this.svg.setAttribute(key, attributes[key]);
     });
+  }
+
+  /**
+   * Function to fade events
+   * @param {boolean|number} fade - fade value
+   */
+  setFade(fade) {
+    this.fade = fade ? parseInt(fade, 10) * 1000 : fade;
+    this.update(this.data);
   }
 }

@@ -21,6 +21,8 @@ html
           li.nav-item
             a.nav-link(href='#settings') Settings
           li.nav-item
+            a.nav-link(href='#imexport') Im/Export
+          li.nav-item
             a.nav-link(href='#about') About
 
       main.container
@@ -137,6 +139,26 @@ html
 
           .col-12
             button#settings-save.btn.btn-primary.float-right Save settings
+
+        section#imexport.row
+          header.col-12
+            h3 Im/Export
+            p.lead Options to export and import data.
+
+          fieldset.col-sm-6
+            legend Export
+            p.form-text.text-muted Exports the data as a backup or for use on other systems. Note: Only the sessions and its sites will be exported. Screenshots of the sessions or extension options wont be exported.
+
+            button#export.btn.btn-primary Export
+
+          fieldset.col-sm-6
+            legend Import
+            p.form-text.text-muted Import data from backups or other systems. Note: Imported data will be merged with existing data. The page will automatically reload.
+
+            label
+              input#importFile(type='file' name='file' accept='.json')
+
+            button#import.btn.btn-primary(disabled) Import
 
         section#about.row
           header.col-12

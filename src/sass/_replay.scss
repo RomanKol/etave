@@ -230,6 +230,45 @@ $height: 10rem;
       input[type="checkbox"]:checked + label {
         opacity: 1;
       }
+
+      .fade {
+        label {
+          padding: 0.5rem;
+          border: 0;
+          border-bottom: 2px solid #aaa;
+          border-right: 2px solid #aaa;
+          background-color: #e6e6e6;
+          border-radius: 0;
+          height: 2.5rem;
+        }
+        input[type="number"] {
+          padding: 0.5rem;
+          border: 0;
+          border-radius: 0;
+          height: 2.5rem;
+          width: 60px;
+          outline: none;
+          background: #f7f7f7;
+          border-bottom: 2px solid #0275d8;
+          text-align: right;
+          &:disabled {
+            border-color: #aaa;
+            background-color: #e6e6e6;
+            cursor: no-drop;
+          }
+        }
+
+      }
+
+      label + input[type="checkbox"] {
+        padding: 0.5rem;
+        border: 0;
+        border-bottom: 2px solid #aaa;
+        background-color: #e6e6e6;
+        border-radius: 0;
+        height: 2.5rem;
+        width: 120px;
+      }
     }
 
     .options {

@@ -1,18 +1,22 @@
 /**
  * @typedef {Event} Event object
- * @param {string} type - Type of event
- * @param {number} timeStamp - Timestamp of event relative to site load
- * @param {number} [pageX] - X-position on page of event
- * @param {number} [pageY] - Y-position on page of event
- * @param {string} [target] - The event target
- * @param {string} [selection] - Selected text
- * @param {string[]} [domPath] - Array of dom selectors
- * @param {number} [scrollX] - X-position of scroll event
- * @param {number} [scrollY] - Y-position of scroll event
- * @param {boolean} [altKey] - True if altKey was pressed on key event
- * @param {boolean} [ctrlKey] - True if ctrlKey was pressed on key event
- * @param {boolean} [metaKey] - True if metaKey was pressed on key event
- * @param {string} [key] - String representation of pressed key
+ * @prop {string} type - Type of event
+ * @prop {number} timeStamp - Timestamp of event relative to site load
+ * @prop {number} [pageX] - X-position on page of event
+ * @prop {number} [pageY] - Y-position on page of event
+ * @prop {string} [target] - The event target
+ * @prop {string[]} [domPath] - Array of dom selectors
+ * @prop {string} [selection] - Selected text
+ * @prop {number} [scrollX] - X-position of scroll event
+ * @prop {number} [scrollY] - Y-position of scroll event
+ * @prop {boolean} [altKey] - True if altKey was pressed on key event
+ * @prop {boolean} [ctrlKey] - True if ctrlKey was pressed on key event
+ * @prop {boolean} [metaKey] - True if metaKey was pressed on key event
+ * @prop {boolean} [shitKey] - True if shiftKey was pressed on key event
+ * @prop {number} [button] - The pressed mouse button
+ * @prop {string} [key] - String representation of pressed key
+ * @prop {string} [targetType] - The type of input target eg text,change,radio
+ * @prop {string} [attribute] - The attribute that changed
  */
 
 /**
@@ -205,6 +209,10 @@ function mouseup({ button, pageX, pageY, target, type }) {
   events.push(event);
 }
 
+/**
+ * Function to record click events
+ * @param {Event} - Event object
+ */
 function click({ button, pageX, pageY, target, type }) {
   const event = {
     button,
@@ -276,13 +284,14 @@ function scroll({ type }) {
  * Function to record key down events
  * @param {Event} - Event object
  */
-function keydown({ altKey, ctrlKey, metaKey, key, target, type }) {
+function keydown({ altKey, ctrlKey, metaKey, key, shiftKey, target, type }) {
   const event = {
     altKey,
     ctrlKey,
     domPath: createDomPath(target),
     key: ((target.nodeName === 'INPUT') && (target.type === 'password')) ? '*' : key,
     metaKey,
+    shiftKey,
     target: createElementSelector(target),
     timeStamp: Math.round(Date.now() - ts),
     type,
@@ -479,7 +488,17 @@ function messageListener(msg, sender, sendResponse) {
         console.error(err);
       });
 
-    const { height, width } = document.documentElement.getBoundingClientRect();
+    const width = Math.max(
+      document.documentElement.getBoundingClientRect().width,
+      document.body.getBoundingClientRect().width,
+      document.body.scrollWidth,
+    );
+
+    const height = Math.max(
+      document.documentElement.getBoundingClientRect().height,
+      document.body.getBoundingClientRect().height,
+      document.body.scrollHeight,
+    );
 
     const response = {
       height: Math.round(height),

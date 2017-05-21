@@ -14,7 +14,6 @@ function saveStorage(data) {
   });
 }
 
-
 /**
  * Function to load data from the chrome.storage api
  * @param {string} key - The key of the data
@@ -51,7 +50,7 @@ function removeStorage(key) {
  */
 function loadSession(uuid) {
   return loadStorage('sessions')
-    .then(_sessions => _sessions.filter(_session => _session.uuid === uuid)[0])
+    .then(_sessions => _sessions.find(_session => _session.uuid === uuid))
     .then((_session) => {
       if (!_session) Promise.reject(new Error(`No session "${uuid}" was found!`));
       return Promise.resolve(_session);
@@ -143,6 +142,20 @@ async function removeSession(uuid) {
 
   // Update the sessions
   await saveStorage({ sessions });
+}
+
+/**
+ * Function to send a message
+ * @param {any} msg - Message to send
+ * @return {Promise<Object, Error>} - Returns a tab object, else an error
+ */
+function getActiveTab() {
+  return new Promise((resolve, reject) => {
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      if (tabs.length === 0) reject(new Error('No tab'));
+      resolve(tabs[0]);
+    });
+  });
 }
 
 /**

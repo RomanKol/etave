@@ -23,6 +23,8 @@ let playIndex;
 let speed = 1;
 let playing = false;
 
+let fadeValue;
+
 let optionsEls;
 const options = [];
 
@@ -93,7 +95,10 @@ function updateClick(events) {
   events
     .filter(event => event.type === 'click')
     .forEach((click) => {
-      const target = iframeDocument.querySelector(click.domPath.join('>'));
+      // Build element selector and unescape starting numeric ids
+      const selector = click.domPath
+        .map((_selector => _selector.replace(/(^#[0-9])/, (match, p1, offset, string) => `#\\\\${p1.charCodeAt(0)} ${string.substring(offset + 2)}`))).join('>');
+      const target = iframeDocument.querySelector(selector);
       if (target !== null) {
         target.click();
       }
@@ -308,22 +313,44 @@ function toggleScrollMap() {
 /**
  * Function to reinitialize iframe and reset player
  */
-function replay() {
+function restart() {
   // Somehow the scroll map has to be reinitialized :/
   scrollMap = new ScrollMapCanvas(site.width, site.height, session.viewport.width, session.viewport.height, duration, sessionEvents);
-  scrollMap.setAttributes({ style: `display: block; position: absolute; top: 0; left: 0; z-index: 1001; width: ${site.width}px; height: ${site.height}px` });
-  scrollMap.canvas.style.setProperty('display', ui.querySelector('#scrollmap').checked ? 'block' : 'none');
+  scrollMap.setAttributes({ style: `display: ${ui.querySelector('#scrollmap').checked ? 'block' : 'none'}; position: absolute; top: 0; left: 0; z-index: 1001; width: ${site.width}px; height: ${site.height}px; background-color: transparent;` });
+
+  heatMap = new HeatMapCanvas(site.width, site.height);
+  heatMap.setAttributes({ style: `display: ${ui.querySelector('#heatmap').checked ? 'block' : 'none'}; position: absolute; top: 0; left: 0; z-index: 1002; width: ${site.width}px; height: ${site.height}px; background-color: transparent;` });
 
   // Reset the site url to reload the site
   iframe.src = site.url;
 
-  // Clear click path and heat map, no reinitialize needed
+  // Clear click path, no reinitialize needed
   clickPath.clear();
-  heatMap.clear();
 
   // Reset player
   progressInp.value = 0;
   updateDuration();
+}
+
+/**
+ * Function to update fade in overlays
+ */
+function updateFade() {
+  let fade = false;
+  if (!fadeValue.disabled) {
+    fade = parseInt(fadeValue.value, 10) || 0;
+  }
+
+  clickPath.setFade(fade);
+  heatMap.setFade(fade);
+}
+
+/**
+ * Function to toggle fadeValue
+ */
+function toggleFade() {
+  fadeValue.disabled = !this.checked;
+  updateFade();
 }
 
 /**
@@ -355,6 +382,10 @@ function loadUi() {
       timeInp = ui.querySelectorAll('.timeline input[type="text"]')[0];
       timeLeftInp = ui.querySelectorAll('.timeline input[type="text"]')[1];
 
+      fadeValue = ui.querySelector('#fadeValue');
+      fadeValue.addEventListener('change', updateFade);
+      ui.querySelector('#fade').addEventListener('change', toggleFade);
+
       progressInp = ui.querySelector('.timeline input[type="range"]');
       progressInp.addEventListener('change', updateReplay);
       progressInp.addEventListener('mousemove', updateDuration);
@@ -363,7 +394,7 @@ function loadUi() {
       playBtn = ui.querySelector('#play');
       playBtn.addEventListener('click', start);
 
-      ui.querySelector('#replay').addEventListener('click', replay);
+      ui.querySelector('#replay').addEventListener('click', restart);
 
       ui.querySelector('#backward').addEventListener('click', backward);
       ui.querySelector('#forward').addEventListener('click', forward);
@@ -383,7 +414,6 @@ function initUi() {
   timeInp.value = millisecondsToIso(0);
   timeLeftInp.value = millisecondsToIso(duration);
   progressInp.max = duration;
-
   urlbar.value = site.url;
 
   updateOptions(false);
@@ -436,7 +466,7 @@ function initReplay({ siteUuid, sessionUuid }) {
       document.querySelectorAll('body > *').forEach((element) => {
         element.style.setProperty('display', 'none');
       });
-      document.head.querySelectorAll('style, [type="text/css"]').forEach((element) => {
+      document.head.querySelectorAll('style, [type="text/css"], [rel="stylesheet"]').forEach((element) => {
         element.parentElement.removeChild(element);
       });
       document.documentElement.classList.add('etave-reset');
@@ -450,11 +480,11 @@ function initReplay({ siteUuid, sessionUuid }) {
     })
     .then(() => {
       scrollMap = new ScrollMapCanvas(site.width, site.height, session.viewport.width, session.viewport.height, duration, sessionEvents);
-      scrollMap.setAttributes({ style: `display: block; position: absolute; top: 0; left: 0; z-index: 1001; width: ${site.width}px; height: ${site.height}px` });
+      scrollMap.setAttributes({ style: `display: block; position: absolute; top: 0; left: 0; z-index: 1001; width: ${site.width}px; height: ${site.height}px; background-color: transparent;` });
       heatMap = new HeatMapCanvas(site.width, site.height);
-      heatMap.setAttributes({ style: `display: block; position: absolute; top: 0; left: 0; z-index: 1002; width: ${site.width}px; height: ${site.height}px` });
+      heatMap.setAttributes({ style: `display: block; position: absolute; top: 0; left: 0; z-index: 1002; width: ${site.width}px; height: ${site.height}px; background-color: transparent;` });
       clickPath = new ClickPathSVG(site.width, site.height);
-      clickPath.setAttributes({ style: `display: block; position: absolute; top: 0; left: 0; z-index: 1003; width: ${site.width}px; height: ${site.height}px` });
+      clickPath.setAttributes({ style: `display: block; position: absolute; top: 0; left: 0; z-index: 1003; width: ${site.width}px; height: ${site.height}px; background-color: transparent;` });
     })
     .then(() => {
       initIframe();

@@ -12,13 +12,13 @@ An extension to record and analyze mouse and keyboard interactions of users for 
 
 ## Development
 1. Install [node.js](https://nodejs.org/en/download/)
-2. Install the gulp dependencies via `npm install`
+2. Install node dependencies via `npm install`
 3. Checkout the `dev` branch
-4. Start the default gulp task (`gulp`)
+4. Start the default _webpack_ task (`npm run dev`)
 5. Develop within the `src` folder
-6. The extension will be build in the `extension` folder
+6. The extension will be build in the `dist` folder
 
-_ __Info:__ When you add new files you have to restart the gulp task_
+__Info:__ When you add new files you have to restart the _webpack_ task
 
 ## Usage
 

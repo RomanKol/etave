@@ -2,25 +2,31 @@
   "name": "etave",
   "version": "0.0.4",
   "description": "chrome extension for event tracking and visualization",
-  "main": "",
   "dependencies": {
-    "eslint": "^3.13.1",
-    "eslint-config-airbnb": "^14.0.0",
-    "eslint-plugin-import": "^2.2.0",
-    "gulp": "^3.9.1",
-    "gulp-autoprefixer": "^3.1.1",
-    "gulp-cssnano": "^2.1.2",
-    "gulp-eslint": "^3.0.1",
-    "gulp-imagemin": "^3.1.1",
-    "gulp-pug": "^3.2.0",
-    "gulp-sass": "^3.1.0",
-    "gulp-uncss": "^1.0.6"
+    "react": "^16.2.0",
+    "react-dom": "^16.2.0"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "babel-core": "^6.20.0",
+    "babel-loader": "^7.1.2",
+    "babel-plugin-transform-class-properties": "^6.19.0",
+    "babel-plugin-transform-object-rest-spread": "^6.20.2",
+    "babel-preset-latest": "^6.24.1",
+    "babel-preset-react": "^6.16.0",
+    "babel-preset-stage-2": "^6.18.0",
+    "copy-webpack-plugin": "^4.3.1",
+    "eslint": "^4.15.0",
+    "eslint-config-airbnb": "^16.1.0",
+    "eslint-plugin-import": "^2.8.0",
+    "eslint-plugin-jsx-a11y": "^6.0.3",
+    "eslint-plugin-react": "^7.5.1",
+    "image-webpack-loader": "^3.4.2",
+    "update": "^0.7.4",
+    "webpack": "^3.10.0"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "gulp build",
-    "dev": "gulp"
+    "dev": "webpack -w --display-error-details --progress --colors"
   },
   "repository": {
     "type": "git",
@@ -34,7 +40,7 @@
     "visualization"
   ],
   "author": "Roman Kollatschny <mail@kollatschny.net> (http://kollatschny.net/)",
-  "license": "ISC",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/RomanKol/etave/issues"
   },

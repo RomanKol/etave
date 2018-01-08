@@ -2,8 +2,9 @@
  * WIP
  */
 
+/* eslint import/no-extraneous-dependencies: ["error", {"peerDependencies": true}] */
 const path = require('path');
-// const webpack = require('webpack');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 module.exports = {
@@ -51,15 +52,19 @@ module.exports = {
   //     ],
   // },
   plugins: [
-    // new webpack.DefinePlugin({
-    //   'process.env.NODE_ENV': JSON.stringify('production'),
-    // }),
+    new HtmlWebpackPlugin({
+      title: 'Etave popup',
+      filename: 'popup/popup.html',
+      chunks: ['popup/popup'],
+    }),
+    new HtmlWebpackPlugin({
+      title: 'Etave options',
+      filename: 'options/options.html',
+      chunks: ['options/options'],
+    }),
     new CopyWebpackPlugin([
-      { from: './popup/popup.html', to: 'popup/popup.html' },
-      { from: './options/options.html', to: 'options/options.html' },
       { from: './manifest.json', to: 'manifest.json' },
       { from: './assets/icon.png', to: 'icon.png' },
     ]),
   ],
-  devtool: 'sourcemap',
 };

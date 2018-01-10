@@ -54,11 +54,13 @@ module.exports = {
   plugins: [
     new HtmlWebpackPlugin({
       title: 'Etave popup',
+      template: path.join(__dirname, '/src/index.html'),
       filename: 'popup/popup.html',
       chunks: ['popup/popup'],
     }),
     new HtmlWebpackPlugin({
       title: 'Etave options',
+      template: path.join(__dirname, '/src/index.html'),
       filename: 'options/options.html',
       chunks: ['options/options'],
     }),

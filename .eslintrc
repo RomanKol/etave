@@ -4,6 +4,11 @@
   },
   "extends": "airbnb",
   "globals": {
-    "chrome": true
+    "chrome": true,
+    "React": true
+  },
+  "parser": "babel-eslint",
+  "rules": {
+    "react/jsx-indent": "disabled"
   }
 }

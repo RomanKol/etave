@@ -11,8 +11,8 @@ module.exports = {
   context: path.join(__dirname, '/src'),
   entry: {
     background: './background.js',
-    'popup/popup': './popup/popup.jsx',
-    'options/options': './options/options.jsx',
+    'popup/app': './popup/index.jsx',
+    'options/app': './options/index.jsx',
   },
   output: {
     path: path.join(__dirname, '/dist'),
@@ -40,29 +40,29 @@ module.exports = {
       },
     ],
   },
-  // resolve: {
-  //     // This allows you to import modules just like you would in a NodeJS app.
-  //     extensions: ['.js', '.jsx'],
-  //     root: [
-  //         path.resolve(__dirname),
-  //     ],
-  //     modules: [
-  //         'src',
-  //         'node_modules',
-  //     ],
-  // },
+  resolve: {
+    // This allows you to import modules just like you would in a NodeJS app.
+    extensions: ['.js', '.jsx'],
+    // root: [
+    //     path.resolve(__dirname),
+    // ],
+    // modules: [
+    //     'src',
+    //     'node_modules',
+    // ],
+  },
   plugins: [
     new HtmlWebpackPlugin({
       title: 'Etave popup',
       template: path.join(__dirname, '/src/index.html'),
-      filename: 'popup/popup.html',
-      chunks: ['popup/popup'],
+      filename: 'popup/index.html',
+      chunks: ['popup/app'],
     }),
     new HtmlWebpackPlugin({
       title: 'Etave options',
       template: path.join(__dirname, '/src/index.html'),
-      filename: 'options/options.html',
-      chunks: ['options/options'],
+      filename: 'options/index.html',
+      chunks: ['options/app'],
     }),
     new CopyWebpackPlugin([
       { from: './manifest.json', to: 'manifest.json' },

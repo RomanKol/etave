@@ -1,1 +1,1 @@
-console.log('Hello from the Background page');
+console.log('möp');

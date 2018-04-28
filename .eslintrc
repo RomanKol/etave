@@ -9,6 +9,7 @@
   },
   "parser": "babel-eslint",
   "rules": {
-    "react/jsx-indent": "disabled"
+    "react/jsx-indent": "disabled",
+    "jsx-a11y/heading-has-content": "disable"
   }
 }

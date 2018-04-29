@@ -1,8 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import Btn from '../components/button';
-
 class Popup extends React.Component {
   constructor(props) {
     super(props);
@@ -20,7 +18,6 @@ class Popup extends React.Component {
     return (
       <div>
         <h1>Etave Popup</h1>
-        <Btn>Hi there</Btn>
         <pre>{JSON.stringify(activeTab, null, '  ')}</pre>
       </div>
     );

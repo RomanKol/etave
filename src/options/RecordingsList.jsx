@@ -7,7 +7,7 @@ import Table, { TableBody, TableCell, TableHead, TableRow } from 'material-ui/Ta
 import Heading from '../components/Heading';
 import { loadStorage } from '../utils/storage';
 
-const Time = styled.date`
+const Time = styled.time`
   display: block;
 `;
 

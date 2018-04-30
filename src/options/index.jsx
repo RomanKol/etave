@@ -5,6 +5,7 @@ import styled from 'react-emotion';
 
 import HeaderBar from '../components/HeaderBar';
 import RecordingsList from './RecordingsList';
+import RecordingSettings from './RecordingSettings';
 import ImExport from './ImExport';
 
 const AppWrapper = styled.div`
@@ -47,6 +48,7 @@ class Options extends React.Component {
 
           <Main>
             <RecordingsList />
+            <RecordingSettings />
             <ImExport />
           </Main>
         </AppWrapper>

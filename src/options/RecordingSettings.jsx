@@ -1,20 +1,30 @@
 import React from 'react';
 import styled from 'react-emotion';
 
-import { FormControlLabel, Switch, Paper } from 'material-ui';
+import {
+  FormControlLabel,
+  Switch,
+  Paper,
+  TextField,
+  InputAdornment,
+} from 'material-ui';
 
 import Heading from '../components/Heading';
 import IconTextButton from '../components/IconTextButton';
 
 import { loadStorage, saveStorage } from '../utils/storage';
 
-const SwitchWrapper = styled.section`
+const InputWrapper = styled.section`
   display: flex;
   padding: 1em;
   flex-wrap: wrap;
 
   > * {
     flex: 0 0 12em;
+    margin-right: 1em;
+    &:last-child {
+      margin-right: 0;
+    }
   }
 `;
 
@@ -35,10 +45,10 @@ class RecordingSettings extends React.Component {
       mouseup: false,
       scroll: false,
     },
-    // throttle: {
-    //   distance: 25,
-    //   time: 50,
-    // },
+    throttle: {
+      distance: 25,
+      time: 50,
+    },
   }
 
   async componentWillMount() {
@@ -51,6 +61,10 @@ class RecordingSettings extends React.Component {
           ...prevState.events,
           ...settings.events,
         },
+        throttle: {
+          ...prevState.throttle,
+          ...settings.throttle,
+        },
       }));
     }
   }
@@ -58,11 +72,12 @@ class RecordingSettings extends React.Component {
   saveSettings = async () => {
     const settings = {
       events: this.state.events,
+      throttle: this.state.throttle,
     };
     await saveStorage({ settings });
   }
 
-  handleChange = (event) => {
+  handleEventChange = (event) => {
     event.persist();
     this.setState(prevState => ({
       events: {
@@ -72,15 +87,27 @@ class RecordingSettings extends React.Component {
     }));
   }
 
+  handleThrottleChange = (event) => {
+    event.persist();
+    const inputVal = event.target.value.replace(/\D/g, '');
+    const parsedValue = Math.abs(Number.parseInt(inputVal || 1, 10));
+    this.setState(prevState => ({
+      throttle: {
+        ...prevState.throttle,
+        [event.target.name]: parsedValue,
+      },
+    }));
+  }
+
   render() {
-    const { events } = this.state;
+    const { events, throttle } = this.state;
     return (
       <Paper>
         <Heading
           headline="Recording Settings"
           subheadline="Toggle the events you want to capture during a session"
         />
-        <SwitchWrapper>
+        <InputWrapper>
           {Object.keys(events).map(key => (
             <FormControlLabel
               key={key}
@@ -94,12 +121,36 @@ class RecordingSettings extends React.Component {
                     id: key,
                     name: key,
                   }}
-                  onChange={this.handleChange}
+                  onChange={this.handleEventChange}
                 />
               }
             />
           ))}
-        </SwitchWrapper>
+        </InputWrapper>
+
+        <InputWrapper>
+          {Object.keys(throttle).map(key => (
+            <TextField
+              label={key}
+              id={key}
+              key={key}
+              value={throttle[key]}
+              onChange={this.handleThrottleChange}
+              type="number"
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    {key === 'time' ? 'ms' : 'px'}
+                  </InputAdornment>
+                ),
+                id: key,
+                name: key,
+              }}
+              margin="normal"
+            />
+
+          ))}
+        </InputWrapper>
 
         <Wrapper>
           <IconTextButton

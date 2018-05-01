@@ -1,24 +1,27 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-class Popup extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = { activeTab: null };
-  }
+import Heading from '../components/Heading';
+import IconTextButton from '../components/IconTextButton';
 
-  componentDidMount() {
-    chrome.tabs.query({ active: true }, (tabs) => {
-      this.setState({ activeTab: tabs[0] });
-    });
+class Popup extends React.Component {
+  openDashboad = () => {
+    chrome.tabs.create({ url: '/options/index.html' });
   }
 
   render() {
-    const { activeTab } = this.state;
     return (
       <div>
-        <h1>Etave Popup</h1>
-        <pre>{JSON.stringify(activeTab, null, '  ')}</pre>
+        <Heading
+          headline="Etave Popup"
+        />
+        <IconTextButton
+          text="Dashboard"
+          icon="settings"
+          variant="raised"
+          color="primary"
+          onClick={this.openDashboad}
+        />
       </div>
     );
   }

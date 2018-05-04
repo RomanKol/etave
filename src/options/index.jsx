@@ -2,11 +2,11 @@ import React, { Fragment } from 'react';
 import ReactDOM from 'react-dom';
 import CssBaseline from 'material-ui/CssBaseline';
 import styled from 'react-emotion';
+import { HashRouter as Router, Route, Switch } from 'react-router-dom';
 
 import HeaderBar from '../components/HeaderBar';
-import RecordingsList from './RecordingsList';
-import RecordingSettings from './RecordingSettings';
-import ImExport from './ImExport';
+import Dashboard from './Dashboard/';
+import RecordingDetails from './RecordingDetails/';
 
 const AppWrapper = styled.div`
   flex-grow: 1;
@@ -31,6 +31,12 @@ const Main = styled.main`
   }
 `;
 
+const Meh = () => (
+  <div>
+    <h2>Meh</h2>
+  </div>
+);
+
 class Options extends React.Component {
   state = {
     title: 'etave Dashboard',
@@ -43,15 +49,19 @@ class Options extends React.Component {
       <Fragment>
         <CssBaseline />
 
-        <AppWrapper>
-          <HeaderBar title={title} />
+        <Router>
+          <AppWrapper>
+            <HeaderBar title={title} />
 
-          <Main>
-            <RecordingsList />
-            <RecordingSettings />
-            <ImExport />
-          </Main>
-        </AppWrapper>
+            <Main>
+              <Switch>
+                <Route path="/" exact component={Dashboard} />
+                <Route path="/recordings/:uuid" component={RecordingDetails} />
+                <Route component={Meh} />
+              </Switch>
+            </Main>
+          </AppWrapper>
+        </Router>
       </Fragment>
     );
   }

@@ -1,16 +1,23 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { withRouter } from 'react-router';
 
-import { AppBar, Toolbar, Typography } from 'material-ui';
+import { AppBar, Toolbar, Typography, IconButton, Icon } from 'material-ui';
 
 const HeaderBar = (props) => {
-  const { title } = props;
+  const { title, location, history } = props;
+
   return (
     <div>
       <AppBar
         position="fixed"
       >
         <Toolbar>
+          {location.pathname !== '/' &&
+            <IconButton color="inherit" onClick={() => history.goBack()}>
+              <Icon>arrow_back</Icon>
+            </IconButton>
+          }
           <Typography
             variant="title"
             color="inherit"
@@ -25,6 +32,12 @@ const HeaderBar = (props) => {
 
 HeaderBar.propTypes = {
   title: PropTypes.string.isRequired,
+  location: PropTypes.shape({
+    pathname: PropTypes.string.isRequired,
+  }).isRequired,
+  history: PropTypes.shape({
+    goBack: PropTypes.func.isRequired,
+  }).isRequired,
 };
 
-export default HeaderBar;
+export default withRouter(HeaderBar);

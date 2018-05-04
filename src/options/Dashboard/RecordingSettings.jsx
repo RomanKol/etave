@@ -9,10 +9,10 @@ import {
   InputAdornment,
 } from 'material-ui';
 
-import Heading from '../components/Heading';
-import IconTextButton from '../components/IconTextButton';
+import Heading from '../../components/Heading';
+import IconTextButton from '../../components/IconTextButton';
 
-import { loadStorage, saveStorage } from '../utils/storage';
+import { loadStorage, saveStorage } from '../../utils/storage';
 
 const InputWrapper = styled.section`
   display: flex;

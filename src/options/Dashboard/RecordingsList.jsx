@@ -3,7 +3,8 @@ import React from 'react';
 import styled from 'react-emotion';
 import PropTypes from 'prop-types';
 
-import { Paper } from 'material-ui';
+import { Link } from 'react-router-dom';
+import { Paper, Button } from 'material-ui';
 import Table,
 {
   TableBody,
@@ -19,8 +20,8 @@ import KeyboardArrowLeft from '@material-ui/icons/KeyboardArrowLeft';
 import KeyboardArrowRight from '@material-ui/icons/KeyboardArrowRight';
 import LastPageIcon from '@material-ui/icons/LastPage';
 
-import Heading from '../components/Heading';
-import { loadStorage } from '../utils/storage';
+import Heading from '../../components/Heading';
+import { loadStorage } from '../../utils/storage';
 
 const Time = styled.time`
   display: block;
@@ -150,7 +151,17 @@ class RecordingList extends React.Component {
                   <Time datetime={recording.start}>{this.formatDate(recording.start)}</Time>
                 </TableCell>
                 <TableCell numeric>
-                  <button>Some Button</button>
+                  <Link
+                    href={`/recordings/${recording.uuid}`}
+                    to={`/recordings/${recording.uuid}`}
+                  >
+                    <Button
+                      variant="raised"
+                      color="primary"
+                    >
+                      Open Details
+                    </Button>
+                  </Link>
                 </TableCell>
               </TableRow>
             ))}
@@ -180,7 +191,7 @@ class RecordingList extends React.Component {
   render() {
     return (
       <Paper>
-        <Heading headline="Sesseion Recordings" />
+        <Heading headline="Session Recordings" />
         {this.state.recordings.length > 0
           ? this.renderTable()
           : <h2>No recordings</h2>

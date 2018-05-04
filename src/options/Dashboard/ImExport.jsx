@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from 'react-emotion';
 
-import { Paper } from 'material-ui';
+import Paper from 'material-ui/Paper';
 import Heading from '../../components/Heading';
 import IconTextButton from '../../components/IconTextButton';
 

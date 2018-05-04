@@ -4,7 +4,8 @@ import styled from 'react-emotion';
 import PropTypes from 'prop-types';
 
 import { Link } from 'react-router-dom';
-import { Paper, Button } from 'material-ui';
+import Button from 'material-ui/Button';
+import Paper from 'material-ui/Paper';
 import Table,
 {
   TableBody,
@@ -15,10 +16,7 @@ import Table,
   TablePagination,
 } from 'material-ui/Table';
 import IconButton from 'material-ui/IconButton';
-import FirstPageIcon from '@material-ui/icons/FirstPage';
-import KeyboardArrowLeft from '@material-ui/icons/KeyboardArrowLeft';
-import KeyboardArrowRight from '@material-ui/icons/KeyboardArrowRight';
-import LastPageIcon from '@material-ui/icons/LastPage';
+import Icon from 'material-ui/Icon';
 
 import Heading from '../../components/Heading';
 import { loadStorage } from '../../utils/storage';
@@ -61,28 +59,28 @@ class TablePaginationActions extends React.Component {
           disabled={page === 0}
           aria-label="First Page"
         >
-          <FirstPageIcon />
+          <Icon>first_page_icon</Icon>
         </IconButton>
         <IconButton
           onClick={this.handleBackButtonClick}
           disabled={page === 0}
           aria-label="Previous Page"
         >
-          <KeyboardArrowLeft />
+          <Icon>keyboard_arrow_left</Icon>
         </IconButton>
         <IconButton
           onClick={this.handleNextButtonClick}
           disabled={page >= Math.ceil(count / rowsPerPage) - 1}
           aria-label="Next Page"
         >
-          <KeyboardArrowRight />
+          <Icon>keyboard_arrow_right</Icon>
         </IconButton>
         <IconButton
           onClick={this.handleLastPageButtonClick}
           disabled={page >= Math.ceil(count / rowsPerPage) - 1}
           aria-label="Last Page"
         >
-          <LastPageIcon />
+          <Icon>last_page_icon</Icon>
         </IconButton>
       </PaginationWrapper>
     );

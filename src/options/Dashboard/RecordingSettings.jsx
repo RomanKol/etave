@@ -2,12 +2,12 @@ import React from 'react';
 import styled from 'react-emotion';
 
 import {
-  FormControlLabel,
   Switch,
   Paper,
   TextField,
   InputAdornment,
 } from 'material-ui';
+import { FormControl, FormControlLabel, FormLabel, FormGroup } from 'material-ui/Form';
 
 import Heading from '../../components/Heading';
 import IconTextButton from '../../components/IconTextButton';
@@ -44,6 +44,8 @@ class RecordingSettings extends React.Component {
       mousemove: true,
       mouseup: false,
       scroll: false,
+      focus: false,
+      blur: false,
     },
     throttle: {
       distance: 25,
@@ -53,7 +55,10 @@ class RecordingSettings extends React.Component {
 
   async componentWillMount() {
     const settings = await loadStorage('settings')
-      .catch((e) => { throw Error(e); });
+      .catch((e) => {
+        console.warn(e);
+        return {};
+      });
 
     if (settings.events) {
       this.setState(prevState => ({
@@ -99,33 +104,48 @@ class RecordingSettings extends React.Component {
     }));
   }
 
-  render() {
-    const { events, throttle } = this.state;
+  renderEventGroup(legend, events) {
     return (
-      <Paper>
-        <Heading
-          headline="Recording Settings"
-          subheadline="Toggle the events you want to capture during a session"
-        />
-        <InputWrapper>
-          {Object.keys(events).map(key => (
+      <FormControl component="fieldset">
+        <FormLabel component="legend">{legend}</FormLabel>
+        <FormGroup>
+          {events.map(event => (
             <FormControlLabel
-              key={key}
-              label={key}
+              key={event}
+              label={event}
               control={
                 <Switch
-                  checked={events[key]}
+                  checked={this.state.events[event]}
                   color="primary"
-                  value={key}
+                  value={event}
                   inputProps={{
-                    id: key,
-                    name: key,
+                    id: event,
+                    name: event,
                   }}
                   onChange={this.handleEventChange}
                 />
               }
             />
           ))}
+        </FormGroup>
+      </FormControl>
+    );
+  }
+
+  render() {
+    const { throttle } = this.state;
+    return (
+      <Paper>
+        <Heading
+          headline="Recording Settings"
+          subheadline="Toggle the events you want to capture during a session"
+        />
+
+        <InputWrapper>
+          {this.renderEventGroup('Mouse events', ['mousemove', 'mousedown', 'mouseup', 'click'])}
+          {this.renderEventGroup('Keyboard events', ['keydown', 'keyup'])}
+          {this.renderEventGroup('Form events', ['change', 'focus', 'blur'])}
+          {this.renderEventGroup('Navigation events', ['scroll'])}
         </InputWrapper>
 
         <InputWrapper>

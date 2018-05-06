@@ -1,12 +1,12 @@
 import React, { Fragment } from 'react';
 
-import RecordingsList from './RecordingsList';
+import SessionsList from './SessionList';
 import RecordingSettings from './RecordingSettings';
 import ImExport from './ImExport';
 
 const Dashboard = () => (
   <Fragment>
-    <RecordingsList />
+    <SessionsList />
     <RecordingSettings />
     <ImExport />
   </Fragment>

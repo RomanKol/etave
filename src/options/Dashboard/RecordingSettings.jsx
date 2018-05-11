@@ -1,5 +1,7 @@
 import React from 'react';
 import styled from 'react-emotion';
+import { observer } from 'mobx-react';
+import { observable } from 'mobx';
 
 import {
   Switch,
@@ -33,26 +35,8 @@ const Wrapper = styled.div`
   display: flex;
 `;
 
+@observer
 class RecordingSettings extends React.Component {
-  state = {
-    events: {
-      change: false,
-      click: true,
-      keydown: true,
-      keyup: true,
-      mousedown: false,
-      mousemove: true,
-      mouseup: false,
-      scroll: false,
-      focus: false,
-      blur: false,
-    },
-    throttle: {
-      distance: 25,
-      time: 50,
-    },
-  }
-
   async componentWillMount() {
     const settings = await loadStorage('settings')
       .catch((e) => {
@@ -61,79 +45,84 @@ class RecordingSettings extends React.Component {
       });
 
     if (settings.events) {
-      this.setState(prevState => ({
-        events: {
-          ...prevState.events,
-          ...settings.events,
-        },
-        throttle: {
-          ...prevState.throttle,
-          ...settings.throttle,
-        },
-      }));
+      this.events = {
+        ...this.events,
+        ...settings.events,
+      };
+    }
+    if (settings.throttle) {
+      this.throttle = {
+        ...this.throttle,
+        ...settings.throttle,
+      };
     }
   }
 
+  @observable events = {
+    change: false,
+    click: true,
+    keydown: true,
+    keyup: true,
+    mousedown: false,
+    mousemove: true,
+    mouseup: false,
+    scroll: false,
+    focus: false,
+    blur: false,
+  };
+
+  @observable throttle = {
+    distance: 25,
+    time: 50,
+  };
+
   saveSettings = async () => {
     const settings = {
-      events: this.state.events,
-      throttle: this.state.throttle,
+      events: this.events,
+      throttle: this.throttle,
     };
     await saveStorage({ settings });
   }
 
   handleEventChange = (event) => {
     event.persist();
-    this.setState(prevState => ({
-      events: {
-        ...prevState.events,
-        [event.target.name]: event.target.checked,
-      },
-    }));
+    this.events[event.target.name] = event.target.checked;
   }
 
   handleThrottleChange = (event) => {
     event.persist();
     const inputVal = event.target.value.replace(/\D/g, '');
     const parsedValue = Math.abs(Number.parseInt(inputVal || 1, 10));
-    this.setState(prevState => ({
-      throttle: {
-        ...prevState.throttle,
-        [event.target.name]: parsedValue,
-      },
-    }));
+    this.throttle[event.target.name] = parsedValue;
   }
 
-  renderEventGroup(legend, events) {
-    return (
-      <FormControl component="fieldset">
-        <FormLabel component="legend">{legend}</FormLabel>
-        <FormGroup>
-          {events.map(event => (
-            <FormControlLabel
-              key={event}
-              label={event}
-              control={
-                <Switch
-                  checked={this.state.events[event]}
-                  color="primary"
-                  value={event}
-                  inputProps={{
-                    id: event,
-                    name: event,
-                  }}
-                  onChange={this.handleEventChange}
-                />
-              }
-            />
-          ))}
-        </FormGroup>
-      </FormControl>
-    );
-  }
+  renderEventGroup = (legend, eventKeys) => (
+    <FormControl component="fieldset">
+      <FormLabel component="legend">{legend}</FormLabel>
+      <FormGroup>
+        {eventKeys.map(eventKey => (
+          <FormControlLabel
+            key={eventKey}
+            label={eventKey}
+            control={
+              <Switch
+                checked={this.events[eventKey]}
+                color="primary"
+                value={eventKey}
+                inputProps={{
+                  id: eventKey,
+                  name: eventKey,
+                }}
+                onChange={this.handleEventChange}
+              />
+            }
+          />
+        ))}
+      </FormGroup>
+    </FormControl>
+  )
 
   render() {
-    const { throttle } = this.state;
     return (
       <Paper>
         <Heading
@@ -149,12 +138,12 @@ class RecordingSettings extends React.Component {
         </InputWrapper>
 
         <InputWrapper>
-          {Object.keys(throttle).map(key => (
+          {Object.keys(this.throttle).map(key => (
             <TextField
               label={key}
               id={key}
               key={key}
-              value={throttle[key]}
+              value={this.throttle[key]}
               onChange={this.handleThrottleChange}
               type="number"
               InputProps={{

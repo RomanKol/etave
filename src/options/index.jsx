@@ -38,20 +38,16 @@ const Meh = () => (
 );
 
 class Options extends React.Component {
-  state = {
-    title: 'etave Dashboard',
-  }
+  title = 'etave Dashboard';
 
   render() {
-    const { title } = this.state;
-
     return (
       <Fragment>
         <CssBaseline />
 
         <Router>
           <AppWrapper>
-            <HeaderBar title={title} />
+            <HeaderBar title={this.title} />
 
             <Main>
               <Switch>

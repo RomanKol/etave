@@ -6,7 +6,7 @@ import { HashRouter as Router, Route, Switch } from 'react-router-dom';
 
 import HeaderBar from '../components/HeaderBar';
 import Dashboard from './Dashboard/';
-import RecordingDetails from './RecordingDetails/';
+import SessionDetails from './SessionDetails/';
 
 const AppWrapper = styled.div`
   flex-grow: 1;
@@ -52,7 +52,7 @@ class Options extends React.Component {
             <Main>
               <Switch>
                 <Route path="/" exact component={Dashboard} />
-                <Route path="/recordings/:uuid" component={RecordingDetails} />
+                <Route path="/recordings/:uuid" component={SessionDetails} />
                 <Route component={Meh} />
               </Switch>
             </Main>

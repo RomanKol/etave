@@ -1,6 +1,8 @@
 /* eslint-disable react/no-multi-comp */
 import React, { Fragment } from 'react';
 import styled from 'react-emotion';
+import { observer } from 'mobx-react';
+import { observable } from 'mobx';
 
 import Paper from 'material-ui/Paper';
 import IconButton from 'material-ui/IconButton';
@@ -8,9 +10,9 @@ import Icon from 'material-ui/Icon';
 // import Select from 'material-ui/Select';
 import Menu, { MenuItem } from 'material-ui/Menu';
 
-
 import Heading from '../../components/Heading';
-import { loadStorage } from '../../utils/storage';
+
+import store from '../store';
 
 const List = styled.ul`
   display: flex;
@@ -69,32 +71,17 @@ const ListFooter = styled.footer`
   }
 `;
 
+@observer
 class SessionList extends React.Component {
-  state = {
-    sessions: [],
-    page: 0,
-    itemsPerPage: 5,
-    menuAnchor: null,
-  };
-
-  async componentWillMount() {
-    const sessions = await loadStorage('sessions')
-      .catch((err) => {
-        console.warn(err);
-        return [];
-      });
-    this.setState({ sessions });
-  }
+  @observable menuAnchor = null;
 
   setItemsPerPage = (itemsPerPage) => {
-    this.setState({
-      itemsPerPage,
-      menuAnchor: null,
-    });
+    store.itemsPerPage = itemsPerPage;
+    this.menuAnchor = null;
   }
 
   handleChangeitemsPerPage = (event) => {
-    this.setState({ itemsPerPage: event.target.value });
+    store.itemsPerPage = event.target.value;
   };
 
   formatDate = (datetime) => {
@@ -102,99 +89,92 @@ class SessionList extends React.Component {
     return date.toLocaleString('en-GB');
   }
 
-  renderListFooter = () => {
-    const { page, itemsPerPage, menuAnchor } = this.state;
-    const sessionsCount = this.state.sessions.length;
-    const lastPage = Math.ceil(sessionsCount / itemsPerPage) - 1;
-    return (
-      <ListFooter>
-        <span>
-          Items per page: {itemsPerPage}
-          <Icon
-            onClick={e => this.setState({ menuAnchor: e.currentTarget })}
-            aria-label="Items per page"
-          >
-            arrow_drop_down
-          </Icon>
-        </span>
-
-        <Menu
-          anchorEl={menuAnchor}
-          open={Boolean(menuAnchor)}
+  renderListFooter = () => (
+    <ListFooter>
+      <span>
+        Items per page: {store.itemsPerPage}
+        <Icon
+          onClick={(e) => { this.menuAnchor = e.currentTarget; }}
+          aria-label="Items per page"
         >
-          <MenuItem value={5} onClick={() => this.setItemsPerPage(5)}>5</MenuItem>
-          <MenuItem value={10} onClick={() => this.setItemsPerPage(10)}>10</MenuItem>
-          <MenuItem value={20} onClick={() => this.setItemsPerPage(20)}>20</MenuItem>
-        </Menu>
+          arrow_drop_down
+        </Icon>
+      </span>
 
-        <span>Current Page: {page + 1}/{lastPage + 1}</span>
+      <Menu
+        anchorEl={this.menuAnchor}
+        open={Boolean(this.menuAnchor)}
+      >
+        <MenuItem value={5} onClick={() => this.setItemsPerPage(5)}>5</MenuItem>
+        <MenuItem value={10} onClick={() => this.setItemsPerPage(10)}>10</MenuItem>
+        <MenuItem value={20} onClick={() => this.setItemsPerPage(20)}>20</MenuItem>
+      </Menu>
 
-        <IconButton
-          onClick={() => this.setState({ page: 0 })}
-          disabled={page === 0}
-          aria-label="First Page"
-        >
-          <Icon>first_page_icon</Icon>
-        </IconButton>
-        <IconButton
-          onClick={() => this.setState({ page: page - 1 })}
-          disabled={page === 0}
-          aria-label="Previous Page"
-        >
-          <Icon>keyboard_arrow_left</Icon>
-        </IconButton>
-        <IconButton
-          onClick={() => this.setState({ page: page + 1 })}
-          disabled={page >= Math.ceil(sessionsCount / itemsPerPage) - 1}
-          aria-label="Next Page"
-        >
-          <Icon>keyboard_arrow_right</Icon>
-        </IconButton>
-        <IconButton
-          onClick={() => this.setState({ page: lastPage })}
-          disabled={page >= lastPage}
-          aria-label="Last Page"
-        >
-          <Icon>last_page_icon</Icon>
-        </IconButton>
-      </ListFooter >
-    );
-  }
+      <span>Current Page: {store.page + 1}/{store.lastPage + 1}</span>
 
-  renderList = () => {
-    const { sessions, itemsPerPage, page } = this.state;
+      <IconButton
+        onClick={() => { store.page = 0; }}
+        disabled={store.page === 0}
+        aria-label="First Page"
+      >
+        <Icon>first_page_icon</Icon>
+      </IconButton>
+      <IconButton
+        onClick={() => { store.page += 1; }}
+        disabled={store.page === 0}
+        aria-label="Previous Page"
+      >
+        <Icon>keyboard_arrow_left</Icon>
+      </IconButton>
+      <IconButton
+        onClick={() => { store.page += 1; }}
+        disabled={store.page >= Math.ceil(store.sessionsCount / store.itemsPerPage) - 1}
+        aria-label="Next Page"
+      >
+        <Icon>keyboard_arrow_right</Icon>
+      </IconButton>
+      <IconButton
+        onClick={() => { store.page = store.lastPage; }}
+        disabled={store.page >= store.lastPage}
+        aria-label="Last Page"
+      >
+        <Icon>last_page_icon</Icon>
+      </IconButton>
+    </ListFooter >
+  );
 
-    return (
-      <Fragment>
-        <List>
-          {sessions
-            .slice(page * itemsPerPage, (page * itemsPerPage) + itemsPerPage)
-            .map((session) => {
-              const { uuid, name, descr, start } = session;
-              return (
-                <ListItem key={uuid}>
-                  <A href={`#/recordings/${uuid}`}>
-                    <ListItemHeader>
-                      <h3>{name}</h3>
-                      <p>{descr}</p>
-                    </ListItemHeader>
-                    <Time datetime={start}>{this.formatDate(start)}</Time>
-                  </A>
-                </ListItem>
-              );
-            })
-          }
-        </List>
-        {this.renderListFooter()}
-      </Fragment>
-    );
-  }
+
+  renderList = () => (
+    <Fragment>
+      <List>
+        {store.paginatedSessions
+          .map((session) => {
+            const {
+              uuid, name, descr, start,
+            } = session;
+            return (
+              <ListItem key={uuid}>
+                <A href={`#/recordings/${uuid}`}>
+                  <ListItemHeader>
+                    <h3>{name}</h3>
+                    <p>{descr}</p>
+                  </ListItemHeader>
+                  <Time datetime={start}>{this.formatDate(start)}</Time>
+                </A>
+              </ListItem>
+            );
+          })
+        }
+      </List>
+      {this.renderListFooter()}
+    </Fragment>
+  );
 
   render() {
     return (
       <Paper>
         <Heading headline="Recorded Sessions" />
-        {this.state.sessions.length > 0
+        {store.sessions.toJS().length > 0
           ? this.renderList()
           : <h2>No sessions recorded yet</h2>
         }

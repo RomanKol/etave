@@ -120,7 +120,7 @@ class SessionList extends React.Component {
         <Icon>first_page_icon</Icon>
       </IconButton>
       <IconButton
-        onClick={() => { store.page += 1; }}
+        onClick={() => { store.page -= 1; }}
         disabled={store.page === 0}
         aria-label="Previous Page"
       >

@@ -3,6 +3,8 @@ import PropTypes from 'prop-types';
 import { observer } from 'mobx-react';
 import { observable } from 'mobx';
 
+import SiteList from './SiteList';
+
 import { loadStorage } from '../../utils/storage';
 import store from '../store';
 
@@ -25,12 +27,29 @@ class RecordingDetails extends React.Component {
       });
   }
 
+  formatDate = (datetime) => {
+    const date = new Date(datetime);
+    return date.toLocaleString('en-GB');
+  }
+
   render() {
     return (
       <div>
-        <h1>Detailseite: {this.uuid}</h1>
-        <pre>{JSON.stringify(this.session, null, 2)}</pre>
-        <pre>{JSON.stringify(this.recordings, null, 2)}</pre>
+        <div>
+          <small>UUID: {this.uuid}</small>
+          <h2>Title: {this.session.name}</h2>
+          {this.session.description &&
+            <p>Description: {this.session.description}</p>
+          }
+          <time>{this.formatDate(this.session.start)} - {this.formatDate(this.session.end)}</time>
+          <p>Viewport: {this.session.viewport.width}px * {this.session.viewport.height}px</p>
+        </div>
+
+        {/* <pre>{JSON.stringify(this.session, null, 2)}</pre> */}
+        {this.session.sites.length > 0 &&
+          <SiteList sites={this.session.sites.toJS()} />
+        }
+        {/* <pre>{JSON.stringify(this.recordings, null, 2)}</pre> */}
       </div>
     );
   }

@@ -8,8 +8,11 @@ import {
   Paper,
   TextField,
   InputAdornment,
-} from 'material-ui';
-import { FormControl, FormControlLabel, FormLabel, FormGroup } from 'material-ui/Form';
+  FormControl,
+  FormControlLabel,
+  FormLabel,
+  FormGroup,
+} from '@material-ui/core';
 
 import Heading from '../../components/Heading';
 import IconTextButton from '../../components/IconTextButton';

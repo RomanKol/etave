@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'react-emotion';
 
-import Typography from 'material-ui/Typography';
+import Typography from '@material-ui/core/Typography';
 
 const Header = styled.header`
   padding: 1em;

@@ -1,6 +1,6 @@
 import React, { Fragment } from 'react';
 import ReactDOM from 'react-dom';
-import CssBaseline from 'material-ui/CssBaseline';
+import CssBaseline from '@material-ui/core/CssBaseline';
 import styled from 'react-emotion';
 import { HashRouter as Router, Route, Switch } from 'react-router-dom';
 

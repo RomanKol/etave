@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { withRouter } from 'react-router';
 
-import { AppBar, Toolbar, Typography, IconButton, Icon } from 'material-ui';
+import { AppBar, Toolbar, Typography, IconButton, Icon } from '@material-ui/core';
 
 const HeaderBar = (props) => {
   const { title, location, history } = props;

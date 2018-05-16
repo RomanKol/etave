@@ -4,11 +4,13 @@ import styled from 'react-emotion';
 import { observer } from 'mobx-react';
 import { observable } from 'mobx';
 
-import Paper from 'material-ui/Paper';
-import IconButton from 'material-ui/IconButton';
-import Icon from 'material-ui/Icon';
-// import Select from 'material-ui/Select';
-import Menu, { MenuItem } from 'material-ui/Menu';
+import {
+  Paper,
+  IconButton,
+  Icon,
+  Menu,
+  MenuItem,
+} from '@material-ui/core';
 
 import Heading from '../../components/Heading';
 

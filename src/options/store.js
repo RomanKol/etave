@@ -13,6 +13,8 @@ class Store {
   @observable page = 0;
   @observable itemsPerPage = 5;
 
+  @observable initialized = false;
+
   // init function to load from browser storage
   async init() {
     const sessions = await loadStorage('sessions')
@@ -22,6 +24,7 @@ class Store {
       });
 
     this.sessions = sessions;
+    this.initialized = true;
   }
 
   @computed get sessionsCount() {

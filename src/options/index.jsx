@@ -1,12 +1,17 @@
 import React, { Fragment } from 'react';
 import ReactDOM from 'react-dom';
-import CssBaseline from '@material-ui/core/CssBaseline';
 import styled from 'react-emotion';
+import CssBaseline from '@material-ui/core/CssBaseline';
+import { observer } from 'mobx-react';
+
 import { HashRouter as Router, Route, Switch } from 'react-router-dom';
+import CircularProgress from '@material-ui/core/CircularProgress';
 
 import HeaderBar from '../components/HeaderBar';
 import Dashboard from './Dashboard/';
 import SessionDetails from './SessionDetails/';
+
+import store from './store';
 
 const AppWrapper = styled.div`
   flex-grow: 1;
@@ -37,27 +42,53 @@ const Meh = () => (
   </div>
 );
 
+const ViewportCenter = styled.div`
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+`;
+
+@observer
 class Options extends React.Component {
   title = 'etave Dashboard';
+
+  renderApp() {
+    return (
+      <Router>
+        <AppWrapper>
+          <HeaderBar title={this.title} />
+
+          <Main>
+            <Switch>
+              <Route path="/" exact component={Dashboard} />
+              <Route path="/recordings/:uuid" component={SessionDetails} />
+              <Route component={Meh} />
+            </Switch>
+          </Main>
+        </AppWrapper>
+      </Router>
+    );
+  }
+
+  static renderLoading() {
+    return (
+      <ViewportCenter>
+        <CircularProgress size={80} />
+      </ViewportCenter>
+    );
+  }
 
   render() {
     return (
       <Fragment>
         <CssBaseline />
-
-        <Router>
-          <AppWrapper>
-            <HeaderBar title={this.title} />
-
-            <Main>
-              <Switch>
-                <Route path="/" exact component={Dashboard} />
-                <Route path="/recordings/:uuid" component={SessionDetails} />
-                <Route component={Meh} />
-              </Switch>
-            </Main>
-          </AppWrapper>
-        </Router>
+        {store.initialized
+          ? this.renderApp()
+          : this.renderLoading()
+        }
       </Fragment>
     );
   }

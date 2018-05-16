@@ -6,7 +6,7 @@ import IconTextButton from '../components/IconTextButton';
 
 class Popup extends React.Component {
   openDashboad = () => {
-    chrome.tabs.create({ url: '/options/index.html' });
+    chrome.tabs.create({ url: '/options.html' });
   }
 
   render() {

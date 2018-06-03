@@ -73,21 +73,17 @@ class Options extends React.Component {
     );
   }
 
-  static renderLoading() {
-    return (
-      <ViewportCenter>
-        <CircularProgress size={80} />
-      </ViewportCenter>
-    );
-  }
-
   render() {
     return (
       <Fragment>
         <CssBaseline />
         {store.initialized
           ? this.renderApp()
-          : this.renderLoading()
+          : (
+            <ViewportCenter>
+              <CircularProgress size={80} />
+            </ViewportCenter >
+          )
         }
       </Fragment>
     );

@@ -1,5 +1,7 @@
 # etave - event tracking and visualization extension
 
+__This application is currently under refactoring -> checkout the [update-2018 branch](https://github.com/RomanKol/etave/tree/update-2018)__
+
 An extension to record and analyze mouse and keyboard interactions of users for usability tests on webpages.
 
 ---

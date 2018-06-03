@@ -1,8 +1,27 @@
-# etave - event tracking and visualization extension
+# etave - event tracking and visualization extension v2
+__Refactor with react and material-ui__
+
+##  Refactor roadmap/todos
+* dashboard *doing*
+  * ~~startpage~~ *done*
+    * ~~sessions list~~ *done*
+    * ~~settings~~ *done*
+    * ~~im/export~~ *done*
+  * session detailpage *wip*
+  * session player/replay
+    * heatmap
+    * clickpath
+    * scrollmap
+* popup
+  * start/stop recording
+  * quick settings
+* background script
+* content script
+
+___
 
 An extension to record and analyze mouse and keyboard interactions of users for usability tests on webpages.
 
----
 
 ## Installation
 1. Open your chrome browser (min v58)

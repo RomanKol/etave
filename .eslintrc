@@ -10,6 +10,7 @@
   "parser": "babel-eslint",
   "rules": {
     "react/jsx-indent": "disabled",
-    "jsx-a11y/heading-has-content": "disable"
+    "jsx-a11y/heading-has-content": "disable",
+    "react/sort-comp": "disable"
   }
 }

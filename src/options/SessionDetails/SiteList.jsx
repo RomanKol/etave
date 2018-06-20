@@ -1,29 +1,14 @@
-/* eslint-disable react/no-multi-comp */
-import React, { Fragment } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'react-emotion';
 import { observer } from 'mobx-react';
-import { action, computed, observable } from 'mobx';
 
-import {
-  Paper,
-  IconButton,
-  Icon,
-  Menu,
-  MenuItem,
-} from '@material-ui/core';
+import { Paper } from '@material-ui/core';
 
 import Heading from '../../components/Heading';
+import PaginatedList from '../../components/PaginatedList';
 
-const List = styled.ul`
-  display: flex;
-  flex-direction: column;
-  list-style: none;
-  margin: 0 1em;
-  padding: 0;
-`;
-
-const ListItem = styled.li`
+const ListItem = styled.div`
   color: #000;
   &:not(:last-child) {
     border-bottom: 1px solid #eee;
@@ -50,45 +35,8 @@ const Time = styled.time`
   flex: 0 0 auto;
 `;
 
-const ListFooter = styled.footer`
-  display: flex;
-  flex-direction: row;
-  justify-content: flex-end;
-  align-items: center;
-  margin: .5em 0;
-  > span {
-    display: flex;
-    align-items: center;
-    color: rgba(0,0,0,.42);
-    margin: 0 .5em;
-  }
-`;
-
 @observer
 class SitesList extends React.Component {
-  @observable menuAnchor = null;
-  @observable itemsPerPage = 5;
-  @observable page = 0;
-
-  @computed get lastPage() {
-    return Math.ceil(this.props.sites.length / this.itemsPerPage);
-  }
-  @computed get paginatedSites() {
-    return this.props.sites
-      .slice(this.page * this.itemsPerPage, (this.page * this.itemsPerPage) + this.itemsPerPage);
-  }
-
-  @action
-  setItemsPerPage = (itemsPerPage) => {
-    this.itemsPerPage = itemsPerPage;
-    this.menuAnchor = null;
-  }
-
-  @action
-  handleChangeitemsPerPage = (event) => {
-    this.itemsPerPage = event.target.value;
-  };
-
   formatDate = (datetime) => {
     const date = new Date(datetime);
     return date.toLocaleString('en-GB');
@@ -99,88 +47,31 @@ class SitesList extends React.Component {
     return uri.origin;
   }
 
-  renderListFooter = () => (
-    <ListFooter>
-      <span>
-        Items per page: {this.itemsPerPage}
-        <Icon
-          onClick={(e) => { this.menuAnchor = e.currentTarget; }}
-          aria-label="Items per page"
+  renderItem = props => (
+    <ListItem>
+      <ListItemHeader>
+        <h3>{props.title}</h3>
+        <a
+          href={props.url}
+          target="_blank"
+          rel="noopener noreferrer"
         >
-          arrow_drop_down
-        </Icon>
-      </span>
-
-      <Menu
-        anchorEl={this.menuAnchor}
-        open={Boolean(this.menuAnchor)}
-      >
-        <MenuItem value={5} onClick={() => this.setItemsPerPage(5)}>5</MenuItem>
-        <MenuItem value={10} onClick={() => this.setItemsPerPage(10)}>10</MenuItem>
-        <MenuItem value={20} onClick={() => this.setItemsPerPage(20)}>20</MenuItem>
-      </Menu>
-
-      <span>Current Page: {this.page + 1}/{this.lastPage + 1}</span>
-
-      <IconButton
-        onClick={() => { this.page = 0; }}
-        disabled={this.page === 0}
-        aria-label="First Page"
-      >
-        <Icon>first_page_icon</Icon>
-      </IconButton>
-      <IconButton
-        onClick={() => { this.page -= 1; }}
-        disabled={this.page === 0}
-        aria-label="Previous Page"
-      >
-        <Icon>keyboard_arrow_left</Icon>
-      </IconButton>
-      <IconButton
-        onClick={() => { this.page += 1; }}
-        disabled={this.page >= Math.ceil(this.props.sites.length / this.itemsPerPage) - 1}
-        aria-label="Next Page"
-      >
-        <Icon>keyboard_arrow_right</Icon>
-      </IconButton>
-      <IconButton
-        onClick={() => { this.page = this.lastPage; }}
-        disabled={this.page >= this.lastPage}
-        aria-label="Last Page"
-      >
-        <Icon>last_page_icon</Icon>
-      </IconButton>
-    </ListFooter >
-  );
-
-  renderList = () => (
-    <Fragment>
-      <List>
-        {this.paginatedSites
-          .map(site => (
-            <ListItem key={site.uuid}>
-              <ListItemHeader>
-                <h3>{site.title}</h3>
-                <a href={site.url} target="_blank">{this.getOriginfromUrl(site.url)}</a>
-              </ListItemHeader>
-              <Time datetime={site.start}>{this.formatDate(site.start)}</Time>
-              <Time datetime={site.end}>{this.formatDate(site.end)}</Time>
-            </ListItem>
-          ))
-        }
-      </List>
-      {this.renderListFooter()}
-    </Fragment>
+          {this.getOriginfromUrl(props.url)}
+        </a>
+      </ListItemHeader>
+      <Time datetime={props.start}>{this.formatDate(props.start)}</Time>
+      <Time datetime={props.end}>{this.formatDate(props.end)}</Time>
+    </ListItem>
   );
 
   render() {
     return (
       <Paper>
         <Heading headline="Visited Sites" />
-        {this.props.sites.length > 0
-          ? this.renderList()
-          : <h2>No sites found</h2>
-        }
+        <PaginatedList
+          items={this.props.sites}
+          Item={this.renderItem}
+        />
       </Paper>
     );
   }

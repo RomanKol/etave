@@ -1,12 +1,20 @@
-import React from 'react';
+import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { observer } from 'mobx-react';
 import { observable } from 'mobx';
+import styled from 'react-emotion';
+
+import { Paper } from '@material-ui/core';
 
 import SiteList from './SiteList';
+import Heading from '../../components/Heading';
 
 import { loadStorage } from '../../utils/storage';
 import store from '../store';
+
+const Wrapper = styled.section`
+  padding: 1em;
+`;
 
 @observer
 class RecordingDetails extends React.Component {
@@ -17,6 +25,7 @@ class RecordingDetails extends React.Component {
 
   @observable session = {};
   @observable recordings = [];
+  @observable eventCounts = {};
 
   componentWillMount = async () => {
     this.session = store.sessions.find(s => s.uuid === this.uuid);
@@ -25,6 +34,9 @@ class RecordingDetails extends React.Component {
         console.warn(e);
         return [];
       });
+
+    this.eventCounts = this.recordings.map(record => record
+      .reduce((red, item) => ({ ...red, [item.type]: ((red[item.type] || 0) + 1) }), {}));
   }
 
   formatDate = (datetime) => {
@@ -33,24 +45,36 @@ class RecordingDetails extends React.Component {
   }
 
   render() {
-    return (
-      <div>
-        <div>
-          <small>UUID: {this.uuid}</small>
-          <h2>Title: {this.session.name}</h2>
-          {this.session.description &&
-            <p>Description: {this.session.description}</p>
-          }
-          <time>{this.formatDate(this.session.start)} - {this.formatDate(this.session.end)}</time>
-          <p>Viewport: {this.session.viewport.width}px * {this.session.viewport.height}px</p>
-        </div>
+    const sites = this.session.sites
+      .map((site, index) => ({ ...site, events: this.eventCounts[index] || {} }));
 
-        {/* <pre>{JSON.stringify(this.session, null, 2)}</pre> */}
-        {this.session.sites.length > 0 &&
-          <SiteList sites={this.session.sites.toJS()} />
+    const {
+      name, descr, start, end, viewport,
+    } = this.session;
+
+    return (
+      <Fragment>
+        <Paper>
+          <Heading
+            headline={name}
+            subheadline={descr}
+          />
+          <Wrapper>
+            <div>
+              <strong>Recording times: </strong>
+              <time>{this.formatDate(start)} - {this.formatDate(end)}</time>
+            </div>
+            <div>
+              <strong>Viewport: </strong>
+              <span>width: {viewport.width}px; height: {viewport.height}px</span>
+            </div>
+          </Wrapper>
+        </Paper>
+
+        {sites.length > 0 &&
+          <SiteList sites={sites} />
         }
-        {/* <pre>{JSON.stringify(this.recordings, null, 2)}</pre> */}
-      </div>
+      </Fragment>
     );
   }
 }

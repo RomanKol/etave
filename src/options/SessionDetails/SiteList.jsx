@@ -9,6 +9,10 @@ import Heading from '../../components/Heading';
 import PaginatedList from '../../components/PaginatedList';
 
 const ListItem = styled.div`
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  padding: 1em;
   color: #000;
   &:not(:last-child) {
     border-bottom: 1px solid #eee;
@@ -30,10 +34,22 @@ const ListItemHeader = styled.header`
   }
 `;
 
-const Time = styled.time`
-  display: block;
-  flex: 0 0 auto;
+const ListItemBody = styled.section`
+  display: flex;
+  flex-direction: row;
+  margin-top: 1em;
+  > * {
+    flex: 1 1;
+    p {
+      margin: 0;
+    }
+  }
 `;
+
+// const Time = styled.time`
+//   display: inline-block;
+//   flex: 0 0 auto;
+// `;
 
 @observer
 class SitesList extends React.Component {
@@ -51,16 +67,33 @@ class SitesList extends React.Component {
     <ListItem>
       <ListItemHeader>
         <h3>{props.title}</h3>
-        <a
-          href={props.url}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          {this.getOriginfromUrl(props.url)}
-        </a>
+        <p>
+          <span>Link: </span>
+          <a
+            href={props.url}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {this.getOriginfromUrl(props.url)}
+          </a>
+        </p>
       </ListItemHeader>
-      <Time datetime={props.start}>{this.formatDate(props.start)}</Time>
-      <Time datetime={props.end}>{this.formatDate(props.end)}</Time>
+      <ListItemBody>
+        {/* <Time datetime={props.start}>{this.formatDate(props.start)}</Time>
+         <Time datetime={props.end}>{this.formatDate(props.end)}</Time> */}
+        <div>
+          <strong>Site visit:</strong>
+          <p>enter: {this.formatDate(props.start)}; leave: {this.formatDate(props.end)}</p>
+        </div>
+        <div>
+          <strong>Site dimensions:</strong>
+          <p>width: {props.width}px; height: {props.height}px</p>
+        </div>
+        <div>
+          <strong>Recorded events:</strong>
+          <p>{Object.keys(props.events).map(key => `${key}: ${props.events[key]}; `)}</p>
+        </div>
+      </ListItemBody>
     </ListItem>
   );
 
@@ -86,6 +119,7 @@ SitesList.propTypes = {
     url: PropTypes.string.isRequired,
     uuid: PropTypes.string.isRequired,
     width: PropTypes.number.isRequired,
+    events: PropTypes.objectOf(PropTypes.number).isRequired,
   })).isRequired,
 };
 

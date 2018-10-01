@@ -20,6 +20,6 @@ module.exports = {
       { loose: true },
     ],
     '@babel/plugin-syntax-object-rest-spread',
-    'emotion'
+    'emotion',
   ],
 };

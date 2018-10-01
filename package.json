@@ -45,7 +45,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "webpack -w --display-error-details --progress --colors --mode=development --env.NODE_ENV=development --display-error-details",
-    "build": "webpack --display-error-details --progress --colors --mode=production --env.NODE_ENV=production"
+    "build": "webpack --display-error-details --progress --colors --mode=production --env.NODE_ENV=production",
+    "lint": "eslint --ext .js,.jsx --ignore-path .gitignore ."
   },
   "repository": {
     "type": "git",

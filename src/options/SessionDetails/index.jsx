@@ -23,8 +23,12 @@ class RecordingDetails extends React.Component {
     this.uuid = props.match.params.uuid;
   }
 
+  @observable loaded = false;
+
   @observable session = {};
+
   @observable recordings = [];
+
   @observable eventCounts = {};
 
   componentWillMount = async () => {
@@ -62,11 +66,21 @@ class RecordingDetails extends React.Component {
           <Wrapper>
             <div>
               <strong>Recording times: </strong>
-              <time>{this.formatDate(start)} - {this.formatDate(end)}</time>
+              <time>
+                {this.formatDate(start)}
+                {' - '}
+                {this.formatDate(end)}
+              </time>
             </div>
             <div>
               <strong>Viewport: </strong>
-              <span>width: {viewport.width}px; height: {viewport.height}px</span>
+              <span>
+                {'width: '}
+                {viewport.width}
+                {'px; height: '}
+                {viewport.height}
+                px
+              </span>
             </div>
           </Wrapper>
         </Paper>

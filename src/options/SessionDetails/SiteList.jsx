@@ -83,11 +83,22 @@ class SitesList extends React.Component {
          <Time datetime={props.end}>{this.formatDate(props.end)}</Time> */}
         <div>
           <strong>Site visit:</strong>
-          <p>enter: {this.formatDate(props.start)}; leave: {this.formatDate(props.end)}</p>
+          <p>
+            {'enter: '}
+            {this.formatDate(props.start)}
+            {'; leave: '}
+            {this.formatDate(props.end)}
+          </p>
         </div>
         <div>
           <strong>Site dimensions:</strong>
-          <p>width: {props.width}px; height: {props.height}px</p>
+          <p>
+            {'width: '}
+            {props.width}
+            {'px; height: '}
+            {props.height}
+            px
+          </p>
         </div>
         <div>
           <strong>Recorded events:</strong>

@@ -107,7 +107,7 @@ class RecordingSettings extends React.Component {
           <FormControlLabel
             key={eventKey}
             label={eventKey}
-            control={
+            control={(
               <Switch
                 checked={this.events[eventKey]}
                 color="primary"
@@ -118,7 +118,7 @@ class RecordingSettings extends React.Component {
                 }}
                 onChange={this.handleEventChange}
               />
-            }
+            )}
           />
         ))}
       </FormGroup>

@@ -2,7 +2,13 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { withRouter } from 'react-router';
 
-import { AppBar, Toolbar, Typography, IconButton, Icon } from '@material-ui/core';
+import {
+  AppBar,
+  Toolbar,
+  Typography,
+  IconButton,
+  Icon,
+} from '@material-ui/core';
 
 const HeaderBar = (props) => {
   const { title, location, history } = props;
@@ -13,10 +19,12 @@ const HeaderBar = (props) => {
         position="fixed"
       >
         <Toolbar>
-          {location.pathname !== '/' &&
-            <IconButton color="inherit" onClick={() => history.goBack()}>
-              <Icon>arrow_back</Icon>
-            </IconButton>
+          {location.pathname !== '/'
+            && (
+              <IconButton color="inherit" onClick={() => history.goBack()}>
+                <Icon>arrow_back</Icon>
+              </IconButton>
+            )
           }
           <Typography
             variant="title"

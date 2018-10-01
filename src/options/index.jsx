@@ -8,8 +8,8 @@ import { HashRouter as Router, Route, Switch } from 'react-router-dom';
 import CircularProgress from '@material-ui/core/CircularProgress';
 
 import HeaderBar from '../components/HeaderBar';
-import Dashboard from './Dashboard/';
-import SessionDetails from './SessionDetails/';
+import Dashboard from './Dashboard';
+import SessionDetails from './SessionDetails';
 
 import store from './store';
 
@@ -82,7 +82,7 @@ class Options extends React.Component {
           : (
             <ViewportCenter>
               <CircularProgress size={80} />
-            </ViewportCenter >
+            </ViewportCenter>
           )
         }
       </Fragment>

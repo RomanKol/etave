@@ -5,8 +5,8 @@
  */
 export const saveStorage = data => new Promise((resolve, reject) => {
   chrome.storage.local.set(data, () => {
-    if (chrome.runtime.lastError) reject(new Error('Runtime error'));
-    resolve();
+    if (chrome.runtime.lastError) return reject(new Error('Runtime error'));
+    return resolve();
   });
 });
 
@@ -17,10 +17,10 @@ export const saveStorage = data => new Promise((resolve, reject) => {
  */
 export const loadStorage = key => new Promise((resolve, reject) => {
   chrome.storage.local.get(key, (items) => {
-    if (Object.keys(items).length === 0) reject(new Error(`No item "${key}" was found!`));
-    if (chrome.runtime.lastError) reject(new Error('Runtime error'));
-    if (key) resolve(items[key]);
-    else resolve(items);
+    if (Object.keys(items).length === 0) return reject(new Error(`No item "${key}" was found!`));
+    if (chrome.runtime.lastError) return reject(new Error('Runtime error'));
+    if (key) return resolve(items[key]);
+    return resolve(items);
   });
 });
 
@@ -31,8 +31,8 @@ export const loadStorage = key => new Promise((resolve, reject) => {
  */
 export const removeStorage = key => new Promise((resolve, reject) => {
   chrome.storage.local.remove(key, () => {
-    if (chrome.runtime.lastError) reject(new Error('Runtime error'));
-    resolve();
+    if (chrome.runtime.lastError) return reject(new Error('Runtime error'));
+    return resolve();
   });
 });
 

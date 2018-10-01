@@ -37,12 +37,15 @@ const ListFooter = styled.footer`
 @observer
 class SitesList extends React.Component {
   @observable menuAnchor = null;
+
   @observable itemsPerPage = this.props.itemsPerPage[0];
+
   @observable page = 0;
 
   @computed get lastPage() {
     return Math.ceil(this.props.items.length / this.itemsPerPage) - 1;
   }
+
   @computed get paginatedItems() {
     return this.props.items
       .map((item, key) => Object.assign({ key }, { data: item })) // TODO: move in constructor
@@ -57,7 +60,8 @@ class SitesList extends React.Component {
   renderListFooter = () => (
     <ListFooter>
       <span>
-        Items per page: {this.itemsPerPage}
+        {'Items per page: '}
+        {this.itemsPerPage}
         <Icon
           onClick={(e) => { this.menuAnchor = e.currentTarget; }}
           aria-label="Items per page"
@@ -83,7 +87,12 @@ class SitesList extends React.Component {
         }
       </Menu>
 
-      <span>Current Page: {this.page + 1}/{this.lastPage + 1}</span>
+      <span>
+        {'Current Page: '}
+        {this.page + 1}
+        /
+        {this.lastPage + 1}
+      </span>
 
       <IconButton
         onClick={() => { this.page = 0; }}
@@ -113,7 +122,7 @@ class SitesList extends React.Component {
       >
         <Icon>last_page_icon</Icon>
       </IconButton>
-    </ListFooter >
+    </ListFooter>
   );
 
   renderList = () => {

@@ -58,7 +58,7 @@ class SessionList extends React.Component {
           <h3>{props.name}</h3>
           <p>{props.descr}</p>
         </ListItemHeader>
-        <Time datetime={props.start}>{this.formatDate(props.start)}</Time>
+        <Time dateTime={props.start}>{this.formatDate(props.start)}</Time>
       </A>
     </ListItem>
   );

@@ -11,6 +11,7 @@ class Store {
 
   // session list pagination
   @observable page = 0;
+
   @observable itemsPerPage = 5;
 
   @observable initialized = false;
@@ -30,9 +31,11 @@ class Store {
   @computed get sessionsCount() {
     return this.sessions.length;
   }
+
   @computed get lastPage() {
     return Math.ceil(this.sessionsCount / this.itemsPerPage) - 1;
   }
+
   @computed get paginatedSessions() {
     return this.sessions
       .slice(this.page * this.itemsPerPage, (this.page * this.itemsPerPage) + this.itemsPerPage);

@@ -10,11 +10,11 @@ const Header = styled.header`
 
 const Heading = ({ headline, subheadline, ...others }) => (
   <Header {...others}>
-    {headline &&
-      <Typography variant="headline" component="h2">{headline}</Typography>
+    {headline
+      && <Typography variant="headline" component="h2">{headline}</Typography>
     }
-    {subheadline &&
-      <Typography variant="subheading" component="p">{subheadline}</Typography>
+    {subheadline
+      && <Typography variant="subheading" component="p">{subheadline}</Typography>
     }
   </Header>
 );

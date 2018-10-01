@@ -33,11 +33,13 @@ class RecordingDetails extends React.Component {
 
   componentWillMount = async () => {
     this.session = store.sessions.find(s => s.uuid === this.uuid);
-    this.recordings = await Promise.all(this.session.sites.map(site => loadStorage(site.uuid)))
-      .catch((e) => {
-        console.warn(e);
-        return [];
-      });
+    try {
+      this.recordings = await Promise.all(this.session.sites.map(site => loadStorage(site.uuid)));
+    } catch (error) {
+      this.recordings = [];
+    }
+
+    this.loaded = true;
 
     this.eventCounts = this.recordings.map(record => record
       .reduce((red, item) => ({ ...red, [item.type]: ((red[item.type] || 0) + 1) }), {}));
@@ -50,7 +52,7 @@ class RecordingDetails extends React.Component {
 
   render() {
     const sites = this.session.sites
-      .map((site, index) => ({ ...site, events: this.eventCounts[index] || {} }));
+      .map((site, index) => Object.assign({}, site, { events: this.eventCounts[index] || {} }));
 
     const {
       name, descr, start, end, viewport,
@@ -85,8 +87,8 @@ class RecordingDetails extends React.Component {
           </Wrapper>
         </Paper>
 
-        {sites.length > 0 &&
-          <SiteList sites={sites} />
+        {this.loaded && sites.length > 0
+          && <SiteList sites={sites} />
         }
       </Fragment>
     );

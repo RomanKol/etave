@@ -5,6 +5,7 @@ import { observable } from 'mobx';
 import styled from 'react-emotion';
 
 import { Paper } from '@material-ui/core';
+import { AccessTime, SettingsOverscan } from '@material-ui/icons';
 
 import SiteList from './SiteList';
 import Heading from '../../components/Heading';
@@ -12,8 +13,20 @@ import Heading from '../../components/Heading';
 import { loadStorage } from '../../utils/storage';
 import store from '../store';
 
-const Wrapper = styled.section`
+const Wrapper = styled.div`
+  display: flex;
+  flex-direction: row;
   padding: 1em;
+  > * ~ * {
+    margin-left: 2em;
+  }
+  header {
+    display: flex;
+    align-items: center;
+    * ~ * {
+      margin-left: .5em;
+    }
+  }
 `;
 
 @observer
@@ -36,7 +49,7 @@ class RecordingDetails extends React.Component {
     this.recordings = await Promise.all(this.session.sites.map(site => loadStorage(site.uuid)))
       .catch((e) => {
         console.warn(e);
-      this.recordings = [];
+        this.recordings = [];
       });
 
     this.loaded = true;
@@ -63,24 +76,36 @@ class RecordingDetails extends React.Component {
             subheadline={descr}
           />
           <Wrapper>
-            <div>
-              <strong>Recording times: </strong>
+            <section>
+              <header>
+                <AccessTime />
+                <strong>Overall times</strong>
+              </header>
+
               <time>
+                {'start: '}
                 {this.formatDate(start)}
-                {' - '}
+                <br />
+                {'end: '}
                 {this.formatDate(end)}
               </time>
-            </div>
-            <div>
-              <strong>Viewport: </strong>
+            </section>
+            <section>
+              <header>
+                <SettingsOverscan />
+                <strong>Viewport dimension</strong>
+              </header>
+
               <span>
                 {'width: '}
                 {viewport.width}
-                {'px; height: '}
+                px
+                <br />
+                {'height: '}
                 {viewport.height}
                 px
               </span>
-            </div>
+            </section>
           </Wrapper>
         </Paper>
 

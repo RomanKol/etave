@@ -3,6 +3,7 @@ import styled from 'react-emotion';
 import { observer } from 'mobx-react';
 
 import { Paper } from '@material-ui/core';
+import { AccessTime } from '@material-ui/icons';
 
 import Heading from '../../components/Heading';
 import PaginatedList from '../../components/PaginatedList';
@@ -40,8 +41,13 @@ const ListItemHeader = styled.header`
 `;
 
 const Time = styled.time`
-  display: block;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
   flex: 0 0 auto;
+  > * {
+    margin-right: .5em;
+  }
 `;
 
 @observer
@@ -58,7 +64,10 @@ class SessionList extends React.Component {
           <h3>{props.name}</h3>
           <p>{props.descr}</p>
         </ListItemHeader>
-        <Time dateTime={props.start}>{this.formatDate(props.start)}</Time>
+        <Time dateTime={props.start}>
+          <AccessTime />
+          {this.formatDate(props.start)}
+        </Time>
       </A>
     </ListItem>
   );

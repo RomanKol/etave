@@ -4,6 +4,12 @@ import styled from 'react-emotion';
 import { observer } from 'mobx-react';
 
 import { Paper } from '@material-ui/core';
+import {
+  AccessTime,
+  InsertLink,
+  Mouse,
+  SettingsOverscan,
+} from '@material-ui/icons';
 
 import Heading from '../../components/Heading';
 import PaginatedList from '../../components/PaginatedList';
@@ -29,12 +35,17 @@ const ListItemHeader = styled.header`
   > h3 {
     margin: 0 0 .33em 0;
   }
-  > p {
+  > div {
+    display: flex;
+    align-items: center;
     margin: 0;
+    > a {
+      margin-left: .5em;
+    }
   }
 `;
 
-const ListItemBody = styled.section`
+const ListItemWrapper = styled.div`
   display: flex;
   flex-direction: row;
   margin-top: 1em;
@@ -46,10 +57,15 @@ const ListItemBody = styled.section`
   }
 `;
 
-// const Time = styled.time`
-//   display: inline-block;
-//   flex: 0 0 auto;
-// `;
+const ListeItem = styled.section`
+  header {
+    display: flex;
+    align-items: center;
+    strong {
+      margin-left: .5em;
+    }
+  }
+`;
 
 @observer
 class SitesList extends React.Component {
@@ -61,44 +77,56 @@ class SitesList extends React.Component {
     <ListItem>
       <ListItemHeader>
         <h3>{props.title}</h3>
-        <p>
-          <span>Link: </span>
+        <div>
+          <InsertLink />
           <a
             href={props.url}
             target="_blank"
             rel="noopener noreferrer"
           >
-            {this.getOriginfromUrl(props.url)}
+            {this.getOriginFromUrl(props.url)}
           </a>
-        </p>
+        </div>
       </ListItemHeader>
-      <ListItemBody>
+      <ListItemWrapper>
         {/* <Time datetime={props.start}>{this.formatDate(props.start)}</Time>
          <Time datetime={props.end}>{this.formatDate(props.end)}</Time> */}
-        <div>
-          <strong>Site visit:</strong>
+        <ListeItem>
+          <header>
+            <AccessTime />
+            <strong>Visit times</strong>
+          </header>
           <p>
-            {'enter: '}
+            {'start: '}
             {this.formatDate(props.start)}
-            {'; leave: '}
+            <br />
+            {'end: '}
             {this.formatDate(props.end)}
           </p>
-        </div>
-        <div>
-          <strong>Site dimensions:</strong>
+        </ListeItem>
+        <ListeItem>
+          <header>
+            <SettingsOverscan />
+            <strong>Site dimensions</strong>
+          </header>
           <p>
             {'width: '}
             {props.width}
-            {'px; height: '}
+            px
+            <br />
+            {'height: '}
             {props.height}
             px
           </p>
-        </div>
-        <div>
-          <strong>Recorded events:</strong>
+        </ListeItem>
+        <ListeItem>
+          <header>
+            <Mouse />
+            <strong>Events recorded</strong>
+          </header>
           <p>{Object.keys(props.events).map(key => `${key}: ${props.events[key]}; `)}</p>
-        </div>
-      </ListItemBody>
+        </ListeItem>
+      </ListItemWrapper>
     </ListItem>
   );
 

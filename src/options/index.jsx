@@ -7,7 +7,7 @@ import { observer } from 'mobx-react';
 import { HashRouter as Router, Route, Switch } from 'react-router-dom';
 import CircularProgress from '@material-ui/core/CircularProgress';
 
-import HeaderBar from '../components/HeaderBar';
+import HeaderBar from '$components/HeaderBar';
 import Dashboard from './Dashboard';
 import SessionDetails from './SessionDetails';
 

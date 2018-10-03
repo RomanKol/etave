@@ -2,10 +2,10 @@ import React from 'react';
 import styled from 'react-emotion';
 
 import Paper from '@material-ui/core/Paper';
-import Heading from '../../components/Heading';
-import IconTextButton from '../../components/IconTextButton';
+import Heading from '$components/Heading';
+import IconTextButton from '$components/IconTextButton';
 
-import { loadStorage, saveStorage, downloadFile } from '../../utils/storage';
+import { loadStorage, saveStorage, downloadFile } from '$utils/storage';
 
 const Wrapper = styled.section`
   display: flex;

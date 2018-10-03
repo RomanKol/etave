@@ -14,10 +14,10 @@ import {
   FormGroup,
 } from '@material-ui/core';
 
-import Heading from '../../components/Heading';
-import IconTextButton from '../../components/IconTextButton';
+import Heading from '$components/Heading';
+import IconTextButton from '$components/IconTextButton';
 
-import { loadStorage, saveStorage } from '../../utils/storage';
+import { loadStorage, saveStorage } from '$utils/storage';
 
 const InputWrapper = styled.section`
   display: flex;

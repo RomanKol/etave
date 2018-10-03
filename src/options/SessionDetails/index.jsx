@@ -8,9 +8,9 @@ import { Paper } from '@material-ui/core';
 import { AccessTime, SettingsOverscan } from '@material-ui/icons';
 
 import SiteList from './SiteList';
-import Heading from '../../components/Heading';
+import Heading from '$components/Heading';
 
-import { loadStorage } from '../../utils/storage';
+import { loadStorage } from '$utils/storage';
 import store from '../store';
 
 const Wrapper = styled.div`

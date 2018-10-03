@@ -1,5 +1,5 @@
 import { observable, computed, autorun } from 'mobx';
-import { loadStorage } from '../utils/storage';
+import { loadStorage } from '$utils/storage';
 
 class Store {
   constructor() {

@@ -1,8 +1,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import Heading from '../components/Heading';
-import IconTextButton from '../components/IconTextButton';
+import Heading from '$components/Heading';
+import IconTextButton from '$components/IconTextButton';
 
 class Popup extends React.Component {
   openDashboad = () => {

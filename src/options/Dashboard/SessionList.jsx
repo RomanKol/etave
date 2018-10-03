@@ -5,8 +5,8 @@ import { observer } from 'mobx-react';
 import { Paper } from '@material-ui/core';
 import { AccessTime } from '@material-ui/icons';
 
-import Heading from '../../components/Heading';
-import PaginatedList from '../../components/PaginatedList';
+import Heading from '$components/Heading';
+import PaginatedList from '$components/PaginatedList';
 
 import store from '../store';
 

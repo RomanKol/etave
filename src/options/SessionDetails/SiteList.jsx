@@ -11,8 +11,8 @@ import {
   SettingsOverscan,
 } from '@material-ui/icons';
 
-import Heading from '../../components/Heading';
-import PaginatedList from '../../components/PaginatedList';
+import Heading from '$components/Heading';
+import PaginatedList from '$components/PaginatedList';
 
 const ListItem = styled.div`
   display: flex;

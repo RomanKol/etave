@@ -35,7 +35,7 @@ const ListFooter = styled.footer`
 `;
 
 @observer
-class SitesList extends React.Component {
+class PaginatedList extends React.Component {
   @observable menuAnchor = null;
 
   @observable itemsPerPage = this.props.itemsPerPage[0];
@@ -48,7 +48,7 @@ class SitesList extends React.Component {
 
   @computed get paginatedItems() {
     return this.props.items
-      .map((item, key) => Object.assign({ key }, { data: item })) // TODO: move in constructor
+      .map((item, key) => Object.assign({ key }, { data: item }))
       .slice(this.page * this.itemsPerPage, (this.page * this.itemsPerPage) + this.itemsPerPage);
   }
 
@@ -144,16 +144,16 @@ class SitesList extends React.Component {
   }
 }
 
-SitesList.propTypes = {
+PaginatedList.propTypes = {
   Item: PropTypes.func,
   items: PropTypes.arrayOf(PropTypes.any),
   itemsPerPage: PropTypes.arrayOf(PropTypes.number),
 };
 
-SitesList.defaultProps = {
+PaginatedList.defaultProps = {
   Item: props => <div>{props}</div>,
   items: [],
   itemsPerPage: [5, 10, 20],
 };
 
-export default SitesList;
+export default PaginatedList;

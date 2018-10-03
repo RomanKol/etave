@@ -53,15 +53,9 @@ const ListItemBody = styled.section`
 
 @observer
 class SitesList extends React.Component {
-  formatDate = (datetime) => {
-    const date = new Date(datetime);
-    return date.toLocaleString('en-GB');
-  }
+  formatDate = datetime => new Date(datetime).toLocaleString('en-GB');
 
-  getOriginfromUrl = (url) => {
-    const uri = new URL(url);
-    return uri.origin;
-  }
+  getOriginFromUrl = url => new URL(url).origin;
 
   renderItem = props => (
     <ListItem>

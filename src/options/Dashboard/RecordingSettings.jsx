@@ -47,18 +47,8 @@ class RecordingSettings extends React.Component {
         return {};
       });
 
-    if (settings.events) {
-      this.events = {
-        ...this.events,
-        ...settings.events,
-      };
-    }
-    if (settings.throttle) {
-      this.throttle = {
-        ...this.throttle,
-        ...settings.throttle,
-      };
-    }
+    if (settings.events) Object.assign(this.events, settings.events);
+    if (settings.throttle) Object.assign(this.throttle, settings.throttle);
   }
 
   @observable events = {

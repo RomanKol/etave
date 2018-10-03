@@ -31,13 +31,13 @@ class RecordingDetails extends React.Component {
 
   @observable eventCounts = {};
 
-  componentWillMount = async () => {
+  async componentWillMount() {
     this.session = store.sessions.find(s => s.uuid === this.uuid);
-    try {
-      this.recordings = await Promise.all(this.session.sites.map(site => loadStorage(site.uuid)));
-    } catch (error) {
+    this.recordings = await Promise.all(this.session.sites.map(site => loadStorage(site.uuid)))
+      .catch((e) => {
+        console.warn(e);
       this.recordings = [];
-    }
+      });
 
     this.loaded = true;
 
@@ -45,10 +45,7 @@ class RecordingDetails extends React.Component {
       .reduce((red, item) => ({ ...red, [item.type]: ((red[item.type] || 0) + 1) }), {}));
   }
 
-  formatDate = (datetime) => {
-    const date = new Date(datetime);
-    return date.toLocaleString('en-GB');
-  }
+  formatDate = datetime => new Date(datetime).toLocaleString('en-GB');
 
   render() {
     const sites = this.session.sites

@@ -4,7 +4,7 @@
   "description": "chrome extension for event tracking and visualization",
   "main": "",
   "dependencies": {
-    "eslint": "^3.13.1",
+    "eslint": "^6.6.0",
     "eslint-config-airbnb": "^14.0.0",
     "eslint-plugin-import": "^2.2.0",
     "gulp": "^3.9.1",
